@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="3.0" xmlns:edmx="http://schemas.microsoft.com/ado/2009/11/edmx">
+ <!-- EF Designer content (DO NOT EDIT MANUALLY BELOW HERE) -->
+  <edmx:Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
+    <!-- Diagram content (shape and connector positions) -->
+    <edmx:Diagrams>
+      <Diagram DiagramId="e0a9c5878c6948d1827fbaeb0b626baf" Name="Diagram1">
+        <EntityTypeShape EntityType="marsh_contableModel.Adjuntos" Width="1.5" PointX="3.75" PointY="53.875" IsExpanded="true" />
+        <EntityTypeShape EntityType="marsh_contableModel.Canton" Width="1.5" PointX="1.5" PointY="35.625" IsExpanded="true" />
+        <EntityTypeShape EntityType="marsh_contableModel.Categoria_gasto" Width="1.5" PointX="6.75" PointY="3.5" IsExpanded="true" />
+        <EntityTypeShape EntityType="marsh_contableModel.Categoria_presupuestaria" Width="1.5" PointX="1.5" PointY="7" IsExpanded="true" />
+        <EntityTypeShape EntityType="marsh_contableModel.Centro_Costos" Width="1.5" PointX="0.75" PointY="17.5" IsExpanded="true" />
+        <EntityTypeShape EntityType="marsh_contableModel.Clientes" Width="1.5" PointX="0.75" PointY="22" IsExpanded="true" />
+        <EntityTypeShape EntityType="marsh_contableModel.codigo_actividad" Width="1.5" PointX="1.5" PointY="28.375" IsExpanded="true" />
+        <EntityTypeShape EntityType="marsh_contableModel.Codigo_comercial" Width="1.5" PointX="9" PointY="18.25" IsExpanded="true" />
+        <EntityTypeShape EntityType="marsh_contableModel.Codigos_cabys" Width="1.5" PointX="9" PointY="20.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="marsh_contableModel.Condicion_venta" Width="1.5" PointX="3.75" PointY="7.875" IsExpanded="true" />
+        <EntityTypeShape EntityType="marsh_contableModel.Cuenta_Detalle" Width="1.5" PointX="5.25" PointY="19.25" IsExpanded="true" />
+        <EntityTypeShape EntityType="marsh_contableModel.Cuenta_Encabezado" Width="1.5" PointX="3" PointY="11.25" IsExpanded="true" />
+        <EntityTypeShape EntityType="marsh_contableModel.Cuentas_Contables" Width="1.5" PointX="0.75" PointY="47.875" IsExpanded="true" />
+        <EntityTypeShape EntityType="marsh_contableModel.Devoluciones" Width="1.5" PointX="10.5" PointY="7.625" IsExpanded="true" />
+        <EntityTypeShape EntityType="marsh_contableModel.Distrito" Width="1.5" PointX="1.5" PointY="31.375" IsExpanded="true" />
+        <EntityTypeShape EntityType="marsh_contableModel.Empresa" Width="1.5" PointX="1.5" PointY="59.25" IsExpanded="true" />
+        <EntityTypeShape EntityType="marsh_contableModel.Estado_Factura" Width="1.5" PointX="3.75" PointY="4.375" IsExpanded="true" />
+        <EntityTypeShape EntityType="marsh_contableModel.Factura_Detalles" Width="1.5" PointX="11.25" PointY="12.25" IsExpanded="true" />
+        <EntityTypeShape EntityType="marsh_contableModel.Facturas" Width="1.5" PointX="6" PointY="11.375" IsExpanded="true" />
+        <EntityTypeShape EntityType="marsh_contableModel.Gastos" Width="1.5" PointX="9" PointY="12.125" IsExpanded="true" />
+        <EntityTypeShape EntityType="marsh_contableModel.Gastos_Detalles" Width="1.5" PointX="14.25" PointY="12.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="marsh_contableModel.Gestion_P_detalle" Width="1.5" PointX="6" PointY="35.625" IsExpanded="true" />
+        <EntityTypeShape EntityType="marsh_contableModel.Gestion_Presupuestaria" Width="1.5" PointX="3.75" PointY="35.375" IsExpanded="true" />
+        <EntityTypeShape EntityType="marsh_contableModel.Impuesto" Width="1.5" PointX="1.5" PointY="65.5" IsExpanded="true" />
+        <EntityTypeShape EntityType="marsh_contableModel.Ingresos" Width="1.5" PointX="8.25" PointY="5.875" IsExpanded="true" />
+        <EntityTypeShape EntityType="marsh_contableModel.Ingresos_Detalle" Width="1.5" PointX="13.5" PointY="6.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="marsh_contableModel.Medio_pago" Width="1.5" PointX="0.75" PointY="13.25" IsExpanded="true" />
+        <EntityTypeShape EntityType="marsh_contableModel.Permisos" Width="1.5" PointX="1.5" PointY="76.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="marsh_contableModel.Permisos_x_rol" Width="1.5" PointX="3.75" PointY="68.625" IsExpanded="true" />
+        <EntityTypeShape EntityType="marsh_contableModel.Proveedor" Width="1.5" PointX="6.75" PointY="22.875" IsExpanded="true" />
+        <EntityTypeShape EntityType="marsh_contableModel.Provincia" Width="1.5" PointX="1.5" PointY="38.875" IsExpanded="true" />
+        <EntityTypeShape EntityType="marsh_contableModel.Roles" Width="1.5" PointX="1.5" PointY="68.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="marsh_contableModel.Tablas_referencia" Width="1.5" PointX="1.5" PointY="72" IsExpanded="true" />
+        <EntityTypeShape EntityType="marsh_contableModel.Telefonos" Width="1.5" PointX="9" PointY="23.625" IsExpanded="true" />
+        <EntityTypeShape EntityType="marsh_contableModel.Tipo_archivo" Width="1.5" PointX="1.5" PointY="74.25" IsExpanded="true" />
+        <EntityTypeShape EntityType="marsh_contableModel.Tipo_cambio" Width="1.5" PointX="6" PointY="39.375" IsExpanded="true" />
+        <EntityTypeShape EntityType="marsh_contableModel.Tipo_Cuenta_Contable" Width="1.5" PointX="1.5" PointY="44.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="marsh_contableModel.Tipo_cuentas" Width="1.5" PointX="0.75" PointY="10.25" IsExpanded="true" />
+        <EntityTypeShape EntityType="marsh_contableModel.Tipo_documento" Width="1.5" PointX="6.75" PointY="28.625" IsExpanded="true" />
+        <EntityTypeShape EntityType="marsh_contableModel.tipo_identificacion" Width="1.5" PointX="1.5" PointY="41.875" IsExpanded="true" />
+        <EntityTypeShape EntityType="marsh_contableModel.Tipo_moneda" Width="1.5" PointX="3.75" PointY="23" IsExpanded="true" />
+        <EntityTypeShape EntityType="marsh_contableModel.Unidad_medida" Width="1.5" PointX="11.25" PointY="4.625" IsExpanded="true" />
+        <EntityTypeShape EntityType="marsh_contableModel.Usuarios" Width="1.5" PointX="1.5" PointY="53.625" IsExpanded="true" />
+        <AssociationConnector Association="marsh_contableModel.fk_Adjuntos_Tablas_referencia1" ManuallyRouted="false" />
+        <AssociationConnector Association="marsh_contableModel.fk_Adjuntos_Tipo_archivo1" ManuallyRouted="false" />
+        <AssociationConnector Association="marsh_contableModel.fk_Adjuntos_Usuarios1" ManuallyRouted="false" />
+        <AssociationConnector Association="marsh_contableModel.fk_Canton_Provincia1" ManuallyRouted="false" />
+        <AssociationConnector Association="marsh_contableModel.fk_Distrito_Canton1" ManuallyRouted="false" />
+        <AssociationConnector Association="marsh_contableModel.fk_Gastos_Categoria_gasto1" ManuallyRouted="false" />
+        <AssociationConnector Association="marsh_contableModel.fk_Gestion_Presupuestaria_Categoria_presupuestaria1" ManuallyRouted="false" />
+        <AssociationConnector Association="marsh_contableModel.fk_Cuenta_Encabezado_Centro_Costos1" ManuallyRouted="false" />
+        <AssociationConnector Association="marsh_contableModel.fk_Gestion_Presupuestaria_Centro_Costos1" ManuallyRouted="false" />
+        <AssociationConnector Association="marsh_contableModel.fk_Clientes_codigo_actividad1" ManuallyRouted="false" />
+        <AssociationConnector Association="marsh_contableModel.fk_Clientes_Distrito1" ManuallyRouted="false" />
+        <AssociationConnector Association="marsh_contableModel.fk_Clientes_tipo_identificacion1" ManuallyRouted="false" />
+        <AssociationConnector Association="marsh_contableModel.fk_CXC_Encabezado_Clientes1" ManuallyRouted="false" />
+        <AssociationConnector Association="marsh_contableModel.fk_Facturas_Clientes1" ManuallyRouted="false" />
+        <AssociationConnector Association="marsh_contableModel.fk_Facturas_Clientes10" ManuallyRouted="false" />
+        <AssociationConnector Association="marsh_contableModel.fk_Telefonos_Clientes1" ManuallyRouted="false" />
+        <AssociationConnector Association="marsh_contableModel.fk_Clientes_codigo_actividad10" ManuallyRouted="false" />
+        <AssociationConnector Association="marsh_contableModel.fk_Empresa_codigo_actividad1" ManuallyRouted="false" />
+        <AssociationConnector Association="marsh_contableModel.fk_Factura_Detalles_Codigo_comercial1" ManuallyRouted="false" />
+        <AssociationConnector Association="marsh_contableModel.fk_Codigos_cabys_Impuesto1" ManuallyRouted="false" />
+        <AssociationConnector Association="marsh_contableModel.fk_Factura_Detalles_Codigos_cabys1" ManuallyRouted="false" />
+        <AssociationConnector Association="marsh_contableModel.fk_Facturas_Condicion_venta1" ManuallyRouted="false" />
+        <AssociationConnector Association="marsh_contableModel.fk_Cuenta_Detalle_Cuenta_Encabezado1" ManuallyRouted="false" />
+        <AssociationConnector Association="marsh_contableModel.fk_Cuenta_Encabezado_Cuentas_Contables1" ManuallyRouted="false" />
+        <AssociationConnector Association="marsh_contableModel.fk_Cuenta_Encabezado_Gastos1" ManuallyRouted="false" />
+        <AssociationConnector Association="marsh_contableModel.fk_Cuenta_Encabezado_Tipo_cuentas1" ManuallyRouted="false" />
+        <AssociationConnector Association="marsh_contableModel.fk_CXC_Encabezado_Facturas1" ManuallyRouted="false" />
+        <AssociationConnector Association="marsh_contableModel.fk_CXC_Encabezado_Medio_pago1" ManuallyRouted="false" />
+        <AssociationConnector Association="marsh_contableModel.fk_CXC_Encabezado_Tipo_moneda1" ManuallyRouted="false" />
+        <AssociationConnector Association="marsh_contableModel.fk_CXC_Encabezado_Usuarios1" ManuallyRouted="false" />
+        <AssociationConnector Association="marsh_contableModel.fk_Cuentas_Contables_Tipo_Cuenta_Contable1" ManuallyRouted="false" />
+        <AssociationConnector Association="marsh_contableModel.fk_Cuentas_Contables_Usuarios1" ManuallyRouted="false" />
+        <AssociationConnector Association="marsh_contableModel.fk_Devoluciones_Ingresos1" ManuallyRouted="false" />
+        <AssociationConnector Association="marsh_contableModel.fk_Clientes_Distrito10" ManuallyRouted="false" />
+        <AssociationConnector Association="marsh_contableModel.fk_Empresa_Impuesto1" ManuallyRouted="false" />
+        <AssociationConnector Association="marsh_contableModel.fk_Empresa_tipo_identificacion1" ManuallyRouted="false" />
+        <AssociationConnector Association="marsh_contableModel.fk_Usuario_Empresa1" ManuallyRouted="false" />
+        <AssociationConnector Association="marsh_contableModel.fk_Factura_Estado_Factura1" ManuallyRouted="false" />
+        <AssociationConnector Association="marsh_contableModel.fk_Factura_Estado_Factura10" ManuallyRouted="false" />
+        <AssociationConnector Association="marsh_contableModel.fk_Factura_Detalles_Facturas1" ManuallyRouted="false" />
+        <AssociationConnector Association="marsh_contableModel.fk_Factura_Detalles_Unidad_medida1" ManuallyRouted="false" />
+        <AssociationConnector Association="marsh_contableModel.fk_Factura_Impuesto1" ManuallyRouted="false" />
+        <AssociationConnector Association="marsh_contableModel.fk_Factura_Tipo_documento1" ManuallyRouted="false" />
+        <AssociationConnector Association="marsh_contableModel.fk_Factura_Tipo_moneda1" ManuallyRouted="false" />
+        <AssociationConnector Association="marsh_contableModel.fk_Facturas_Medio_pago1" ManuallyRouted="false" />
+        <AssociationConnector Association="marsh_contableModel.fk_Ingresos_Facturas1" ManuallyRouted="false" />
+        <AssociationConnector Association="marsh_contableModel.fk_Factura_Detalles_copy1_Gastos1" ManuallyRouted="false" />
+        <AssociationConnector Association="marsh_contableModel.fk_Gastos_Medio_pago1" ManuallyRouted="false" />
+        <AssociationConnector Association="marsh_contableModel.fk_Gastos_Proveedor1" ManuallyRouted="false" />
+        <AssociationConnector Association="marsh_contableModel.fk_Gastos_Tipo_documento1" ManuallyRouted="false" />
+        <AssociationConnector Association="marsh_contableModel.fk_Gastos_Usuarios1" ManuallyRouted="false" />
+        <AssociationConnector Association="marsh_contableModel.fk_Factura_Detalles_Medio_pago10" ManuallyRouted="false" />
+        <AssociationConnector Association="marsh_contableModel.fk_Gestion_P_detalle_Gestion_Presupuestaria1" ManuallyRouted="false" />
+        <AssociationConnector Association="marsh_contableModel.fk_Gestion_Presupuestaria_Usuarios1" ManuallyRouted="false" />
+        <AssociationConnector Association="marsh_contableModel.fk_Factura_Tipo_moneda10" ManuallyRouted="false" />
+        <AssociationConnector Association="marsh_contableModel.fk_Ingresos_Detalle_Ingresos1" ManuallyRouted="false" />
+        <AssociationConnector Association="marsh_contableModel.fk_Ingresos_Medio_pago1" ManuallyRouted="false" />
+        <AssociationConnector Association="marsh_contableModel.fk_Ingresos_Usuarios1" ManuallyRouted="false" />
+        <AssociationConnector Association="marsh_contableModel.fk_Factura_Detalles_Unidad_medida10" ManuallyRouted="false" />
+        <AssociationConnector Association="marsh_contableModel.fk_Permisos_x_rol_Permisos1" ManuallyRouted="false" />
+        <AssociationConnector Association="marsh_contableModel.fk_Permisos_x_rol_Roles1" ManuallyRouted="false" />
+        <AssociationConnector Association="marsh_contableModel.fk_Clientes_tipo_identificacion10" ManuallyRouted="false" />
+        <AssociationConnector Association="marsh_contableModel.fk_Telefonos_Proveedor1" ManuallyRouted="false" />
+        <AssociationConnector Association="marsh_contableModel.fk_Usuario_Roles1" ManuallyRouted="false" />
+        <AssociationConnector Association="marsh_contableModel.fk_Tipo_cambio_Tipo_moneda1" ManuallyRouted="false" />
+        <AssociationConnector Association="marsh_contableModel.fk_Tipo_cambio_Usuarios1" ManuallyRouted="false" />
+      </Diagram>
+    </edmx:Diagrams>
+  </edmx:Designer>
+</edmx:Edmx>
