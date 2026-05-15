@@ -192,7 +192,7 @@
           <Key>
             <PropertyRef Name="Emp_id" />
           </Key>
-          <Property Name="Emp_id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="Emp_id" Type="int" Nullable="false" />
           <Property Name="Nombre_empresa" Type="varchar" MaxLength="100" Nullable="false" />
           <Property Name="Correo_empresa" Type="varchar" MaxLength="150" Nullable="false" />
           <Property Name="Ruta_nas" Type="varchar" MaxLength="255" Nullable="false" />
@@ -204,9 +204,9 @@
           <Property Name="terminal" Type="int" Nullable="false" />
           <Property Name="codigo_seguridad" Type="varchar" MaxLength="8" Nullable="false" />
           <Property Name="identificacion" Type="varchar" MaxLength="45" Nullable="false" />
-          <Property Name="codigo_actividad_id" Type="int" Nullable="false" />
+          <Property Name="codigo_actividad_id" Type="int" />
           <Property Name="tipo_identificacion_id" Type="int" Nullable="false" />
-          <Property Name="Impuesto_id" Type="int" Nullable="false" />
+          <Property Name="Impuesto_id" Type="int" />
         </EntityType>
         <EntityType Name="Estado_Factura">
           <Key>
@@ -430,7 +430,7 @@
             <PropertyRef Name="id" />
           </Key>
           <Property Name="id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
-          <Property Name="Descripcion" Type="int" Nullable="false" />
+          <Property Name="Descripcion" Type="varchar" MaxLength="100" Nullable="false" />
         </EntityType>
         <EntityType Name="Tablas_referencia">
           <Key>
@@ -446,8 +446,8 @@
           <Property Name="id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
           <Property Name="Numero" Type="varchar" MaxLength="10" Nullable="false" />
           <Property Name="codigo_pais" Type="varchar" MaxLength="3" Nullable="false" />
-          <Property Name="Clientes_id" Type="int" Nullable="false" />
-          <Property Name="Proveedor_id" Type="int" Nullable="false" />
+          <Property Name="Clientes_id" Type="int" />
+          <Property Name="Proveedor_id" Type="int" />
           <Property Name="telefono_principal" Type="smallint" Nullable="false" />
         </EntityType>
         <EntityType Name="Tipo_archivo">
@@ -531,6 +531,9 @@
           <Property Name="Roles_id" Type="int" Nullable="false" />
           <Property Name="Id_Empleado" Type="varchar" MaxLength="20" Nullable="false" />
           <Property Name="activo" Type="smallint" Nullable="false" />
+          <Property Name="Fec_creacion" Type="datetime" />
+          <Property Name="Fec_Actualizacion" Type="datetime" />
+          <Property Name="Fec_Login" Type="datetime" />
         </EntityType>
         <Association Name="fk_Adjuntos_Tablas_referencia1">
           <End Role="Tablas_referencia" Type="Self.Tablas_referencia" Multiplicity="1" />
@@ -843,7 +846,7 @@
           </ReferentialConstraint>
         </Association>
         <Association Name="fk_Empresa_codigo_actividad1">
-          <End Role="codigo_actividad" Type="Self.codigo_actividad" Multiplicity="1" />
+          <End Role="codigo_actividad" Type="Self.codigo_actividad" Multiplicity="0..1" />
           <End Role="Empresa" Type="Self.Empresa" Multiplicity="*" />
           <ReferentialConstraint>
             <Principal Role="codigo_actividad">
@@ -855,7 +858,7 @@
           </ReferentialConstraint>
         </Association>
         <Association Name="fk_Empresa_Impuesto1">
-          <End Role="Impuesto" Type="Self.Impuesto" Multiplicity="1" />
+          <End Role="Impuesto" Type="Self.Impuesto" Multiplicity="0..1" />
           <End Role="Empresa" Type="Self.Empresa" Multiplicity="*" />
           <ReferentialConstraint>
             <Principal Role="Impuesto">
@@ -1267,7 +1270,7 @@
           </ReferentialConstraint>
         </Association>
         <Association Name="fk_Telefonos_Clientes1">
-          <End Role="Clientes" Type="Self.Clientes" Multiplicity="1" />
+          <End Role="Clientes" Type="Self.Clientes" Multiplicity="0..1" />
           <End Role="Telefonos" Type="Self.Telefonos" Multiplicity="*" />
           <ReferentialConstraint>
             <Principal Role="Clientes">
@@ -1279,7 +1282,7 @@
           </ReferentialConstraint>
         </Association>
         <Association Name="fk_Telefonos_Proveedor1">
-          <End Role="Proveedor" Type="Self.Proveedor" Multiplicity="1" />
+          <End Role="Proveedor" Type="Self.Proveedor" Multiplicity="0..1" />
           <End Role="Telefonos" Type="Self.Telefonos" Multiplicity="*" />
           <ReferentialConstraint>
             <Principal Role="Proveedor">
@@ -1880,7 +1883,7 @@
           <Key>
             <PropertyRef Name="Emp_id" />
           </Key>
-          <Property Name="Emp_id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="Emp_id" Type="Int32" Nullable="false" />
           <Property Name="Nombre_empresa" Type="String" MaxLength="100" FixedLength="false" Unicode="false" Nullable="false" />
           <Property Name="Correo_empresa" Type="String" MaxLength="150" FixedLength="false" Unicode="false" Nullable="false" />
           <Property Name="Ruta_nas" Type="String" MaxLength="255" FixedLength="false" Unicode="false" Nullable="false" />
@@ -1892,9 +1895,9 @@
           <Property Name="terminal" Type="Int32" Nullable="false" />
           <Property Name="codigo_seguridad" Type="String" MaxLength="8" FixedLength="false" Unicode="false" Nullable="false" />
           <Property Name="identificacion" Type="String" MaxLength="45" FixedLength="false" Unicode="false" Nullable="false" />
-          <Property Name="codigo_actividad_id" Type="Int32" Nullable="false" />
+          <Property Name="codigo_actividad_id" Type="Int32" />
           <Property Name="tipo_identificacion_id" Type="Int32" Nullable="false" />
-          <Property Name="Impuesto_id" Type="Int32" Nullable="false" />
+          <Property Name="Impuesto_id" Type="Int32" />
           <NavigationProperty Name="codigo_actividad" Relationship="Self.fk_Empresa_codigo_actividad1" FromRole="Empresa" ToRole="codigo_actividad" />
           <NavigationProperty Name="Impuesto" Relationship="Self.fk_Empresa_Impuesto1" FromRole="Empresa" ToRole="Impuesto" />
           <NavigationProperty Name="tipo_identificacion" Relationship="Self.fk_Empresa_tipo_identificacion1" FromRole="Empresa" ToRole="tipo_identificacion" />
@@ -2179,7 +2182,7 @@
             <PropertyRef Name="id" />
           </Key>
           <Property Name="id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
-          <Property Name="Descripcion" Type="Int32" Nullable="false" />
+          <Property Name="Descripcion" Type="String" MaxLength="100" FixedLength="false" Unicode="false" Nullable="false" />
           <NavigationProperty Name="Permisos_x_rol" Relationship="Self.fk_Permisos_x_rol_Roles1" FromRole="Roles" ToRole="Permisos_x_rol" />
           <NavigationProperty Name="Usuarios" Relationship="Self.fk_Usuario_Roles1" FromRole="Roles" ToRole="Usuarios" />
         </EntityType>
@@ -2198,8 +2201,8 @@
           <Property Name="id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
           <Property Name="Numero" Type="String" MaxLength="10" FixedLength="false" Unicode="false" Nullable="false" />
           <Property Name="codigo_pais" Type="String" MaxLength="3" FixedLength="false" Unicode="false" Nullable="false" />
-          <Property Name="Clientes_id" Type="Int32" Nullable="false" />
-          <Property Name="Proveedor_id" Type="Int32" Nullable="false" />
+          <Property Name="Clientes_id" Type="Int32" />
+          <Property Name="Proveedor_id" Type="Int32" />
           <Property Name="telefono_principal" Type="Int16" Nullable="false" />
           <NavigationProperty Name="Clientes" Relationship="Self.fk_Telefonos_Clientes1" FromRole="Telefonos" ToRole="Clientes" />
           <NavigationProperty Name="Proveedor" Relationship="Self.fk_Telefonos_Proveedor1" FromRole="Telefonos" ToRole="Proveedor" />
@@ -2301,6 +2304,9 @@
           <Property Name="Roles_id" Type="Int32" Nullable="false" />
           <Property Name="Id_Empleado" Type="String" MaxLength="20" FixedLength="false" Unicode="false" Nullable="false" />
           <Property Name="activo" Type="Int16" Nullable="false" />
+          <Property Name="Fec_creacion" Type="DateTime" Precision="3" />
+          <Property Name="Fec_Actualizacion" Type="DateTime" Precision="3" />
+          <Property Name="Fec_Login" Type="DateTime" Precision="3" />
           <NavigationProperty Name="Adjuntos" Relationship="Self.fk_Adjuntos_Usuarios1" FromRole="Usuarios" ToRole="Adjuntos" />
           <NavigationProperty Name="Cuenta_Encabezado" Relationship="Self.fk_CXC_Encabezado_Usuarios1" FromRole="Usuarios" ToRole="Cuenta_Encabezado" />
           <NavigationProperty Name="Cuentas_Contables" Relationship="Self.fk_Cuentas_Contables_Usuarios1" FromRole="Usuarios" ToRole="Cuentas_Contables" />
@@ -2498,7 +2504,7 @@
           </ReferentialConstraint>
         </Association>
         <Association Name="fk_Telefonos_Clientes1">
-          <End Role="Clientes" Type="Self.Clientes" Multiplicity="1" />
+          <End Role="Clientes" Type="Self.Clientes" Multiplicity="0..1" />
           <End Role="Telefonos" Type="Self.Telefonos" Multiplicity="*" />
           <ReferentialConstraint>
             <Principal Role="Clientes">
@@ -2522,7 +2528,7 @@
           </ReferentialConstraint>
         </Association>
         <Association Name="fk_Empresa_codigo_actividad1">
-          <End Role="codigo_actividad" Type="Self.codigo_actividad" Multiplicity="1" />
+          <End Role="codigo_actividad" Type="Self.codigo_actividad" Multiplicity="0..1" />
           <End Role="Empresa" Type="Self.Empresa" Multiplicity="*" />
           <ReferentialConstraint>
             <Principal Role="codigo_actividad">
@@ -2734,7 +2740,7 @@
           </ReferentialConstraint>
         </Association>
         <Association Name="fk_Empresa_Impuesto1">
-          <End Role="Impuesto" Type="Self.Impuesto" Multiplicity="1" />
+          <End Role="Impuesto" Type="Self.Impuesto" Multiplicity="0..1" />
           <End Role="Empresa" Type="Self.Empresa" Multiplicity="*" />
           <ReferentialConstraint>
             <Principal Role="Impuesto">
@@ -3070,7 +3076,7 @@
           </ReferentialConstraint>
         </Association>
         <Association Name="fk_Telefonos_Proveedor1">
-          <End Role="Proveedor" Type="Self.Proveedor" Multiplicity="1" />
+          <End Role="Proveedor" Type="Self.Proveedor" Multiplicity="0..1" />
           <End Role="Telefonos" Type="Self.Telefonos" Multiplicity="*" />
           <ReferentialConstraint>
             <Principal Role="Proveedor">
@@ -3117,7 +3123,7 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <EntityContainer Name="marsh_contableEntities" annotation:LazyLoadingEnabled="true">
+        <EntityContainer Name="EntitiesModel" annotation:LazyLoadingEnabled="true">
           <EntitySet Name="Adjuntos" EntityType="Self.Adjuntos" />
           <EntitySet Name="Canton" EntityType="Self.Canton" />
           <EntitySet Name="Categoria_gasto" EntityType="Self.Categoria_gasto" />
@@ -3431,7 +3437,7 @@
     <!-- C-S mapping content -->
     <edmx:Mappings>
       <Mapping Space="C-S" xmlns="http://schemas.microsoft.com/ado/2009/11/mapping/cs">
-        <EntityContainerMapping StorageEntityContainer="marsh_contableModelStoreContainer" CdmEntityContainer="marsh_contableEntities">
+        <EntityContainerMapping StorageEntityContainer="marsh_contableModelStoreContainer" CdmEntityContainer="EntitiesModel">
           <EntitySetMapping Name="Adjuntos">
             <EntityTypeMapping TypeName="marsh_contableModel.Adjuntos">
               <MappingFragment StoreEntitySet="Adjuntos">
@@ -3994,6 +4000,9 @@
                 <ScalarProperty Name="Roles_id" ColumnName="Roles_id" />
                 <ScalarProperty Name="Id_Empleado" ColumnName="Id_Empleado" />
                 <ScalarProperty Name="activo" ColumnName="activo" />
+                <ScalarProperty Name="Fec_creacion" ColumnName="Fec_creacion" />
+                <ScalarProperty Name="Fec_Actualizacion" ColumnName="Fec_Actualizacion" />
+                <ScalarProperty Name="Fec_Login" ColumnName="Fec_Login" />
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>

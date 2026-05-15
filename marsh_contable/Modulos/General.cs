@@ -2,13 +2,17 @@
 using System.IO;
 using System.Security.Cryptography;
 using System.Text;
+using System.Text.RegularExpressions;
+using System.Configuration;
+using System.Security.Claims;
+using Microsoft.IdentityModel.Tokens;
 
 
 namespace marsh_contable.Modulos
 {
     public class General
     {
-
+         String input = ConfigurationManager.AppSettings["Input"];
 
         public string GenerarClave()
         {
@@ -24,36 +28,16 @@ namespace marsh_contable.Modulos
         }
 
 
-        public string EncriptarArchivo(string pArchivoBase64, int pInd_Activa_Encriptacion, string pEmpresaInput)
+        public string EncriptarArchivo(string pArchivoBase64)
 
         {
 
             try
 
             {
-
-                if (pInd_Activa_Encriptacion == 1)
-
-                {
-
-                    byte[] bytesToBeEncrypted = Convert.FromBase64String(pArchivoBase64);
-
-                    byte[] bytesEncrypted = Encrypt(bytesToBeEncrypted, pEmpresaInput);
-
-
-
-                    return Convert.ToBase64String(bytesEncrypted);
-
-                }
-
-                else
-
-                {
-
-                    return pArchivoBase64;
-
-                }
-
+                byte[] bytesToBeEncrypted = Convert.FromBase64String(pArchivoBase64);
+                byte[] bytesEncrypted = Encrypt(bytesToBeEncrypted);
+                return Convert.ToBase64String(bytesEncrypted);
             }
 
             catch (Exception ex)
@@ -68,36 +52,20 @@ namespace marsh_contable.Modulos
 
 
 
-        public string DesencriptarArchivo(string pArchivoBase64, int pInd_Activa_Encriptacion, string pEmpresaInput)
+        public string DesencriptarArchivo(string pArchivoBase64)
 
         {
 
             try
 
             {
+                byte[] bytesToBeDecrypted = Convert.FromBase64String(pArchivoBase64);
 
-                if (pInd_Activa_Encriptacion == 1)
-
-                {
-
-                    byte[] bytesToBeDecrypted = Convert.FromBase64String(pArchivoBase64);
-
-                    byte[] bytesDecrypted = Decrypt(bytesToBeDecrypted, pEmpresaInput);
+                byte[] bytesDecrypted = Decrypt(bytesToBeDecrypted);
 
 
 
-                    return Convert.ToBase64String(bytesDecrypted);
-
-                }
-
-                else
-
-                {
-
-                    return pArchivoBase64;
-
-                }
-
+                return Convert.ToBase64String(bytesDecrypted);
             }
 
             catch (Exception ex)
@@ -112,79 +80,36 @@ namespace marsh_contable.Modulos
 
 
 
-        public string Encriptar(string texto, int pInd_Activa_Encriptacion, string pEmpresaInput)
-
+        public string Encriptar(string texto)
         {
-
             try
 
             {
-
-                if (pInd_Activa_Encriptacion == 1)
-
-                {
-
-                    byte[] bytesToBeEncrypted = Encoding.UTF8.GetBytes(texto);
-
-                    byte[] bytesEncrypted = Encrypt(bytesToBeEncrypted, pEmpresaInput);
-
-
-
-                    return Convert.ToBase64String(bytesEncrypted);
-
-                }
-
-                else
-
-                {
-
-                    return texto;
-
-                }
-
+                byte[] bytesToBeEncrypted = Encoding.UTF8.GetBytes(texto);
+                byte[] bytesEncrypted = Encrypt(bytesToBeEncrypted);
+                return Convert.ToBase64String(bytesEncrypted);
             }
-
             catch (Exception ex)
 
             {
-
                 return ex.Message;
-
             }
-
         }
 
 
 
-        public string Desencriptar(string texto, int pInd_Activa_Encriptacion, string pEmpresaInput)
+        public string Desencriptar(string texto)
 
         {
 
             try
 
             {
+                byte[] bytesToBeEncrypted = Convert.FromBase64String(texto);
 
-                if (pInd_Activa_Encriptacion == 1)
+                byte[] bytesEncrypted = Decrypt(bytesToBeEncrypted);
 
-                {
-
-                    byte[] bytesToBeEncrypted = Convert.FromBase64String(texto);
-
-                    byte[] bytesEncrypted = Decrypt(bytesToBeEncrypted, pEmpresaInput);
-
-
-
-                    return Encoding.UTF8.GetString(bytesEncrypted);
-
-                }
-
-                else
-
-                {
-
-                    return texto;
-
-                }
+                return Encoding.UTF8.GetString(bytesEncrypted);
 
             }
 
@@ -200,7 +125,7 @@ namespace marsh_contable.Modulos
 
 
 
-        private byte[] Encrypt(byte[] bytesToBeEncrypted, string pEmpresaInput)
+        private byte[] Encrypt(byte[] bytesToBeEncrypted)
 
         {
 
@@ -218,7 +143,7 @@ namespace marsh_contable.Modulos
 
                 {
 
-                    var pdb = new PasswordDeriveBytes(pEmpresaInput, saltBytes);
+                    var pdb = new PasswordDeriveBytes(input, saltBytes);
 
 
 
@@ -258,7 +183,7 @@ namespace marsh_contable.Modulos
 
 
 
-        private byte[] Decrypt(byte[] bytesToBeEncrypted, string pEmpresaInput)
+        private byte[] Decrypt(byte[] bytesToBeEncrypted)
 
         {
 
@@ -284,7 +209,7 @@ namespace marsh_contable.Modulos
 
                     {
 
-                        var pdb = new PasswordDeriveBytes(pEmpresaInput, saltBytes);
+                        var pdb = new PasswordDeriveBytes(input, saltBytes);
 
 
 
@@ -335,5 +260,82 @@ namespace marsh_contable.Modulos
         }
 
 
-}
+        public bool ValidaTexto(string text)
+        {
+            const String regexfotNames = @"^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$";
+            if (!string.IsNullOrWhiteSpace(text) && Regex.IsMatch(text, regexfotNames))
+            {
+                return true;
+            }
+            return false;
+
+        }
+
+        public bool ValidaCorreo(string text)
+        {
+            const String regexfotNames = @"^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$";
+            return Regex.IsMatch(text, regexfotNames);
+        }
+
+        public bool validaNumeros(string valor, bool esDecimal = false)
+        {
+     
+            if(esDecimal)
+            {
+
+                if (decimal.TryParse(valor, out decimal numero))
+                {
+                    return true;
+                }
+
+            }
+            else
+            {
+                if (int.TryParse(valor, out int numero))
+                {
+                    return true;
+                }
+            }
+            return false;
+           
+        }
+
+        public bool validaPassword(string text)
+        {
+            const string pwdFormat = @"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).+$";
+            return Regex.IsMatch(text, pwdFormat);
+
+        }       
+        
+
+        public string GenerateTokenJWT(string username)
+        {
+            var SecretKey = ConfigurationManager.AppSettings["JWT_SECRET_KEY"];
+            var audienceToken = ConfigurationManager.AppSettings["JWT_AUDIENCE_TOKEN"];
+            var issuerToken = ConfigurationManager.AppSettings["JWT_ISSUER_TOKEN"];
+            var expireTime = ConfigurationManager.AppSettings["JWT_EXPIRE_MINUTES"];
+
+
+            var securityKey = new SymmetricSecurityKey(System.Text.Encoding.Default.GetBytes(SecretKey));
+            var signingCredentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
+
+            ClaimsIdentity claimsIdentity = new ClaimsIdentity(new[] { new Claim(ClaimTypes.Name, username)});
+
+            // var tokenHandler = new System.IdentityModel.Tokens.Jwt.JwtSecurityTokenHandler();
+            var tokenHandler = new System.IdentityModel.Tokens.Jwt.JwtSecurityTokenHandler();
+            var JwtSecurityToken = tokenHandler.CreateJwtSecurityToken(
+                audience:audienceToken,
+                issuer:issuerToken,
+                subject: claimsIdentity,
+                notBefore: DateTime.UtcNow,
+                expires:DateTime.UtcNow.AddMinutes(Convert.ToInt32(expireTime)),                
+                signingCredentials:signingCredentials
+                );
+            var jwtTokenString = tokenHandler.WriteToken(JwtSecurityToken);
+            return jwtTokenString;
+
+        }
+
+
+    }
 }

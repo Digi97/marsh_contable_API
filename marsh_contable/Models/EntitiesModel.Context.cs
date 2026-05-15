@@ -13,10 +13,10 @@ namespace marsh_contable.Models
     using System.Data.Entity;
     using System.Data.Entity.Infrastructure;
     
-    public partial class marsh_contableEntities : DbContext
+    public partial class EntitiesModel : DbContext
     {
-        public marsh_contableEntities()
-            : base("name=marsh_contableEntities")
+        public EntitiesModel()
+            : base("name=EntitiesModel")
         {
         }
     
