@@ -12,9 +12,12 @@ using marsh_contable.Modulos;
 
 namespace marsh_contable.Controllers
 {
+
+    [EnableCors(origins: "*", headers: "*", methods: "*")]
     public class UsersController : ApiController
     {
 
+      
 
         [HttpPost]
         [Authorize]
@@ -383,23 +386,31 @@ namespace marsh_contable.Controllers
                     oR.Data = usuario;
                 }
             }
-            catch (Exception ex)
+            catch (System.Data.Entity.Validation.DbEntityValidationException ex)
             {
                 string errorDB = "";
-
-                if (ex is System.Data.Entity.Validation.DbEntityValidationException ex2)
+                foreach (var eve in ex.EntityValidationErrors)
                 {
-                    foreach (var eve in ex2.EntityValidationErrors)
+                    foreach (var ve in eve.ValidationErrors)
                     {
-                        foreach (var ve in eve.ValidationErrors)
-                        {
-                            errorDB += ve.ErrorMessage + " ";
-                        }
+                        errorDB += ve.ErrorMessage + "";
                     }
                 }
 
                 oR.CodeStatus = HttpStatusCode.InternalServerError;
-                oR.Message = ex.Message + " " + errorDB;
+                oR.Message = errorDB;
+            }
+            catch (Exception ex)
+            {
+              
+
+                if (ex is System.Data.Entity.Validation.DbEntityValidationException ex2)
+                {
+                
+                }
+
+                oR.CodeStatus = HttpStatusCode.InternalServerError;
+                oR.Message = ex.Message;
             }
 
             return oR;

@@ -392,7 +392,6 @@
     <Compile Include="Models\UsuariosViewModel.cs" />
     <Compile Include="Modulos\General.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Startup.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Areas\HelpPage\HelpPage.css" />
@@ -518,7 +517,7 @@
           <AutoAssignPort>True</AutoAssignPort>
           <DevelopmentServerPort>64635</DevelopmentServerPort>
           <DevelopmentServerVPath>/</DevelopmentServerVPath>
-          <IISUrl>https://localhost:44356/</IISUrl>
+          <IISUrl>http://localhost:44356/</IISUrl>
           <NTLMAuthentication>False</NTLMAuthentication>
           <UseCustomServer>False</UseCustomServer>
           <CustomServerUrl>
