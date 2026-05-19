@@ -337,5 +337,18 @@ namespace marsh_contable.Modulos
         }
 
 
+        public string FormatearCodigoActividad(string codigo)
+        {
+            string codigoStr = codigo.ToString();
+
+            if (codigoStr.Length > 6)
+            {
+                throw new Exception("codigo_actividad_longer_than_6_characters");
+            }
+
+            return codigoStr.PadLeft(6, '0');
+        }
+
+
     }
 }

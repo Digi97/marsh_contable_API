@@ -83,6 +83,9 @@ namespace marsh_contable.Controllers
                         Roles_id = model.Roles_id,
                         Id_Empleado = model.Id_Empleado,
                         activo = (Int16) model.activo,
+                        Fec_Login = DateTime.Now,
+                        Fec_Actualizacion = DateTime.Now,
+                        Fec_creacion = DateTime.Now,
                         Empresa_Emp_id = 1
 
                     };
@@ -171,6 +174,10 @@ namespace marsh_contable.Controllers
                     usuarioExistente.Roles_id = model.Roles_id;
                     usuarioExistente.Id_Empleado = model.Id_Empleado;
                     usuarioExistente.activo = (Int16)model.activo;
+                    usuarioExistente.Fec_Actualizacion = DateTime.Now;
+                        /* Fec_Login = DateTime.Now,
+                        Fec_Actualizacion = DateTime.Now,
+                        Fec_creacion = DateTime.Now,*/
 
                     // Solo re-encripta la contraseña si se envía una nueva
                     if (!string.IsNullOrEmpty(model.Contrasena))
@@ -186,11 +193,14 @@ namespace marsh_contable.Controllers
 
                     oR.CodeStatus = HttpStatusCode.OK;
                     oR.Data = usuarioExistente.Usuario_id;
+
+                    return oR;
                 }
             }
-            catch (Exception ex)
+
+            catch(System.Data.Entity.Validation.DbEntityValidationException ex2)
             {
-                System.Data.Entity.Validation.DbEntityValidationException ex2 = new System.Data.Entity.Validation.DbEntityValidationException();
+           
                 String errorDB = "";
                 foreach (var eve in ex2.EntityValidationErrors)
                 {
@@ -200,9 +210,16 @@ namespace marsh_contable.Controllers
                     }
                 }
                 oR.CodeStatus = HttpStatusCode.InternalServerError;
-                oR.Message = ex.Message + " " + errorDB;
+                oR.Message = errorDB;
+                return oR;
             }
-            return oR;
+            catch (Exception ex)
+            {
+               
+                oR.CodeStatus = HttpStatusCode.InternalServerError;
+                oR.Message = ex.Message;
+                return oR;
+            }
         }
 
 
@@ -218,20 +235,24 @@ namespace marsh_contable.Controllers
             {
                 using (var ctx = new Models.EntitiesModel())
                 {
-                    List<Models.UsuariosViewModel> usuarios = ctx.Usuarios
-                        .Select(u => new Models.UsuariosViewModel
-                        {
-                            Usuario_id = u.Usuario_id,
-                            Nombre = u.Nombre,
-                            Apellido1 = u.Apellido1,
-                            Apellido2 = u.Apellido2,
-                            Correo = u.Correo,
-                            Roles_id = u.Roles_id,
-                            Id_Empleado = u.Id_Empleado,
-                            activo = u.activo
-                    // Contrasena se omite intencionalmente por seguridad
-                })
-                        .ToList();
+                    List<Models.UsuariosViewModel> usuarios = (
+                from u in ctx.Usuarios
+                join r in ctx.Roles
+                    on u.Roles_id equals r.id
+                select new Models.UsuariosViewModel
+                {
+                    Usuario_id = u.Usuario_id,
+                    Nombre = u.Nombre,
+                    Apellido1 = u.Apellido1,
+                    Apellido2 = u.Apellido2,
+                    Correo = u.Correo,
+                    Roles_id = u.Roles_id,
+                    Id_Empleado = u.Id_Empleado,
+                    activo = u.activo,
+     
+             Rol = r.Descripcion
+ }
+            ).ToList();
 
                     oR.CodeStatus = HttpStatusCode.OK;
                     oR.Data = usuarios;

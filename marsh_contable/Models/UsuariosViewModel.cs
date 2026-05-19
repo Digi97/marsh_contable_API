@@ -19,5 +19,7 @@ namespace marsh_contable.Models
 
         public DateTime Fec_Actualizacion { get; set; }
         public DateTime Fec_Login { get; set; }
+
+        public string Rol { get; set; }
     }
 }
