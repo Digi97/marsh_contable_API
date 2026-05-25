@@ -4,7 +4,7 @@
   <edmx:Runtime>
     <!-- SSDL content -->
     <edmx:StorageModels>
-      <Schema Namespace="marsh_contableModel.Store" Provider="System.Data.SqlClient" ProviderManifestToken="2012" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
+    <Schema Namespace="marsh_contableModel.Store" Provider="System.Data.SqlClient" ProviderManifestToken="2012" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
         <EntityType Name="Adjuntos">
           <Key>
             <PropertyRef Name="id" />
@@ -84,7 +84,7 @@
           </Key>
           <Property Name="id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
           <Property Name="codigo_actividad" Type="varchar" MaxLength="45" Nullable="false" />
-          <Property Name="nombre_actividad" Type="varchar" MaxLength="45" Nullable="false" />
+          <Property Name="nombre_actividad" Type="varchar" MaxLength="255" />
         </EntityType>
         <EntityType Name="Codigo_comercial">
           <Key>
@@ -102,7 +102,7 @@
           </Key>
           <Property Name="id" Type="int" Nullable="false" />
           <Property Name="codigo" Type="varchar" MaxLength="45" Nullable="false" />
-          <Property Name="Nombre" Type="varchar" MaxLength="45" Nullable="false" />
+          <Property Name="Nombre" Type="varchar" MaxLength="1000" />
           <Property Name="Impuesto_id" Type="int" Nullable="false" />
         </EntityType>
         <EntityType Name="Condicion_venta">
@@ -165,6 +165,7 @@
           <Property Name="Saldo_actual" Type="float" Nullable="false" />
           <Property Name="Fecha_Creacion" Type="datetime" Nullable="false" />
           <Property Name="Fecha_actualizacion" Type="datetime" Nullable="false" />
+          <Property Name="Tipo_moneda_id" Type="int" Nullable="false" />
         </EntityType>
         <EntityType Name="Devoluciones">
           <Key>
@@ -335,6 +336,8 @@
           <Property Name="Nombre" Type="varchar" MaxLength="100" Nullable="false" />
           <Property Name="Porcentaje" Type="float" Nullable="false" />
           <Property Name="codigo" Type="varchar" MaxLength="2" Nullable="false" />
+          <Property Name="TarifaIVACodigo" Type="varchar" MaxLength="2" />
+          <Property Name="TarifaIVANombre" Type="varchar" MaxLength="150" />
         </EntityType>
         <EntityType Name="Ingresos">
           <Key>
@@ -744,6 +747,18 @@
             </Principal>
             <Dependent Role="Cuentas_Contables">
               <PropertyRef Name="Tipo_Cuenta_Contable_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Cuentas_Contables_Tipo_moneda">
+          <End Role="Tipo_moneda" Type="Self.Tipo_moneda" Multiplicity="1" />
+          <End Role="Cuentas_Contables" Type="Self.Cuentas_Contables" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Tipo_moneda">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="Cuentas_Contables">
+              <PropertyRef Name="Tipo_moneda_id" />
             </Dependent>
           </ReferentialConstraint>
         </Association>
@@ -1453,6 +1468,10 @@
             <End Role="Tipo_Cuenta_Contable" EntitySet="Tipo_Cuenta_Contable" />
             <End Role="Cuentas_Contables" EntitySet="Cuentas_Contables" />
           </AssociationSet>
+          <AssociationSet Name="FK_Cuentas_Contables_Tipo_moneda" Association="Self.FK_Cuentas_Contables_Tipo_moneda">
+            <End Role="Tipo_moneda" EntitySet="Tipo_moneda" />
+            <End Role="Cuentas_Contables" EntitySet="Cuentas_Contables" />
+          </AssociationSet>
           <AssociationSet Name="fk_Cuentas_Contables_Usuarios1" Association="Self.fk_Cuentas_Contables_Usuarios1">
             <End Role="Usuarios" EntitySet="Usuarios" />
             <End Role="Cuentas_Contables" EntitySet="Cuentas_Contables" />
@@ -1650,8 +1669,7 @@
             <End Role="Usuarios" EntitySet="Usuarios" />
           </AssociationSet>
         </EntityContainer>
-      </Schema>
-    </edmx:StorageModels>
+      </Schema></edmx:StorageModels>
     <!-- CSDL content -->
     <edmx:ConceptualModels>
       <Schema Namespace="marsh_contableModel" Alias="Self" annotation:UseStrongSpatialTypes="false" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm">
@@ -1750,7 +1768,7 @@
           </Key>
           <Property Name="id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
           <Property Name="codigo_actividad1" Type="String" MaxLength="45" FixedLength="false" Unicode="false" Nullable="false" />
-          <Property Name="nombre_actividad" Type="String" MaxLength="45" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="nombre_actividad" Type="String" MaxLength="255" FixedLength="false" Unicode="false" />
           <NavigationProperty Name="Clientes" Relationship="Self.fk_Clientes_codigo_actividad1" FromRole="codigo_actividad" ToRole="Clientes" />
           <NavigationProperty Name="Proveedor" Relationship="Self.fk_Clientes_codigo_actividad10" FromRole="codigo_actividad" ToRole="Proveedor" />
           <NavigationProperty Name="Empresa" Relationship="Self.fk_Empresa_codigo_actividad1" FromRole="codigo_actividad" ToRole="Empresa" />
@@ -1772,7 +1790,7 @@
           </Key>
           <Property Name="id" Type="Int32" Nullable="false" />
           <Property Name="codigo" Type="String" MaxLength="45" FixedLength="false" Unicode="false" Nullable="false" />
-          <Property Name="Nombre" Type="String" MaxLength="45" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="Nombre" Type="String" MaxLength="1000" FixedLength="false" Unicode="false" />
           <Property Name="Impuesto_id" Type="Int32" Nullable="false" />
           <NavigationProperty Name="Impuesto" Relationship="Self.fk_Codigos_cabys_Impuesto1" FromRole="Codigos_cabys" ToRole="Impuesto" />
           <NavigationProperty Name="Factura_Detalles" Relationship="Self.fk_Factura_Detalles_Codigos_cabys1" FromRole="Codigos_cabys" ToRole="Factura_Detalles" />
@@ -1852,6 +1870,8 @@
           <NavigationProperty Name="Cuenta_Encabezado" Relationship="Self.fk_Cuenta_Encabezado_Cuentas_Contables1" FromRole="Cuentas_Contables" ToRole="Cuenta_Encabezado" />
           <NavigationProperty Name="Tipo_Cuenta_Contable" Relationship="Self.fk_Cuentas_Contables_Tipo_Cuenta_Contable1" FromRole="Cuentas_Contables" ToRole="Tipo_Cuenta_Contable" />
           <NavigationProperty Name="Usuarios" Relationship="Self.fk_Cuentas_Contables_Usuarios1" FromRole="Cuentas_Contables" ToRole="Usuarios" />
+          <Property Name="Tipo_moneda_id" Type="Int32" Nullable="false" />
+          <NavigationProperty Name="Tipo_moneda" Relationship="marsh_contableModel.FK_Cuentas_Contables_Tipo_moneda" FromRole="Cuentas_Contables" ToRole="Tipo_moneda" />
         </EntityType>
         <EntityType Name="Devoluciones">
           <Key>
@@ -2063,6 +2083,8 @@
           <NavigationProperty Name="Codigos_cabys" Relationship="Self.fk_Codigos_cabys_Impuesto1" FromRole="Impuesto" ToRole="Codigos_cabys" />
           <NavigationProperty Name="Empresa" Relationship="Self.fk_Empresa_Impuesto1" FromRole="Impuesto" ToRole="Empresa" />
           <NavigationProperty Name="Facturas" Relationship="Self.fk_Factura_Impuesto1" FromRole="Impuesto" ToRole="Facturas" />
+          <Property Name="TarifaIVACodigo" Type="String" MaxLength="2" FixedLength="false" Unicode="false" />
+          <Property Name="TarifaIVANombre" Type="String" MaxLength="150" FixedLength="false" Unicode="false" />
         </EntityType>
         <EntityType Name="Ingresos">
           <Key>
@@ -2279,6 +2301,7 @@
           <NavigationProperty Name="Facturas" Relationship="Self.fk_Factura_Tipo_moneda1" FromRole="Tipo_moneda" ToRole="Facturas" />
           <NavigationProperty Name="Ingresos" Relationship="Self.fk_Factura_Tipo_moneda10" FromRole="Tipo_moneda" ToRole="Ingresos" />
           <NavigationProperty Name="Tipo_cambio" Relationship="Self.fk_Tipo_cambio_Tipo_moneda1" FromRole="Tipo_moneda" ToRole="Tipo_cambio" />
+          <NavigationProperty Name="Cuentas_Contables" Relationship="marsh_contableModel.FK_Cuentas_Contables_Tipo_moneda" FromRole="Tipo_moneda" ToRole="Cuentas_Contables" />
         </EntityType>
         <EntityType Name="Unidad_medida">
           <Key>
@@ -3431,7 +3454,23 @@
             <End Role="Usuarios" EntitySet="Usuarios" />
             <End Role="Tipo_cambio" EntitySet="Tipo_cambio" />
           </AssociationSet>
+          <AssociationSet Name="FK_Cuentas_Contables_Tipo_moneda" Association="marsh_contableModel.FK_Cuentas_Contables_Tipo_moneda">
+            <End Role="Tipo_moneda" EntitySet="Tipo_moneda" />
+            <End Role="Cuentas_Contables" EntitySet="Cuentas_Contables" />
+          </AssociationSet>
         </EntityContainer>
+        <Association Name="FK_Cuentas_Contables_Tipo_moneda">
+          <End Type="marsh_contableModel.Tipo_moneda" Role="Tipo_moneda" Multiplicity="1" />
+          <End Type="marsh_contableModel.Cuentas_Contables" Role="Cuentas_Contables" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Tipo_moneda">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="Cuentas_Contables">
+              <PropertyRef Name="Tipo_moneda_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
       </Schema>
     </edmx:ConceptualModels>
     <!-- C-S mapping content -->
@@ -3596,6 +3635,7 @@
           <EntitySetMapping Name="Cuentas_Contables">
             <EntityTypeMapping TypeName="marsh_contableModel.Cuentas_Contables">
               <MappingFragment StoreEntitySet="Cuentas_Contables">
+                <ScalarProperty Name="Tipo_moneda_id" ColumnName="Tipo_moneda_id" />
                 <ScalarProperty Name="id" ColumnName="id" />
                 <ScalarProperty Name="Codigo" ColumnName="Codigo" />
                 <ScalarProperty Name="Nombre" ColumnName="Nombre" />
@@ -3781,6 +3821,8 @@
           <EntitySetMapping Name="Impuesto">
             <EntityTypeMapping TypeName="marsh_contableModel.Impuesto">
               <MappingFragment StoreEntitySet="Impuesto">
+                <ScalarProperty Name="TarifaIVANombre" ColumnName="TarifaIVANombre" />
+                <ScalarProperty Name="TarifaIVACodigo" ColumnName="TarifaIVACodigo" />
                 <ScalarProperty Name="id" ColumnName="id" />
                 <ScalarProperty Name="Nombre" ColumnName="Nombre" />
                 <ScalarProperty Name="Porcentaje" ColumnName="Porcentaje" />

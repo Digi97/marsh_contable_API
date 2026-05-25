@@ -1,17 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
-using System.Web.Http.Cors;
-using System.Web.Http;
-using System.Net;
-using marsh_contable.Models;
-using System.Configuration;
+﻿using marsh_contable.Models;
 using marsh_contable.Modulos;
+using System;
+using System.Linq;
+using System.Net;
+using System.Web.Http;
+using System.Web.Http.Cors;
 
 namespace marsh_contable.Controllers
 {
-    [EnableCors(origins: "*", headers: "*", methods: "*")]
+    [EnableCors(origins: "http://localhost:3000 , http://192.168.10.182:3000", headers: "*", methods: "*")]
     public class CatalogosController : ApiController
     {
 
@@ -310,7 +307,8 @@ namespace marsh_contable.Controllers
                         Saldo_inicial = model.Saldo_inicial,
                         Saldo_actual = model.Saldo_actual,
                         Fecha_Creacion = DateTime.Now,
-                        Fecha_actualizacion = DateTime.Now
+                        Fecha_actualizacion = DateTime.Now,
+                        Tipo_moneda_id = model.Tipo_moneda_id
                     };
                     ctx.Cuentas_Contables.Add(cc);
                     ctx.SaveChanges();
@@ -359,6 +357,7 @@ namespace marsh_contable.Controllers
                     cc.Saldo_inicial = model.Saldo_inicial;
                     cc.Saldo_actual = model.Saldo_actual;
                     cc.Fecha_actualizacion = DateTime.Now;
+                    cc.Tipo_moneda_id = model.Tipo_moneda_id;
 
                     ctx.SaveChanges();
                     oR.CodeStatus = HttpStatusCode.OK;
@@ -395,12 +394,15 @@ namespace marsh_contable.Controllers
                         x.Codigo,
                         x.Nombre,
                         x.Tipo_Cuenta_Contable_id,
+                        NombreTipoCuenta = x.Tipo_Cuenta_Contable.Nombre,
                         x.Usuarios_Usuario_id,
                         x.Estado,
                         x.Saldo_inicial,
                         x.Saldo_actual,
                         x.Fecha_Creacion,
-                        x.Fecha_actualizacion
+                        x.Fecha_actualizacion,
+                        x.Tipo_moneda_id,
+                        NombreTipoMoneda = x.Tipo_moneda.Nombre
                     }).ToList();
                     oR.CodeStatus = HttpStatusCode.OK;
                     oR.Data = data;
@@ -442,7 +444,8 @@ namespace marsh_contable.Controllers
                         x.Saldo_inicial,
                         x.Saldo_actual,
                         x.Fecha_Creacion,
-                        x.Fecha_actualizacion
+                        x.Fecha_actualizacion,
+                        x.Tipo_moneda_id
                     }).FirstOrDefault();
                     if (data == null) throw new Exception("cuentas_contables_not_found");
                     oR.CodeStatus = HttpStatusCode.OK;
@@ -553,23 +556,99 @@ namespace marsh_contable.Controllers
         [HttpGet]
         [Authorize]
         [Route("api/v1/catalogos/codigos_cabys")]
-        public Reply GetAllCodigosCabys()
+        //[HttpPost]
+        //[Authorize]
+        //[Route("api/v1/catalogos/codigos_cabys/paged")]
+        public Reply GetAllCodigosCabysPaged()
         {
             Reply oR = new Reply();
             oR.CodeStatus = 0;
             try
             {
+                // Leer query string crudo
+                var q = System.Web.HttpContext.Current.Request.QueryString;
+
+                var request = new Models.DataTableRequest
+                {
+                    Draw = int.TryParse(q["draw"], out var d) ? d : 1,
+                    Start = int.TryParse(q["start"], out var s) ? s : 0,
+                    Length = int.TryParse(q["length"], out var l) ? l : 25,
+                    SearchValue = q["search[value]"],
+                    SortDirection = q["order[0][dir]"]
+                };
+
+                // El índice de la columna ordenada -> nombre real de la columna
+                if (int.TryParse(q["order[0][column]"], out var colIdx))
+                {
+                    // columns[colIdx][data] trae el nombre que mandó el front (id, codigo, nombre...)
+                    request.SortColumn = q[$"columns[{colIdx}][data]"];
+                }
+
                 using (var ctx = new Models.EntitiesModel())
                 {
-                    var data = ctx.Codigos_cabys.Select(x => new { x.id, x.codigo, x.Nombre, x.Impuesto_id }).ToList();
+                    var query = ctx.Codigos_cabys.AsQueryable();
+
+                    if (!string.IsNullOrEmpty(request.SearchValue))
+                    {
+                        string search = request.SearchValue.ToLower();
+                        query = query.Where(x =>
+                            x.codigo.ToLower().Contains(search) ||
+                            x.Nombre.ToLower().Contains(search) ||
+                            x.Impuesto.Nombre.ToLower().Contains(search)
+                        );
+                    }
+
+                    int totalRecords = ctx.Codigos_cabys.Count();
+                    int totalFiltered = query.Count();
+
+                    switch (request.SortColumn?.ToLower())
+                    {
+                        case "codigo":
+                            query = request.SortDirection == "asc"
+                                ? query.OrderBy(x => x.codigo)
+                                : query.OrderByDescending(x => x.codigo);
+                            break;
+                        case "nombre":
+                            query = request.SortDirection == "asc"
+                                ? query.OrderBy(x => x.Nombre)
+                                : query.OrderByDescending(x => x.Nombre);
+                            break;
+                        case "nombreimpuesto":   // ver nota abajo sobre el nombre
+                            query = request.SortDirection == "asc"
+                                ? query.OrderBy(x => x.Impuesto.Nombre)
+                                : query.OrderByDescending(x => x.Impuesto.Nombre);
+                            break;
+                        default:
+                            query = query.OrderBy(x => x.id);
+                            break;
+                    }
+
+                    var data = query
+                        .Skip(request.Start)
+                        .Take(request.Length > 0 ? request.Length : totalFiltered)
+                        .Select(x => new {
+                            x.id,
+                            x.codigo,
+                            x.Nombre,
+                            x.Impuesto_id,
+                            NombreImpuesto = x.Impuesto.Nombre
+                        })
+                        .ToList();
+
                     oR.CodeStatus = HttpStatusCode.OK;
-                    oR.Data = data;
+                    oR.Data = new
+                    {
+                        draw = request.Draw,
+                        recordsTotal = totalRecords,
+                        recordsFiltered = totalFiltered,
+                        data = data
+                    };
                     return oR;
                 }
             }
             catch (System.Data.Entity.Validation.DbEntityValidationException ex2)
             {
-                String errorDB = "";
+                string errorDB = "";
                 foreach (var eve in ex2.EntityValidationErrors)
                     foreach (var ve in eve.ValidationErrors)
                         errorDB += ve.ErrorMessage;
@@ -579,6 +658,32 @@ namespace marsh_contable.Controllers
             }
             catch (Exception ex) { oR.CodeStatus = HttpStatusCode.InternalServerError; oR.Message = ex.Message; return oR; }
         }
+        //public Reply GetAllCodigosCabys()
+        //{
+        //    Reply oR = new Reply();
+        //    oR.CodeStatus = 0;
+        //    try
+        //    {
+        //        using (var ctx = new Models.EntitiesModel())
+        //        {
+        //            var data = ctx.Codigos_cabys.Select(x => new { x.id, x.codigo, x.Nombre, x.Impuesto_id, NombreImpuesto = x.Impuesto.Nombre }).ToList();
+        //            oR.CodeStatus = HttpStatusCode.OK;
+        //            oR.Data = data;
+        //            return oR;
+        //        }
+        //    }
+        //    catch (System.Data.Entity.Validation.DbEntityValidationException ex2)
+        //    {
+        //        String errorDB = "";
+        //        foreach (var eve in ex2.EntityValidationErrors)
+        //            foreach (var ve in eve.ValidationErrors)
+        //                errorDB += ve.ErrorMessage;
+        //        oR.CodeStatus = HttpStatusCode.InternalServerError;
+        //        oR.Message = errorDB;
+        //        return oR;
+        //    }
+        //    catch (Exception ex) { oR.CodeStatus = HttpStatusCode.InternalServerError; oR.Message = ex.Message; return oR; }
+        //}
 
         [HttpGet]
         [Authorize]
@@ -1434,22 +1539,22 @@ namespace marsh_contable.Controllers
         [HttpPost]
         [Authorize]
         [Route("api/v1/catalogos/impuesto")]
-        public Reply CreateImpuesto([FromBody] Models.Impuesto model) { Reply oR = new Reply(); oR.CodeStatus = 0; General tool = new General(); try { if (model == null) throw new Exception("invalid_model_request_missing"); if (!tool.ValidaTexto(model.Nombre)) throw new Exception("invalid_string_form_Nombre"); if (!tool.validaNumeros(model.Porcentaje.ToString())) throw new Exception("invalid_value_form_Porcentaje"); if (!tool.ValidaTexto(model.codigo)) throw new Exception("invalid_string_form_codigo"); using (var ctx = new Models.EntitiesModel()) { Models.Impuesto e = new Models.Impuesto() { Nombre = model.Nombre, Porcentaje = model.Porcentaje, codigo = model.codigo }; ctx.Impuesto.Add(e); ctx.SaveChanges(); oR.CodeStatus = HttpStatusCode.OK; oR.Data = e.id; return oR; } } catch (Exception ex) { oR.CodeStatus = HttpStatusCode.InternalServerError; oR.Message = ex.Message; return oR; } }
+        public Reply CreateImpuesto([FromBody] Models.Impuesto model) { Reply oR = new Reply(); oR.CodeStatus = 0; General tool = new General(); try { if (model == null) throw new Exception("invalid_model_request_missing"); if (!tool.ValidaTexto(model.Nombre)) throw new Exception("invalid_string_form_Nombre"); if (!tool.validaNumeros(model.Porcentaje.ToString())) throw new Exception("invalid_value_form_Porcentaje"); if (!tool.validaNumeros(model.codigo)) throw new Exception("invalid_string_form_codigo"); using (var ctx = new Models.EntitiesModel()) { Models.Impuesto e = new Models.Impuesto() { Nombre = model.Nombre, Porcentaje = model.Porcentaje, codigo = model.codigo, TarifaIVACodigo = model.TarifaIVACodigo, TarifaIVANombre = model.TarifaIVANombre }; ctx.Impuesto.Add(e); ctx.SaveChanges(); oR.CodeStatus = HttpStatusCode.OK; oR.Data = e.id; return oR; } } catch (Exception ex) { oR.CodeStatus = HttpStatusCode.InternalServerError; oR.Message = ex.Message; return oR; } }
 
         [HttpPut]
         [Authorize]
         [Route("api/v1/catalogos/impuesto/{id}")]
-        public Reply UpdateImpuesto(int id, [FromBody] Models.Impuesto model) { Reply oR = new Reply(); oR.CodeStatus = 0; General tool = new General(); try { if (model == null) throw new Exception("invalid_model_request_missing"); if (!tool.ValidaTexto(model.Nombre)) throw new Exception("invalid_string_form_Nombre"); if (!tool.validaNumeros(model.Porcentaje.ToString())) throw new Exception("invalid_value_form_Porcentaje"); if (!tool.ValidaTexto(model.codigo)) throw new Exception("invalid_string_form_codigo"); using (var ctx = new Models.EntitiesModel()) { Models.Impuesto e = ctx.Impuesto.FirstOrDefault(x => x.id == id); if (e == null) throw new Exception("impuesto_not_found"); e.Nombre = model.Nombre; e.Porcentaje = model.Porcentaje; e.codigo = model.codigo; ctx.SaveChanges(); oR.CodeStatus = HttpStatusCode.OK; oR.Data = e.id; return oR; } } catch (Exception ex) { oR.CodeStatus = HttpStatusCode.InternalServerError; oR.Message = ex.Message; return oR; } }
+        public Reply UpdateImpuesto(int id, [FromBody] Models.Impuesto model) { Reply oR = new Reply(); oR.CodeStatus = 0; General tool = new General(); try { if (model == null) throw new Exception("invalid_model_request_missing"); if (!tool.ValidaTexto(model.Nombre)) throw new Exception("invalid_string_form_Nombre"); if (!tool.validaNumeros(model.Porcentaje.ToString())) throw new Exception("invalid_value_form_Porcentaje"); if (!tool.validaNumeros(model.codigo)) throw new Exception("invalid_string_form_codigo"); using (var ctx = new Models.EntitiesModel()) { Models.Impuesto e = ctx.Impuesto.FirstOrDefault(x => x.id == id); if (e == null) throw new Exception("impuesto_not_found"); e.Nombre = model.Nombre; e.Porcentaje = model.Porcentaje; e.codigo = model.codigo; e.TarifaIVACodigo = model.TarifaIVACodigo; e.TarifaIVANombre = model.TarifaIVANombre; ctx.SaveChanges(); oR.CodeStatus = HttpStatusCode.OK; oR.Data = e.id; return oR; } } catch (Exception ex) { oR.CodeStatus = HttpStatusCode.InternalServerError; oR.Message = ex.Message; return oR; } }
 
         [HttpGet]
         [Authorize]
         [Route("api/v1/catalogos/impuesto")]
-        public Reply GetAllImpuesto() { Reply oR = new Reply(); oR.CodeStatus = 0; try { using (var ctx = new Models.EntitiesModel()) { oR.CodeStatus = HttpStatusCode.OK; oR.Data = ctx.Impuesto.Select(x => new { x.id, x.Nombre, x.Porcentaje, x.codigo }).ToList(); return oR; } } catch (Exception ex) { oR.CodeStatus = HttpStatusCode.InternalServerError; oR.Message = ex.Message; return oR; } }
+        public Reply GetAllImpuesto() { Reply oR = new Reply(); oR.CodeStatus = 0; try { using (var ctx = new Models.EntitiesModel()) { oR.CodeStatus = HttpStatusCode.OK; oR.Data = ctx.Impuesto.Select(x => new { x.id, x.Nombre, x.Porcentaje, x.codigo, x.TarifaIVACodigo, x.TarifaIVANombre }).ToList(); return oR; } } catch (Exception ex) { oR.CodeStatus = HttpStatusCode.InternalServerError; oR.Message = ex.Message; return oR; } }
 
         [HttpGet]
         [Authorize]
         [Route("api/v1/catalogos/impuesto/{id}")]
-        public Reply GetImpuestoById(int id) { Reply oR = new Reply(); oR.CodeStatus = 0; try { if (id <= 0) throw new Exception("invalid_value_for_id"); using (var ctx = new Models.EntitiesModel()) { var data = ctx.Impuesto.Where(x => x.id == id).Select(x => new { x.id, x.Nombre, x.Porcentaje, x.codigo }).FirstOrDefault(); if (data == null) throw new Exception("impuesto_not_found"); oR.CodeStatus = HttpStatusCode.OK; oR.Data = data; return oR; } } catch (Exception ex) { oR.CodeStatus = HttpStatusCode.InternalServerError; oR.Message = ex.Message; return oR; } }
+        public Reply GetImpuestoById(int id) { Reply oR = new Reply(); oR.CodeStatus = 0; try { if (id <= 0) throw new Exception("invalid_value_for_id"); using (var ctx = new Models.EntitiesModel()) { var data = ctx.Impuesto.Where(x => x.id == id).Select(x => new { x.id, x.Nombre, x.Porcentaje, x.codigo, x.TarifaIVACodigo, x.TarifaIVANombre }).FirstOrDefault(); if (data == null) throw new Exception("impuesto_not_found"); oR.CodeStatus = HttpStatusCode.OK; oR.Data = data; return oR; } } catch (Exception ex) { oR.CodeStatus = HttpStatusCode.InternalServerError; oR.Message = ex.Message; return oR; } }
         #endregion
 
         #region "Tipo_Cuenta_Contable"

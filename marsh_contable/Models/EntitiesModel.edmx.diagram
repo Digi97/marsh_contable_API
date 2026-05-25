@@ -114,6 +114,7 @@
         <AssociationConnector Association="marsh_contableModel.fk_Usuario_Roles1" ManuallyRouted="false" />
         <AssociationConnector Association="marsh_contableModel.fk_Tipo_cambio_Tipo_moneda1" ManuallyRouted="false" />
         <AssociationConnector Association="marsh_contableModel.fk_Tipo_cambio_Usuarios1" ManuallyRouted="false" />
+        <AssociationConnector Association="marsh_contableModel.FK_Cuentas_Contables_Tipo_moneda" />
       </Diagram>
     </edmx:Diagrams>
   </edmx:Designer>

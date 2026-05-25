@@ -26,6 +26,8 @@ namespace marsh_contable.Models
         public string Nombre { get; set; }
         public double Porcentaje { get; set; }
         public string codigo { get; set; }
+        public string TarifaIVACodigo { get; set; }
+        public string TarifaIVANombre { get; set; }
     
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Codigos_cabys> Codigos_cabys { get; set; }
