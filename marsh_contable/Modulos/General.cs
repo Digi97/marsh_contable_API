@@ -350,5 +350,58 @@ namespace marsh_contable.Modulos
         }
 
 
+        public void Send_Mail(string destinatario, string Subject, string Html)
+        {
+            // Leer configuración desde Web.config
+            string smtpHost = System.Configuration.ConfigurationManager.AppSettings["SmtpHost"];
+            int smtpPort = int.Parse(System.Configuration.ConfigurationManager.AppSettings["SmtpPort"]);
+            bool smtpSsl = bool.Parse(System.Configuration.ConfigurationManager.AppSettings["SmtpSsl"]);
+            string smtpUser = System.Configuration.ConfigurationManager.AppSettings["SmtpUser"];
+            string smtpPassword = System.Configuration.ConfigurationManager.AppSettings["SmtpPassword"];
+            string smtpFrom = System.Configuration.ConfigurationManager.AppSettings["SmtpFrom"];
+            string smtpFromName = System.Configuration.ConfigurationManager.AppSettings["SmtpFromName"];
+
+            // Construir el cuerpo HTML del correo
+          
+
+            using (var mensaje = new System.Net.Mail.MailMessage())
+            {
+                mensaje.From = new System.Net.Mail.MailAddress(smtpFrom, smtpFromName);
+                mensaje.To.Add(new System.Net.Mail.MailAddress(destinatario));
+                mensaje.Subject = Subject;
+                mensaje.Body = Html;
+                mensaje.IsBodyHtml = true;
+
+                using (var smtp = new System.Net.Mail.SmtpClient(smtpHost, smtpPort))
+                {
+                    smtp.EnableSsl = smtpSsl;
+                    smtp.Credentials = new System.Net.NetworkCredential(smtpUser, smtpPassword);
+                    smtp.Timeout = 10000; // 10 segundos
+                    smtp.Send(mensaje);
+                }
+            }
+        }
+
+        public string HideMail(string correo)
+        {
+            try
+            {
+                string[] partes = correo.Split('@');
+                string usuario = partes[0];
+                string dominio = partes[1];
+                int visible = Math.Max(2, usuario.Length / 3);
+                string mascara = usuario.Substring(0, visible)
+                                   + new string('*', usuario.Length - visible)
+                                   + "@" + dominio;
+                return mascara;
+            }
+            catch
+            {
+                return correo;
+            }
+        }
+
+
+
     }
 }

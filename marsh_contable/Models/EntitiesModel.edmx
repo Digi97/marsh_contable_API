@@ -29,7 +29,7 @@
             <PropertyRef Name="Provincia_id" />
           </Key>
           <Property Name="id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
-          <Property Name="codigo" Type="varchar" MaxLength="2" Nullable="false" />
+          <Property Name="codigo" Type="varchar" MaxLength="3" />
           <Property Name="Nombre" Type="varchar" MaxLength="100" Nullable="false" />
           <Property Name="Provincia_id" Type="int" Nullable="false" />
         </EntityType>
@@ -183,8 +183,8 @@
             <PropertyRef Name="Canton_Provincia_id" />
           </Key>
           <Property Name="id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
-          <Property Name="codigo_canton" Type="varchar" MaxLength="2" Nullable="false" />
-          <Property Name="codigo_distrito" Type="varchar" MaxLength="2" Nullable="false" />
+          <Property Name="codigo_canton" Type="varchar" MaxLength="3" />
+          <Property Name="codigo_distrito" Type="varchar" MaxLength="5" />
           <Property Name="Nombre" Type="varchar" MaxLength="45" Nullable="false" />
           <Property Name="Canton_id" Type="int" Nullable="false" />
           <Property Name="Canton_Provincia_id" Type="int" Nullable="false" />
@@ -537,6 +537,7 @@
           <Property Name="Fec_creacion" Type="datetime" />
           <Property Name="Fec_Actualizacion" Type="datetime" />
           <Property Name="Fec_Login" Type="datetime" />
+          <Property Name="Codigo_recupera_clave" Type="varchar" MaxLength="20" />
         </EntityType>
         <Association Name="fk_Adjuntos_Tablas_referencia1">
           <End Role="Tablas_referencia" Type="Self.Tablas_referencia" Multiplicity="1" />
@@ -1700,7 +1701,7 @@
             <PropertyRef Name="Provincia_id" />
           </Key>
           <Property Name="id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
-          <Property Name="codigo" Type="String" MaxLength="2" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="codigo" Type="String" MaxLength="3" FixedLength="false" Unicode="false" />
           <Property Name="Nombre" Type="String" MaxLength="100" FixedLength="false" Unicode="false" Nullable="false" />
           <Property Name="Provincia_id" Type="Int32" Nullable="false" />
           <NavigationProperty Name="Provincia" Relationship="Self.fk_Canton_Provincia1" FromRole="Canton" ToRole="Provincia" />
@@ -1890,8 +1891,8 @@
             <PropertyRef Name="Canton_Provincia_id" />
           </Key>
           <Property Name="id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
-          <Property Name="codigo_canton" Type="String" MaxLength="2" FixedLength="false" Unicode="false" Nullable="false" />
-          <Property Name="codigo_distrito" Type="String" MaxLength="2" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="codigo_canton" Type="String" MaxLength="3" FixedLength="false" Unicode="false" />
+          <Property Name="codigo_distrito" Type="String" MaxLength="5" FixedLength="false" Unicode="false" />
           <Property Name="Nombre" Type="String" MaxLength="45" FixedLength="false" Unicode="false" Nullable="false" />
           <Property Name="Canton_id" Type="Int32" Nullable="false" />
           <Property Name="Canton_Provincia_id" Type="Int32" Nullable="false" />
@@ -2339,6 +2340,7 @@
           <NavigationProperty Name="Ingresos" Relationship="Self.fk_Ingresos_Usuarios1" FromRole="Usuarios" ToRole="Ingresos" />
           <NavigationProperty Name="Roles" Relationship="Self.fk_Usuario_Roles1" FromRole="Usuarios" ToRole="Roles" />
           <NavigationProperty Name="Tipo_cambio" Relationship="Self.fk_Tipo_cambio_Usuarios1" FromRole="Usuarios" ToRole="Tipo_cambio" />
+          <Property Name="Codigo_recupera_clave" Type="String" MaxLength="20" FixedLength="false" Unicode="false" />
         </EntityType>
         <Association Name="fk_Adjuntos_Tablas_referencia1">
           <End Role="Tablas_referencia" Type="Self.Tablas_referencia" Multiplicity="1" />
@@ -4032,6 +4034,7 @@
           <EntitySetMapping Name="Usuarios">
             <EntityTypeMapping TypeName="marsh_contableModel.Usuarios">
               <MappingFragment StoreEntitySet="Usuarios">
+                <ScalarProperty Name="Codigo_recupera_clave" ColumnName="Codigo_recupera_clave" />
                 <ScalarProperty Name="Usuario_id" ColumnName="Usuario_id" />
                 <ScalarProperty Name="Empresa_Emp_id" ColumnName="Empresa_Emp_id" />
                 <ScalarProperty Name="Nombre" ColumnName="Nombre" />

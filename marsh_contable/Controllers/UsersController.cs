@@ -423,12 +423,6 @@ namespace marsh_contable.Controllers
             }
             catch (Exception ex)
             {
-              
-
-                if (ex is System.Data.Entity.Validation.DbEntityValidationException ex2)
-                {
-                
-                }
 
                 oR.CodeStatus = HttpStatusCode.InternalServerError;
                 oR.Message = ex.Message;
@@ -437,6 +431,316 @@ namespace marsh_contable.Controllers
             return oR;
         }
 
+
+        [HttpPost]
+        [AllowAnonymous]
+        [Route("api/v1/login/recover")]
+        public Reply RecoverPassword([FromBody] Models.Usuarios model)
+        {
+            Reply oR = new Reply();
+            oR.CodeStatus = 0;
+            General tool = new General();
+
+            try
+            {
+                // Validar body null
+                if (model == null)
+                {
+                    throw new Exception("invalid_model");
+                }
+
+                // Validar correo vacío y formato
+                if (string.IsNullOrWhiteSpace(model.Correo))
+                {
+                    throw new Exception("invalid_value_form_correo");
+                }
+                if (!tool.ValidaCorreo(model.Correo))
+                {
+                    throw new Exception("invalid_value_form_Correo");
+                }
+
+                using (var ctx = new Models.EntitiesModel())
+                {
+                    // Verificar existencia del correo en BD
+                    Models.Usuarios usuario = ctx.Usuarios
+                        .FirstOrDefault(u => u.Correo == model.Correo && u.activo == 1);
+
+                    if (usuario == null)
+                    {
+                        throw new Exception("correo_not_found");
+                    }
+
+                    // Generar código de recuperación seguro de 6 dígitos
+                    string codigoRecuperacion;
+                    using (var rng = System.Security.Cryptography.RandomNumberGenerator.Create())
+                    {
+                        byte[] bytes = new byte[4];
+                        rng.GetBytes(bytes);
+                        int codigo = (Math.Abs(BitConverter.ToInt32(bytes, 0)) % 900000) + 100000;
+                        codigoRecuperacion = codigo.ToString();
+                    }
+
+                    // Almacenar el código en BD
+                    usuario.Fec_Actualizacion = DateTime.Now;//actualizamos la ultima fecha de actualizacion para hacer valido el tiempo de cambio de clave
+                    usuario.Codigo_recupera_clave = codigoRecuperacion;
+                    ctx.SaveChanges();
+
+                    // Enviar correo con el código
+
+                    string cuerpoHtml = $@"
+        <html>
+        <body style='font-family: Arial, sans-serif; color: #333;'>
+            <div style='max-width: 600px; margin: 0 auto; padding: 20px;'>
+                <h2 style='color: #1F4E79;'>Recuperación de contraseña</h2>
+                <p>Hola <strong>{model.Correo}</strong>,</p>
+                <p>Recibimos una solicitud para recuperar tu contraseña. 
+                   Usá el siguiente código para continuar con el proceso:</p>
+                <div style='text-align: center; margin: 30px 0;'>
+                    <span style='
+                        font-size: 36px;
+                        font-weight: bold;
+                        letter-spacing: 8px;
+                        color: #1F4E79;
+                        background-color: #DCE6F1;
+                        padding: 15px 30px;
+                        border-radius: 8px;
+                        display: inline-block;'>
+                        {codigoRecuperacion}
+                    </span>
+                </div>
+                <p>Este código es válido por <strong>15 minutos</strong>. 
+                   Si no solicitaste recuperar tu contraseña, ignorá este mensaje.</p>
+                <hr style='border: none; border-top: 1px solid #ddd; margin: 20px 0;'/>
+                <p style='font-size: 12px; color: #999;'>
+                    Este es un correo automático, por favor no respondas a este mensaje.
+                </p>
+            </div>
+        </body>
+        </html>";
+
+
+                    tool.Send_Mail(usuario.Correo, "Código de recuperación de contraseña", cuerpoHtml);
+
+                    oR.CodeStatus = HttpStatusCode.OK;
+                    oR.Message = "recovery_code_sent";
+                    oR.Data = new { correo = tool.HideMail(usuario.Correo) };
+                }
+            }
+            catch (System.Data.Entity.Validation.DbEntityValidationException ex)
+            {
+                string errorDB = "";
+                foreach (var eve in ex.EntityValidationErrors)
+                    foreach (var ve in eve.ValidationErrors)
+                        errorDB += ve.ErrorMessage;
+
+                oR.CodeStatus = HttpStatusCode.InternalServerError;
+                oR.Message = errorDB;
+            }
+            catch (Exception ex)
+            {
+                oR.CodeStatus = HttpStatusCode.InternalServerError;
+                oR.Message = ex.Message;
+            }
+            return oR;
+        }
+
+
+
+        [HttpPost]
+        [AllowAnonymous]
+        [Route("api/v1/login/validate-code")]
+        public Reply ValidateRecoveryCode([FromBody] Models.Usuarios model)
+        {
+            Reply oR = new Reply();
+            oR.CodeStatus = 0;
+            General tool = new General();
+
+            try
+            {
+                // Validar body null
+                if (model == null)
+                {
+                    throw new Exception("invalid_model");
+                }
+
+                // Validar que el código no venga vacío
+                if (string.IsNullOrWhiteSpace(model.Codigo_recupera_clave))
+                {
+                    throw new Exception("invalid_value_form_Codigo_recupera_clave");
+                }
+
+                using (var ctx = new Models.EntitiesModel())
+                {
+                    // Buscar usuario por código de recuperación
+                    Models.Usuarios usuario = ctx.Usuarios
+                        .FirstOrDefault(u =>
+                            u.Correo == model.Correo &&
+                            u.Codigo_recupera_clave == model.Codigo_recupera_clave &&
+                            u.activo == 1);
+
+                    // Código no existe en ningún usuario activo
+                    if (usuario == null)
+                    {
+                        throw new Exception("invalid_recovery_code");
+                    }
+
+                    // Validar que Fec_Actualizacion tenga valor
+                    if (usuario.Fec_Actualizacion == null)
+                    {
+                        throw new Exception("invalid_recovery_code");
+                    }
+
+                    // Calcular minutos transcurridos desde la solicitud
+                    double minutosTranscurridos = (DateTime.Now - usuario.Fec_Actualizacion.Value).TotalMinutes;
+
+                    if (minutosTranscurridos > 15)
+                    {
+                        // Limpiar el código vencido para que no pueda reutilizarse
+                        usuario.Codigo_recupera_clave = null;
+                        ctx.SaveChanges();
+
+                        throw new Exception("recovery_code_expired");
+                    }
+
+                    // limpiar el código para que no pueda usarse de nuevo
+                    usuario.Codigo_recupera_clave = null;
+                    ctx.SaveChanges();
+
+                    oR.CodeStatus = HttpStatusCode.OK;
+                    oR.Message = "code_validated";
+                    oR.Data = usuario.Usuario_id;
+              
+                }
+            }
+            catch (System.Data.Entity.Validation.DbEntityValidationException ex)
+            {
+                string errorDB = "";
+                foreach (var eve in ex.EntityValidationErrors)
+                    foreach (var ve in eve.ValidationErrors)
+                        errorDB += ve.ErrorMessage;
+
+                oR.CodeStatus = HttpStatusCode.InternalServerError;
+                oR.Message = errorDB;
+            }
+            catch (Exception ex)
+            {
+                oR.CodeStatus = HttpStatusCode.InternalServerError;
+                oR.Message = ex.Message;
+            }
+            return oR;
+        }
+
+
+        [HttpPost]
+        [AllowAnonymous]
+        [Route("api/v1/login/confirm-change-password")]
+        public Reply ConfirmChangePassword([FromBody] Models.ChangePasswordViewModel model)
+        {
+            Reply oR = new Reply();
+            oR.CodeStatus = 0;
+            General tool = new General();
+
+            try
+            {
+                // Validar body null
+                if (model == null)
+                {
+                    throw new Exception("invalid_model");
+                }
+
+                // Validar campos vacíos
+                if (string.IsNullOrWhiteSpace(model.Correo))
+                {
+                    throw new Exception("invalid_value_form_Correo");
+                }
+                if (string.IsNullOrWhiteSpace(model.Contrasena))
+                {
+                    throw new Exception("invalid_value_form_Contrasena");
+                }
+                if (string.IsNullOrWhiteSpace(model.Contrasena_confirma))
+                {
+                    throw new Exception("invalid_value_form_Contrasena_confirma");
+                }
+
+                // Validar formato de correo
+                if (!tool.ValidaCorreo(model.Correo))
+                {
+                    throw new Exception("invalid_format_Correo");
+                }
+
+                // Validar formato de contraseña
+                if (!tool.validaPassword(model.Contrasena))
+                {
+                    throw new Exception("invalid_format_Contrasena");
+                }
+
+                // Validar que ambas contraseñas sean iguales
+                if (model.Contrasena != model.Contrasena_confirma)
+                {
+                    throw new Exception("password_and_confirmation_no_match");
+                }
+
+                using (var ctx = new Models.EntitiesModel())
+                {
+                    // Buscar usuario activo por correo
+                    Models.Usuarios usuario = ctx.Usuarios
+                        .FirstOrDefault(u =>
+                            u.Correo == model.Correo &&
+                            u.activo == 1);
+
+                    if (usuario == null)
+                    {
+                        throw new Exception("correo_not_found");
+                    }
+
+                    // Encriptar y actualizar la nueva contraseña
+                    string nuevaContrasenaEncriptada = tool.Encriptar(model.Contrasena);
+
+                    usuario.Contrasena = nuevaContrasenaEncriptada;
+                    usuario.Fec_Actualizacion = DateTime.Now;
+                    ctx.SaveChanges();
+
+                    // Construir correo de confirmación
+                    string cuerpoHtml = $@"
+                <html>
+                <body style='font-family: Arial, sans-serif; color: #333;'>
+                    <div style='max-width: 600px; margin: 0 auto; padding: 20px;'>
+                        <h2 style='color: #1F4E79;'>Contraseña actualizada</h2>
+                        <p>Hola <strong>{usuario.Nombre} {usuario.Apellido1}</strong>,</p>
+                        <p>Tu contraseña ha sido actualizada exitosamente.</p>
+                        <p>Si no realizaste este cambio, contacte al equipo de soporte de inmediato.</p>
+                        <hr style='border: none; border-top: 1px solid #ddd; margin: 20px 0;'/>
+                        <p style='font-size: 12px; color: #999;'>
+                            Este es un correo automático, por favor no respondas a este mensaje.
+                        </p>
+                    </div>
+                </body>
+                </html>";
+
+                    tool.Send_Mail(usuario.Correo, "Contraseña actualizada correctamente", cuerpoHtml);
+
+                    oR.CodeStatus = HttpStatusCode.OK;
+                    oR.Message = "password_changed_successfully";
+                    oR.Data = new { correo = tool.HideMail(usuario.Correo) };
+                }
+            }
+            catch (System.Data.Entity.Validation.DbEntityValidationException ex)
+            {
+                string errorDB = "";
+                foreach (var eve in ex.EntityValidationErrors)
+                    foreach (var ve in eve.ValidationErrors)
+                        errorDB += ve.ErrorMessage;
+
+                oR.CodeStatus = HttpStatusCode.InternalServerError;
+                oR.Message = errorDB;
+            }
+            catch (Exception ex)
+            {
+                oR.CodeStatus = HttpStatusCode.InternalServerError;
+                oR.Message = ex.Message;
+            }
+            return oR;
+        }
 
     }
 }

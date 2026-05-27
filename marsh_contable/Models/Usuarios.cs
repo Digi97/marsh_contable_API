@@ -39,6 +39,7 @@ namespace marsh_contable.Models
         public Nullable<System.DateTime> Fec_creacion { get; set; }
         public Nullable<System.DateTime> Fec_Actualizacion { get; set; }
         public Nullable<System.DateTime> Fec_Login { get; set; }
+        public string Codigo_recupera_clave { get; set; }
     
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Adjuntos> Adjuntos { get; set; }
