@@ -300,7 +300,7 @@ namespace marsh_contable.Controllers
         [HttpDelete]
         [Authorize]
         [Route("api/v1/telefonos/{id}")]
-        public Reply DeleteTelefono(int id)
+        public Reply DeleteTelefono(int id)//borramos los telefonos por ID de cliente para su recreacion completa
         {
             Reply oR = new Reply();
             oR.CodeStatus = 0;
@@ -312,12 +312,16 @@ namespace marsh_contable.Controllers
                 }
                 using (var ctx = new Models.EntitiesModel())
                 {
-                    Models.Telefonos t = ctx.Telefonos.FirstOrDefault(u => u.id == id);
-                    if (t == null)
+                    List<Models.Telefonos> telefonos = ctx.Telefonos
+         .Where(u => u.Clientes_id == id)
+         .ToList();
+
+                    if (!telefonos.Any())
                     {
-                        throw new Exception("telefono_not_found");
+                        throw new Exception("telefonos_not_found");
                     }
-                    ctx.Telefonos.Remove(t);
+
+                    ctx.Telefonos.RemoveRange(telefonos);
                     ctx.SaveChanges();
 
                     oR.CodeStatus = HttpStatusCode.OK;
@@ -346,5 +350,6 @@ namespace marsh_contable.Controllers
                 return oR;
             }
         }
+
     }
 }

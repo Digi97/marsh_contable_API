@@ -18,6 +18,7 @@ namespace marsh_contable.Models
         public Empresa()
         {
             this.Usuarios = new HashSet<Usuarios>();
+            this.Padron = new HashSet<Padron>();
         }
     
         public int Emp_id { get; set; }
@@ -41,5 +42,7 @@ namespace marsh_contable.Models
         public virtual tipo_identificacion tipo_identificacion { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Usuarios> Usuarios { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<Padron> Padron { get; set; }
     }
 }

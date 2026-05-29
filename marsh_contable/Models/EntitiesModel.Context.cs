@@ -68,5 +68,6 @@ namespace marsh_contable.Models
         public virtual DbSet<Tipo_moneda> Tipo_moneda { get; set; }
         public virtual DbSet<Unidad_medida> Unidad_medida { get; set; }
         public virtual DbSet<Usuarios> Usuarios { get; set; }
+        public virtual DbSet<Padron> Padron { get; set; }
     }
 }

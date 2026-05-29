@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 
 namespace marsh_contable.Models
 {
@@ -28,5 +29,7 @@ namespace marsh_contable.Models
         public string Distrito { get; set; }
         public string Codigo_actividad { get; set; }
         public string Nombre_actividad { get; set; }
+
+        public List<TelefonosViewModel> Telefonos { get; set; }
     }
 }

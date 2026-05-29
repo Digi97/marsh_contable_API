@@ -384,6 +384,17 @@
           <Property Name="codigo" Type="varchar" MaxLength="5" Nullable="false" />
           <Property Name="descripcion" Type="varchar" MaxLength="150" Nullable="false" />
         </EntityType>
+        <EntityType Name="Padron">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="cedula" Type="varchar" MaxLength="20" Nullable="false" />
+          <Property Name="nombre" Type="varchar" MaxLength="100" Nullable="false" />
+          <Property Name="apellido1" Type="varchar" MaxLength="100" Nullable="false" />
+          <Property Name="apellido2" Type="varchar" MaxLength="100" Nullable="false" />
+          <Property Name="Empresa_Emp_id" Type="int" Nullable="false" />
+        </EntityType>
         <EntityType Name="Permisos">
           <Key>
             <PropertyRef Name="id" />
@@ -1261,6 +1272,18 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
+        <Association Name="FK_Padron_Empresa">
+          <End Role="Empresa" Type="Self.Empresa" Multiplicity="1" />
+          <End Role="Padron" Type="Self.Padron" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Empresa">
+              <PropertyRef Name="Emp_id" />
+            </Principal>
+            <Dependent Role="Padron">
+              <PropertyRef Name="Empresa_Emp_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
         <Association Name="fk_Permisos_x_rol_Permisos1">
           <End Role="Permisos" Type="Self.Permisos" Multiplicity="1" />
           <End Role="Permisos_x_rol" Type="Self.Permisos_x_rol" Multiplicity="*" />
@@ -1385,6 +1408,7 @@
           <EntitySet Name="Ingresos" EntityType="Self.Ingresos" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Ingresos_Detalle" EntityType="Self.Ingresos_Detalle" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Medio_pago" EntityType="Self.Medio_pago" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Padron" EntityType="Self.Padron" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Permisos" EntityType="Self.Permisos" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Permisos_x_rol" EntityType="Self.Permisos_x_rol" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Proveedor" EntityType="Self.Proveedor" Schema="dbo" store:Type="Tables" />
@@ -1636,6 +1660,10 @@
           <AssociationSet Name="fk_Ingresos_Usuarios1" Association="Self.fk_Ingresos_Usuarios1">
             <End Role="Usuarios" EntitySet="Usuarios" />
             <End Role="Ingresos" EntitySet="Ingresos" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Padron_Empresa" Association="Self.FK_Padron_Empresa">
+            <End Role="Empresa" EntitySet="Empresa" />
+            <End Role="Padron" EntitySet="Padron" />
           </AssociationSet>
           <AssociationSet Name="fk_Permisos_x_rol_Permisos1" Association="Self.fk_Permisos_x_rol_Permisos1">
             <End Role="Permisos" EntitySet="Permisos" />
@@ -1923,6 +1951,7 @@
           <NavigationProperty Name="Impuesto" Relationship="Self.fk_Empresa_Impuesto1" FromRole="Empresa" ToRole="Impuesto" />
           <NavigationProperty Name="tipo_identificacion" Relationship="Self.fk_Empresa_tipo_identificacion1" FromRole="Empresa" ToRole="tipo_identificacion" />
           <NavigationProperty Name="Usuarios" Relationship="Self.fk_Usuario_Empresa1" FromRole="Empresa" ToRole="Usuarios" />
+          <NavigationProperty Name="Padron" Relationship="marsh_contableModel.FK_Padron_Empresa" FromRole="Empresa" ToRole="Padron" />
         </EntityType>
         <EntityType Name="Estado_Factura">
           <Key>
@@ -3460,6 +3489,11 @@
             <End Role="Tipo_moneda" EntitySet="Tipo_moneda" />
             <End Role="Cuentas_Contables" EntitySet="Cuentas_Contables" />
           </AssociationSet>
+          <EntitySet Name="Padron" EntityType="marsh_contableModel.Padron" />
+          <AssociationSet Name="FK_Padron_Empresa" Association="marsh_contableModel.FK_Padron_Empresa">
+            <End Role="Empresa" EntitySet="Empresa" />
+            <End Role="Padron" EntitySet="Padron" />
+          </AssociationSet>
         </EntityContainer>
         <Association Name="FK_Cuentas_Contables_Tipo_moneda">
           <End Type="marsh_contableModel.Tipo_moneda" Role="Tipo_moneda" Multiplicity="1" />
@@ -3470,6 +3504,30 @@
             </Principal>
             <Dependent Role="Cuentas_Contables">
               <PropertyRef Name="Tipo_moneda_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <EntityType Name="Padron">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="cedula" Type="String" Nullable="false" MaxLength="20" FixedLength="false" Unicode="false" />
+          <Property Name="nombre" Type="String" Nullable="false" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="apellido1" Type="String" Nullable="false" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="apellido2" Type="String" Nullable="false" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="Empresa_Emp_id" Type="Int32" Nullable="false" />
+          <NavigationProperty Name="Empresa" Relationship="marsh_contableModel.FK_Padron_Empresa" FromRole="Padron" ToRole="Empresa" />
+        </EntityType>
+        <Association Name="FK_Padron_Empresa">
+          <End Type="marsh_contableModel.Empresa" Role="Empresa" Multiplicity="1" />
+          <End Type="marsh_contableModel.Padron" Role="Padron" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Empresa">
+              <PropertyRef Name="Emp_id" />
+            </Principal>
+            <Dependent Role="Padron">
+              <PropertyRef Name="Empresa_Emp_id" />
             </Dependent>
           </ReferentialConstraint>
         </Association>
@@ -4048,6 +4106,18 @@
                 <ScalarProperty Name="Fec_creacion" ColumnName="Fec_creacion" />
                 <ScalarProperty Name="Fec_Actualizacion" ColumnName="Fec_Actualizacion" />
                 <ScalarProperty Name="Fec_Login" ColumnName="Fec_Login" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Padron">
+            <EntityTypeMapping TypeName="marsh_contableModel.Padron">
+              <MappingFragment StoreEntitySet="Padron">
+                <ScalarProperty Name="Empresa_Emp_id" ColumnName="Empresa_Emp_id" />
+                <ScalarProperty Name="apellido2" ColumnName="apellido2" />
+                <ScalarProperty Name="apellido1" ColumnName="apellido1" />
+                <ScalarProperty Name="nombre" ColumnName="nombre" />
+                <ScalarProperty Name="cedula" ColumnName="cedula" />
+                <ScalarProperty Name="id" ColumnName="id" />
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>

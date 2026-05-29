@@ -556,9 +556,7 @@ namespace marsh_contable.Controllers
         [HttpGet]
         [Authorize]
         [Route("api/v1/catalogos/codigos_cabys")]
-        //[HttpPost]
-        //[Authorize]
-        //[Route("api/v1/catalogos/codigos_cabys/paged")]
+        
         public Reply GetAllCodigosCabysPaged()
         {
             Reply oR = new Reply();
@@ -1579,5 +1577,66 @@ namespace marsh_contable.Controllers
         public Reply GetTipoCuentaContableById(int id) { Reply oR = new Reply(); oR.CodeStatus = 0; try { if (id <= 0) throw new Exception("invalid_value_for_id"); using (var ctx = new Models.EntitiesModel()) { var data = ctx.Tipo_Cuenta_Contable.Where(x => x.id == id).Select(x => new { x.id, x.Nombre, x.Naturaleza }).FirstOrDefault(); if (data == null) throw new Exception("tipo_cuenta_contable_not_found"); oR.CodeStatus = HttpStatusCode.OK; oR.Data = data; return oR; } } catch (Exception ex) { oR.CodeStatus = HttpStatusCode.InternalServerError; oR.Message = ex.Message; return oR; } }
         #endregion
 
+
+        [HttpGet]
+        [Authorize]
+        [Route("api/v1/catalogos/padron/{cedula}")]
+        public Reply GetPadronByCedula(string cedula)
+        {
+            Reply oR = new Reply();
+            oR.CodeStatus = 0;
+
+            try
+            {
+                if (cedula.ToString() == string.Empty)
+                {
+                    throw new Exception("invalid_value_for_cedula");
+                }
+
+                using (var ctx = new Models.EntitiesModel())
+                {
+
+                    var ca = ctx.Padron
+                       .Where(x => x.cedula == cedula)
+                        .Select(x => new {
+                            x.cedula,
+                            x.nombre,
+                            x.apellido1,
+                            x.apellido2
+                        }).FirstOrDefault();
+
+
+                    if (ca == null)
+                    {
+                        throw new Exception("cedula_not_found");
+                    }
+
+                    oR.CodeStatus = HttpStatusCode.OK;
+                    oR.Data = ca;
+                    return oR;
+                }
+            }
+            catch (System.Data.Entity.Validation.DbEntityValidationException ex2)
+            {
+                String errorDB = "";
+                foreach (var eve in ex2.EntityValidationErrors)
+                {
+                    foreach (var ve in eve.ValidationErrors)
+                    {
+                        errorDB += ve.ErrorMessage;
+                    }
+                }
+                oR.CodeStatus = HttpStatusCode.InternalServerError;
+                oR.Message = errorDB;
+                return oR;
+            }
+            catch (Exception ex)
+            {
+
+                oR.CodeStatus = HttpStatusCode.InternalServerError;
+                oR.Message = ex.Message;
+            }
+            return oR;
+        }
     }
 }

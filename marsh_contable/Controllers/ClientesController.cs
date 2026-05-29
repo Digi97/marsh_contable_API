@@ -11,7 +11,8 @@ using marsh_contable.Modulos;
 
 namespace marsh_contable.Controllers
 {
-    [EnableCors(origins: "*", headers: "*", methods: "*")]
+
+    [EnableCors(origins: "http://localhost:3000 , http://192.168.10.182:3000", headers: "*", methods: "*")]
     public class ClientesController : ApiController
     {
 
@@ -70,6 +71,15 @@ namespace marsh_contable.Controllers
                 {
                     throw new Exception("invalid_value_form_codigo_actividad_id");
                 }
+
+
+                if(model.Telefonos.Count  ==0)
+                {
+                    throw new Exception("a_phone_is_required");
+                }
+
+
+
                 // fin de validaciones
 
                 using (var ctx = new Models.EntitiesModel())
@@ -96,8 +106,17 @@ namespace marsh_contable.Controllers
                     ctx.Clientes.Add(nuevo);
                     ctx.SaveChanges();
 
+                    TelefonosController Telefonos = new TelefonosController();
+                    foreach (var telefono in model.Telefonos)
+                    {
+                        telefono.Clientes_id = nuevo.id;
+                       var result = Telefonos.CreateTelefono(telefono);
+
+                    }
+
                     oR.CodeStatus = HttpStatusCode.OK;
                     oR.Data = nuevo.id;
+                    
                     return oR;
                 }
             }
@@ -160,6 +179,11 @@ namespace marsh_contable.Controllers
                     throw new Exception("invalid_string_form_correo");
                 }
 
+                if (model.Telefonos.Count == 0)
+                {
+                    throw new Exception("a_phone_is_required");
+                }
+
                 using (var ctx = new Models.EntitiesModel())
                 {
                     Models.Clientes cli = ctx.Clientes.FirstOrDefault(u => u.id == id);
@@ -186,6 +210,16 @@ namespace marsh_contable.Controllers
 
                     ctx.SaveChanges();
 
+
+                    TelefonosController Telefonos = new TelefonosController();
+                    Telefonos.DeleteTelefono(cli.id); //eliminamos todos los telefonos de ese cliente
+
+
+                    foreach (var telefono in model.Telefonos)
+                    {
+                        telefono.Clientes_id = cli.id; //creamos los telefonos nuevamente
+                        var result = Telefonos.CreateTelefono(telefono);
+                    }
                     oR.CodeStatus = HttpStatusCode.OK;
                     oR.Data = cli.id;
                     return oR;
@@ -217,69 +251,109 @@ namespace marsh_contable.Controllers
         [HttpGet]
         [Authorize]
         [Route("api/v1/clientes")]
-        public Reply GetAllClientes()
+        public Reply GetAllClientesPaged()
         {
             Reply oR = new Reply();
             oR.CodeStatus = 0;
-
             try
             {
+                // Leer query string crudo
+                var q = System.Web.HttpContext.Current.Request.QueryString;
+
+                var request = new Models.DataTableRequest
+                {
+                    Draw = int.TryParse(q["draw"], out var d) ? d : 1,
+                    Start = int.TryParse(q["start"], out var s) ? s : 0,
+                    Length = int.TryParse(q["length"], out var l) ? l : 25,
+                    SearchValue = q["search[value]"],
+                    SortDirection = q["order[0][dir]"]
+                };
+
+                // El índice de la columna ordenada -> nombre real de la columna
+                if (int.TryParse(q["order[0][column]"], out var colIdx))
+                {
+                    // columns[colIdx][data] trae el nombre que mandó el front (id, codigo, nombre...)
+                    request.SortColumn = q[$"columns[{colIdx}][data]"];
+                }
+
                 using (var ctx = new Models.EntitiesModel())
                 {
-                    var lista = (from c in ctx.Clientes
-                                 join ti in ctx.tipo_identificacion on c.tipo_identificacion_id equals ti.id
-                                 join p in ctx.Provincia on c.Provincia_id equals p.id
-                                 join ca in ctx.codigo_actividad on c.codigo_actividad_id equals ca.id
-                                 select new Models.ClientesViewModel
-                                 {
-                                     id = c.id,
-                                     identificacion = c.identificacion,
-                                     tipo_identificacion_id = c.tipo_identificacion_id,
-                                     Nombre = c.Nombre,
-                                     Apellido1 = c.Apellido1,
-                                     Apellido2 = c.Apellido2,
-                                     correo = c.correo,
-                                     Distrito_id = c.Distrito_id,
-                                     Canton_id = c.Canton_id,
-                                     Provincia_id = c.Provincia_id,
-                                     codigo_actividad_id = c.codigo_actividad_id,
-                                     estado = c.estado,
-                                     exonerado = c.exonerado,
-                                     OtrasSenas = c.OtrasSenas,
-                                     fecha_creacion = c.fecha_creacion,
-                                     fecha_actualizacion = c.fecha_actualizacion,
-                                     Tipo_identificacion = ti.Nombre,
-                                     Provincia = p.Nombre,
-                                     Codigo_actividad = ca.codigo_actividad1,
-                                     Nombre_actividad = ca.nombre_actividad
-                                 }).ToList();
+                    var query = ctx.Clientes.AsQueryable();
+
+                    if (!string.IsNullOrEmpty(request.SearchValue))
+                    {
+                        string search = request.SearchValue.ToLower();
+                        query = query.Where(x =>
+                            x.Nombre.ToLower().Contains(search) ||
+                            x.Apellido1.ToLower().Contains(search) ||
+                            x.Apellido2.ToLower().Contains(search) ||
+                            x.correo.ToLower().Contains(search)
+                        );
+                    }
+
+                    int totalRecords = ctx.Clientes.Count();
+                    int totalFiltered = query.Count();
+
+                    switch (request.SortColumn?.ToLower())
+                    {
+                        case "nombre":
+                            query = request.SortDirection == "asc"
+                                ? query.OrderBy(x => x.Nombre)
+                                : query.OrderByDescending(x => x.Nombre);
+                            break;
+                        case "apellido1":
+                            query = request.SortDirection == "asc"
+                                ? query.OrderBy(x => x.Apellido1)
+                                : query.OrderByDescending(x => x.Apellido1);
+                            break;
+                        case "apellido2":   // ver nota abajo sobre el nombre
+                            query = request.SortDirection == "asc"
+                                ? query.OrderBy(x => x.Apellido2)
+                                : query.OrderByDescending(x => x.Apellido2);
+                            break;
+                        default:
+                            query = query.OrderBy(x => x.id);
+                            break;
+                    }
+
+                    var data = query
+                        .Skip(request.Start)
+                        .Take(request.Length > 0 ? request.Length : totalFiltered)
+                        .Select(x => new {
+                            x.id,
+                            x.Nombre,
+                            x.Apellido1,
+                            x.Apellido2,
+                            tipo_identificacion = x.tipo_identificacion.Nombre,
+                            x.identificacion,
+                            x.correo
+                        })
+                        .ToList();
 
                     oR.CodeStatus = HttpStatusCode.OK;
-                    oR.Data = lista;
+                    oR.Data = new
+                    {
+                        draw = request.Draw,
+                        recordsTotal = totalRecords,
+                        recordsFiltered = totalFiltered,
+                        data = data
+                    };
                     return oR;
                 }
             }
             catch (System.Data.Entity.Validation.DbEntityValidationException ex2)
             {
-                String errorDB = "";
+                string errorDB = "";
                 foreach (var eve in ex2.EntityValidationErrors)
-                {
                     foreach (var ve in eve.ValidationErrors)
-                    {
                         errorDB += ve.ErrorMessage;
-                    }
-                }
                 oR.CodeStatus = HttpStatusCode.InternalServerError;
                 oR.Message = errorDB;
                 return oR;
             }
-            catch (Exception ex)
-            {
-                oR.CodeStatus = HttpStatusCode.InternalServerError;
-                oR.Message = ex.Message;
-                return oR;
-            }
+            catch (Exception ex) { oR.CodeStatus = HttpStatusCode.InternalServerError; oR.Message = ex.Message; return oR; }
         }
+
 
 
         [HttpGet]
@@ -325,12 +399,27 @@ namespace marsh_contable.Controllers
                                    Tipo_identificacion = ti.Nombre,
                                    Provincia = p.Nombre,
                                    Codigo_actividad = ca.codigo_actividad1,
-                                   Nombre_actividad = ca.nombre_actividad
+                                   Nombre_actividad = ca.nombre_actividad,
+                                
                                }).FirstOrDefault();
 
                     if (cli == null)
                     {
                         throw new Exception("cliente_not_found");
+                    }
+
+                    if (cli != null)
+                    {
+                        cli.Telefonos = ctx.Telefonos
+                            .Where(t => t.Clientes_id == id)
+                            .Select(t => new Models.TelefonosViewModel
+                            {
+                                id = t.id,
+                                Numero = t.Numero,
+                                codigo_pais = t.codigo_pais,
+                                telefono_principal = t.telefono_principal,
+                                Clientes_id = t.Clientes_id
+                            }).ToList();
                     }
 
                     oR.CodeStatus = HttpStatusCode.OK;

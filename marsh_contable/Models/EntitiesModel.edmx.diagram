@@ -115,6 +115,8 @@
         <AssociationConnector Association="marsh_contableModel.fk_Tipo_cambio_Tipo_moneda1" ManuallyRouted="false" />
         <AssociationConnector Association="marsh_contableModel.fk_Tipo_cambio_Usuarios1" ManuallyRouted="false" />
         <AssociationConnector Association="marsh_contableModel.FK_Cuentas_Contables_Tipo_moneda" />
+        <EntityTypeShape EntityType="marsh_contableModel.Padron" Width="1.5" PointX="3.75" PointY="60.5" />
+        <AssociationConnector Association="marsh_contableModel.FK_Padron_Empresa" />
       </Diagram>
     </edmx:Diagrams>
   </edmx:Designer>
