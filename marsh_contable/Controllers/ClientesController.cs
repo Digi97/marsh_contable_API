@@ -326,7 +326,8 @@ namespace marsh_contable.Controllers
                             x.Apellido2,
                             tipo_identificacion = x.tipo_identificacion.Nombre,
                             x.identificacion,
-                            x.correo
+                            x.correo,
+                            x.estado
                         })
                         .ToList();
 

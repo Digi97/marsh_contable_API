@@ -324,7 +324,8 @@ namespace marsh_contable.Controllers
                             x.Apellido2,
                             tipo_identificacion = x.tipo_identificacion.Nombre,
                             x.identificacion,
-                            x.correo
+                            x.correo,
+                            x.estado
                         })
                         .ToList();
 
@@ -403,6 +404,21 @@ namespace marsh_contable.Controllers
                     if (p == null)
                     {
                         throw new Exception("proveedor_not_found");
+                    }
+
+
+                    if (p != null)
+                    {
+                        p.Telefonos = ctx.Telefonos
+                            .Where(t => t.Clientes_id == id)
+                            .Select(t => new Models.TelefonosViewModel
+                            {
+                                id = t.id,
+                                Numero = t.Numero,
+                                codigo_pais = t.codigo_pais,
+                                telefono_principal = t.telefono_principal,
+                                Clientes_id = t.Clientes_id
+                            }).ToList();
                     }
 
                     oR.CodeStatus = HttpStatusCode.OK;
