@@ -8,7 +8,7 @@ using System.Web.Http.Cors;
 
 namespace marsh_contable.Controllers
 {
-    [EnableCors(origins: "http://localhost:3000 , http://192.168.10.182:3000", headers: "*", methods: "*")]
+  
     public class CatalogosController : ApiController
     {
 

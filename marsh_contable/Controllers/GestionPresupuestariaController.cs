@@ -191,6 +191,11 @@ namespace marsh_contable.Controllers
             {
                 using (var ctx = new Models.EntitiesModel())
                 {
+
+                    var formato = ctx.Empresa
+    .Where(e => e.Emp_id == 1)
+    .Select(e => e.Formato_fecha)
+    .FirstOrDefault();
                     var lista = (from gp in ctx.Gestion_Presupuestaria
                                  join cp in ctx.Categoria_presupuestaria on gp.Categoria_presupuestaria_id equals cp.id
                                  join cc in ctx.Centro_Costos on gp.Centro_Costos_id equals cc.id
@@ -216,7 +221,8 @@ namespace marsh_contable.Controllers
                                      Centro_Costos_id = gp.Centro_Costos_id,
                                      Categoria_presupuestaria = cp.nombre,
                                      Centro_costo = cc.Nombre,
-                                     Usuario = u.Nombre + " " + u.Apellido1
+                                     Usuario = u.Nombre + " " + u.Apellido1,
+                                     Formato = formato.ToUpper()
                                  }).ToList();
 
                     oR.CodeStatus = HttpStatusCode.OK;

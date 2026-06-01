@@ -12,7 +12,6 @@ using marsh_contable.Modulos;
 namespace marsh_contable.Controllers
 {
 
-    [EnableCors(origins: "http://localhost:3000 , http://192.168.10.182:3000", headers: "*", methods: "*")]
     public class ProveedorController : ApiController
     {
 

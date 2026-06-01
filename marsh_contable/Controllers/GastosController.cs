@@ -11,8 +11,7 @@ using marsh_contable.Modulos;
 
 namespace marsh_contable.Controllers
 {
-    [EnableCors(origins: "*", headers: "*", methods: "*")]
-    public class GastosController : ApiController
+   public class GastosController : ApiController
     {
 
         [HttpPost]
@@ -171,15 +170,90 @@ namespace marsh_contable.Controllers
         [HttpGet]
         [Authorize]
         [Route("api/v1/gastos")]
-        public Reply GetAllGastos()
+        public Reply GetAllClientesPaged()
         {
             Reply oR = new Reply();
             oR.CodeStatus = 0;
             try
             {
+                // Leer query string crudo
+                var q = System.Web.HttpContext.Current.Request.QueryString;
+
+                var request = new Models.DataTableRequest
+                {
+                    Draw = int.TryParse(q["draw"], out var d) ? d : 1,
+                    Start = int.TryParse(q["start"], out var s) ? s : 0,
+                    Length = int.TryParse(q["length"], out var l) ? l : 25,
+                    SearchValue = q["search[value]"],
+                    SortDirection = q["order[0][dir]"]
+                };
+
+                // El índice de la columna ordenada -> nombre real de la columna
+                if (int.TryParse(q["order[0][column]"], out var colIdx))
+                {
+                    // columns[colIdx][data] trae el nombre que mandó el front (id, codigo, nombre...)
+                    request.SortColumn = q[$"columns[{colIdx}][data]"];
+                }
+
                 using (var ctx = new Models.EntitiesModel())
                 {
-                    var lista = (from g in ctx.Gastos
+                    var query = ctx.Gastos.AsQueryable();
+
+                    if (!string.IsNullOrEmpty(request.SearchValue))
+                    {
+                        string search = request.SearchValue.ToLower();
+                        query = query.Where(x =>
+                            x.Descripcion.ToLower().Contains(search) ||
+                            x.Doc_Referencia.ToLower().Contains(search) ||
+                            x.Total.ToString().Contains(search) ||
+                            x.Proveedor.Nombre.ToLower().Contains(search)||
+                            x.Proveedor.Apellido1.ToLower().Contains(search) ||
+                            x.Proveedor.Apellido2.ToLower().Contains(search) ||
+                            x.Categoria_gasto.Nombre.ToLower().Contains(search) ||
+                            x.Usuarios.Nombre.ToLower().Contains(search) ||
+                            x.Usuarios.Apellido1.ToLower().Contains(search) ||
+                            x.Usuarios.Apellido2.ToLower().Contains(search)
+                        );
+                    }
+
+                    int totalRecords = ctx.Gastos.Count();
+                    int totalFiltered = query.Count();
+
+                    switch (request.SortColumn?.ToLower())
+                    {
+                        case "descripcion":
+                            query = request.SortDirection == "asc"
+                                ? query.OrderBy(x => x.Descripcion)
+                                : query.OrderByDescending(x => x.Descripcion);
+                            break;
+                        case "total":
+                            query = request.SortDirection == "asc"
+                                ? query.OrderBy(x => x.Total)
+                                : query.OrderByDescending(x => x.Total);
+                            break;
+                        case "subtotal":   
+                            query = request.SortDirection == "asc"
+                                ? query.OrderBy(x => x.Subtotal)
+                                : query.OrderByDescending(x => x.Subtotal);
+                            break;
+                        case "doc_referencia":  
+                            query = request.SortDirection == "asc"
+                                ? query.OrderBy(x => x.Doc_Referencia)
+                                : query.OrderByDescending(x => x.Doc_Referencia);
+                            break;
+                        case "fecha":
+                            query = request.SortDirection == "asc"
+                                ? query.OrderBy(x => x.Fecha)
+                                : query.OrderByDescending(x => x.Fecha);
+                            break;
+                       
+                        default:
+                            query = query.OrderBy(x => x.id);
+                            break;
+                    }
+
+
+                    var queryJoined = (from g in ctx.Gastos
                                  join cg in ctx.Categoria_gasto on g.Categoria_gasto_id equals cg.id
                                  join td in ctx.Tipo_documento on g.Tipo_documento_id equals td.id
                                  join mp in ctx.Medio_pago on g.Medio_pago_id equals mp.id
@@ -206,19 +280,85 @@ namespace marsh_contable.Controllers
                                      Proveedor = p.Nombre + " " + p.Apellido1,
                                      Usuario = u.Nombre + " " + u.Apellido1
                                  }).ToList();
+                   
+                    var data = queryJoined
+                        .Skip(request.Start)
+                        .Take(request.Length > 0 ? request.Length : totalFiltered)
+                        .ToList();
+
+                  
 
                     oR.CodeStatus = HttpStatusCode.OK;
-                    oR.Data = lista;
+                    oR.Data = new
+                    {
+                        draw = request.Draw,
+                        recordsTotal = totalRecords,
+                        recordsFiltered = totalFiltered,
+                        data = data
+                    };
                     return oR;
                 }
             }
-            catch (Exception ex)
+            catch (System.Data.Entity.Validation.DbEntityValidationException ex2)
             {
+                string errorDB = "";
+                foreach (var eve in ex2.EntityValidationErrors)
+                    foreach (var ve in eve.ValidationErrors)
+                        errorDB += ve.ErrorMessage;
                 oR.CodeStatus = HttpStatusCode.InternalServerError;
-                oR.Message = ex.Message;
+                oR.Message = errorDB;
                 return oR;
             }
+            catch (Exception ex) { oR.CodeStatus = HttpStatusCode.InternalServerError; oR.Message = ex.Message; return oR; }
         }
+        //public Reply GetAllGastos()
+        //{
+        //    Reply oR = new Reply();
+        //    oR.CodeStatus = 0;
+        //    try
+        //    {
+        //        using (var ctx = new Models.EntitiesModel())
+        //        {
+        //            var lista = (from g in ctx.Gastos
+        //                         join cg in ctx.Categoria_gasto on g.Categoria_gasto_id equals cg.id
+        //                         join td in ctx.Tipo_documento on g.Tipo_documento_id equals td.id
+        //                         join mp in ctx.Medio_pago on g.Medio_pago_id equals mp.id
+        //                         join p in ctx.Proveedor on g.Proveedor_id equals p.id
+        //                         join u in ctx.Usuarios on g.Usuarios_Usuario_id equals u.Usuario_id
+        //                         select new Models.GastosViewModel
+        //                         {
+        //                             id = g.id,
+        //                             Descripcion = g.Descripcion,
+        //                             Categoria_gasto_id = g.Categoria_gasto_id,
+        //                             Subtotal = g.Subtotal,
+        //                             Impuesto = g.Impuesto,
+        //                             Total = g.Total,
+        //                             Doc_Referencia = g.Doc_Referencia,
+        //                             Fecha = g.Fecha,
+        //                             Ultima_Fec_Actualizacion = g.Ultima_Fec_Actualizacion,
+        //                             Usuarios_Usuario_id = g.Usuarios_Usuario_id,
+        //                             Tipo_documento_id = g.Tipo_documento_id,
+        //                             Medio_pago_id = g.Medio_pago_id,
+        //                             Proveedor_id = g.Proveedor_id,
+        //                             Categoria_gasto = cg.Nombre,
+        //                             Tipo_documento = td.Nombre,
+        //                             Medio_pago = mp.descripcion,
+        //                             Proveedor = p.Nombre + " " + p.Apellido1,
+        //                             Usuario = u.Nombre + " " + u.Apellido1
+        //                         }).ToList();
+
+        //            oR.CodeStatus = HttpStatusCode.OK;
+        //            oR.Data = lista;
+        //            return oR;
+        //        }
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        oR.CodeStatus = HttpStatusCode.InternalServerError;
+        //        oR.Message = ex.Message;
+        //        return oR;
+        //    }
+        //}
 
 
         [HttpGet]

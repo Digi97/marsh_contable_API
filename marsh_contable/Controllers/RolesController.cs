@@ -13,7 +13,6 @@ using marsh_contable.Modulos;
 namespace marsh_contable.Controllers
 {
 
-    [EnableCors(origins: "*", headers: "*", methods: "*")]
     public class RolesController : ApiController
     {
 

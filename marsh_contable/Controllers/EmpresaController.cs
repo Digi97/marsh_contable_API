@@ -12,7 +12,7 @@ using marsh_contable.Modulos;
 
 namespace marsh_contable.Controllers
 {
-    [EnableCors(origins: "*", headers: "*", methods: "*")]
+  
     public class EmpresaController: ApiController
     {
 
@@ -121,14 +121,14 @@ namespace marsh_contable.Controllers
                 {
                     throw new Exception("invalid_string_form_Correo_empresa");
                 }
-                if (!tool.ValidaTexto(model.Ruta_nas))
+                if (!tool.ValidaRuta(model.Ruta_nas))
                 {
                     throw new Exception("invalid_string_form_Ruta_nas");
                 }
-                if (!tool.ValidaTexto(model.Ruta_llave_factura))
-                {
-                    throw new Exception("invalid_string_form_Ruta_llave_factura");
-                }
+                //if (!tool.ValidaTexto(model.Ruta_llave_factura))
+                //{
+                //    throw new Exception("invalid_string_form_Ruta_llave_factura");
+                //}
                 if (!tool.ValidaTexto(model.identificacion))
                 {
                     throw new Exception("invalid_string_form_identificacion");

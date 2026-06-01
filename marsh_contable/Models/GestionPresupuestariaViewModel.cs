@@ -25,5 +25,6 @@ namespace marsh_contable.Models
         public string Categoria_presupuestaria { get; set; }
         public string Centro_costo { get; set; }
         public string Usuario { get; set; }
+        public string Formato { get; set; }
     }
 }

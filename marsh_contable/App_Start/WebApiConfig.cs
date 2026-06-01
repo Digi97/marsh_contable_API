@@ -4,6 +4,7 @@ using System.Linq;
 using System.Web.Http;
 using marsh_contable.Controllers;
 using System.Web.Http.Cors;
+using System.Configuration;
 
 namespace marsh_contable
 {
@@ -11,6 +12,16 @@ namespace marsh_contable
     {
         public static void Register(HttpConfiguration config)
         {
+
+
+            string origenes = ConfigurationManager.AppSettings["CorsOrigins"] ?? "*";
+
+            var cors = new EnableCorsAttribute(
+                origins: origenes,
+                headers: "*",
+                methods: "*"
+            );
+            config.EnableCors(cors);
             // Configuración y servicios de API web
 
             // Rutas de API web
@@ -20,7 +31,6 @@ namespace marsh_contable
             //    headers: "*",
             //    methods: "*"
             //);
-            config.EnableCors();
 
 
           //  config.EnableCors();

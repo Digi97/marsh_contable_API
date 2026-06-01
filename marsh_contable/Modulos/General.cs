@@ -271,9 +271,21 @@ namespace marsh_contable.Modulos
 
         }
 
+        public bool ValidaRuta(string text)
+        {
+            const String regexfotNames = @"^(https?:\/\/|[a-zA-Z]:\\)([\w\-]+\.)*[\w\-]+([\\/][\w\-._~:/?#\[\]@!$&'()*+,;=%]*)?$";
+            if (!string.IsNullOrWhiteSpace(text) && Regex.IsMatch(text, regexfotNames))
+            {
+                return true;
+            }
+            return false;
+
+        }
+
+
         public bool ValidaCorreo(string text)
         {
-            const String regexfotNames = @"^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$";
+            const String regexfotNames = @"^[#a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$";
             return Regex.IsMatch(text, regexfotNames);
         }
 
