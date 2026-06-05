@@ -18,7 +18,7 @@ namespace marsh_contable.Controllers
         [HttpPost]
         [Authorize]
         [Route("api/v1/gastos_detalles")]
-        public Reply CreateGastoDetalle([FromBody] Models.Gastos_Detalles model)
+        public Reply CreateGastoDetalle([FromBody] Models.Gastos_Detalles model, Models.EntitiesModel ctx)
         {
             Reply oR = new Reply();
             oR.CodeStatus = 0;
@@ -42,8 +42,10 @@ namespace marsh_contable.Controllers
                     throw new Exception("invalid_value_form_Cantidad");
                 }
 
-                using (var ctx = new Models.EntitiesModel())
+                using ( ctx )
                 {
+
+                    
                     Models.Gastos_Detalles d = new Models.Gastos_Detalles()
                     {
                         Subtotal = model.Subtotal,
@@ -55,7 +57,6 @@ namespace marsh_contable.Controllers
                         codigo_comercial = model.codigo_comercial,
                         Fecha = DateTime.Now,
                         Ultima_fec_actualizacion = DateTime.Now,
-                        Medio_pago_id = model.Medio_pago_id,
                         Gastos_id = model.Gastos_id
                     };
                     ctx.Gastos_Detalles.Add(d);
@@ -122,7 +123,7 @@ namespace marsh_contable.Controllers
                     d.Detalle = model.Detalle;
                     d.Descuento = model.Descuento;
                     d.codigo_comercial = model.codigo_comercial;
-                    d.Medio_pago_id = model.Medio_pago_id;
+         
                     d.Ultima_fec_actualizacion = DateTime.Now;
                     ctx.SaveChanges();
 
@@ -170,7 +171,7 @@ namespace marsh_contable.Controllers
                 using (var ctx = new Models.EntitiesModel())
                 {
                     var lista = (from d in ctx.Gastos_Detalles
-                                 join mp in ctx.Medio_pago on d.Medio_pago_id equals mp.id
+                                 
                                  where d.Gastos_id == gastoId
                                  select new Models.GastosDetallesViewModel
                                  {
@@ -184,9 +185,9 @@ namespace marsh_contable.Controllers
                                      codigo_comercial = d.codigo_comercial,
                                      Fecha = d.Fecha,
                                      Ultima_fec_actualizacion = d.Ultima_fec_actualizacion,
-                                     Medio_pago_id = d.Medio_pago_id,
+                                 
                                      Gastos_id = d.Gastos_id,
-                                     Medio_pago = mp.descripcion
+                                  
                                  }).ToList();
 
                     oR.CodeStatus = HttpStatusCode.OK;
@@ -230,7 +231,7 @@ namespace marsh_contable.Controllers
                             x.codigo_comercial,
                             x.Fecha,
                             x.Ultima_fec_actualizacion,
-                            x.Medio_pago_id,
+                          
                             x.Gastos_id
                         }).FirstOrDefault();
 

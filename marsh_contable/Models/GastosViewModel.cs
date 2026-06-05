@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 
 namespace marsh_contable.Models
 {
@@ -17,12 +18,17 @@ namespace marsh_contable.Models
         public int Tipo_documento_id { get; set; }
         public int Medio_pago_id { get; set; }
         public int Proveedor_id { get; set; }
+        public double Descuento { get; set; }
+        public int createElectronicDoc { get; set; }//para validacion de crear documento electrónico 
 
+        public int Tipo_moneda_id { get; set; }
+        public string tipo_moneda { get; set; }
         // Descripciones
         public string Categoria_gasto { get; set; }
         public string Tipo_documento { get; set; }
         public string Medio_pago { get; set; }
         public string Proveedor { get; set; }
         public string Usuario { get; set; }
+        public List<GastosDetallesViewModel> GastosDetalle { get; set; }
     }
 }

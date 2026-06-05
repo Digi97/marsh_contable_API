@@ -21,5 +21,7 @@ namespace marsh_contable.Models
         public DateTime Fec_Login { get; set; }
 
         public string Rol { get; set; }
+        public string FormatoFecha { get; set; }//obtenemos de empresa
+        public int ImpuestoDefault { get; set; } //obtenemos de empresa
     }
 }

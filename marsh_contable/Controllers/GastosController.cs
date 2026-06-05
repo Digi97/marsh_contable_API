@@ -53,29 +53,57 @@ namespace marsh_contable.Controllers
                     throw new Exception("invalid_string_form_Doc_Referencia");
                 }
 
+
+                if (model.Gastos_Detalles.Count == 0)
+                {
+                    throw new Exception("detail_is_required");
+                }
+
+
+
+
                 using (var ctx = new Models.EntitiesModel())
                 {
-                    Models.Gastos g = new Models.Gastos()
-                    {
-                        Descripcion = model.Descripcion,
-                        Categoria_gasto_id = model.Categoria_gasto_id,
-                        Subtotal = model.Subtotal,
-                        Impuesto = model.Impuesto,
-                        Total = model.Total,
-                        Doc_Referencia = model.Doc_Referencia,
-                        Fecha = DateTime.Now,
-                        Ultima_Fec_Actualizacion = DateTime.Now,
-                        Usuarios_Usuario_id = model.Usuarios_Usuario_id,
-                        Tipo_documento_id = model.Tipo_documento_id,
-                        Medio_pago_id = model.Medio_pago_id,
-                        Proveedor_id = model.Proveedor_id
-                    };
-                    ctx.Gastos.Add(g);
-                    ctx.SaveChanges();
+                
+                        Models.Gastos g = new Models.Gastos()
+                        {
+                            Descripcion = model.Descripcion,
+                            Categoria_gasto_id = model.Categoria_gasto_id,
+                            Subtotal = model.Subtotal,
+                            Impuesto = model.Impuesto,
+                            Total = model.Total,
+                            Doc_Referencia = model.Doc_Referencia,
+                            Fecha = DateTime.Now,
+                            Ultima_Fec_Actualizacion = DateTime.Now,
+                            Usuarios_Usuario_id = model.Usuarios_Usuario_id,
+                            Tipo_documento_id = model.Tipo_documento_id,
+                            Medio_pago_id = model.Medio_pago_id,
+                            Proveedor_id = model.Proveedor_id,
+                            Descuento = model.Descuento,
+                            Tipo_moneda_id = model.Tipo_moneda_id
+                        };
+                        ctx.Gastos.Add(g);
+                        ctx.SaveChanges();
 
-                    oR.CodeStatus = HttpStatusCode.OK;
-                    oR.Data = g.id;
-                    return oR;
+
+
+                        GastosDetallesController gastosDetalles = new GastosDetallesController();
+                        foreach (var detalles in model.Gastos_Detalles)
+                        {
+                            detalles.Gastos_id = g.id;
+                            var result = gastosDetalles.CreateGastoDetalle(detalles, ctx);
+                            if (result.CodeStatus != HttpStatusCode.OK)
+                            {
+                             
+                                throw new Exception(result.Message);
+                            }
+
+                        }
+                        oR.CodeStatus = HttpStatusCode.OK;
+                        oR.Data = g.id;
+                        return oR;
+                    
+               
                 }
             }
             catch (System.Data.Entity.Validation.DbEntityValidationException ex2)
@@ -137,6 +165,7 @@ namespace marsh_contable.Controllers
                     g.Medio_pago_id = model.Medio_pago_id;
                     g.Proveedor_id = model.Proveedor_id;
                     g.Ultima_Fec_Actualizacion = DateTime.Now;
+                    g.Descuento = model.Descuento;
                     ctx.SaveChanges();
 
                     oR.CodeStatus = HttpStatusCode.OK;
@@ -259,6 +288,7 @@ namespace marsh_contable.Controllers
                                  join mp in ctx.Medio_pago on g.Medio_pago_id equals mp.id
                                  join p in ctx.Proveedor on g.Proveedor_id equals p.id
                                  join u in ctx.Usuarios on g.Usuarios_Usuario_id equals u.Usuario_id
+                                 join m in ctx.Tipo_moneda on  g.Tipo_moneda_id equals m.id
                                  select new Models.GastosViewModel
                                  {
                                      id = g.id,
@@ -277,8 +307,10 @@ namespace marsh_contable.Controllers
                                      Categoria_gasto = cg.Nombre,
                                      Tipo_documento = td.Nombre,
                                      Medio_pago = mp.descripcion,
-                                     Proveedor = p.Nombre + " " + p.Apellido1,
-                                     Usuario = u.Nombre + " " + u.Apellido1
+                                     Proveedor = p.Nombre + " " + p.Apellido1 + " " +p.Apellido2,
+                                     Usuario = u.Nombre + " " + u.Apellido1 + u.Apellido2,
+                                     tipo_moneda = m.codigo_moneda
+
                                  }).ToList();
                    
                     var data = queryJoined
@@ -403,12 +435,33 @@ namespace marsh_contable.Controllers
                                  Medio_pago = mp.descripcion,
                                  Proveedor = p.Nombre + " " + p.Apellido1,
                                  Usuario = u.Nombre + " " + u.Apellido1
+                                 
                              }).FirstOrDefault();
 
                     if (g == null)
                     {
                         throw new Exception("gasto_not_found");
                     }
+
+                    if (g != null)
+                    {
+                        g.GastosDetalle = ctx.Gastos_Detalles
+                            .Where(t => t.Gastos_id == id)
+                            .Select(t => new Models.GastosDetallesViewModel
+                            {
+                                id = t.id,
+                                Subtotal = t.Subtotal,
+                                Impuesto = t.Impuesto,
+                                Total = t.Total,
+                                Cantidad = t.Cantidad,
+                                Detalle = t.Detalle,
+                                Descuento = t.Descuento,
+                                codigo_comercial = t.codigo_comercial,
+
+                            }).ToList();
+                    }
+
+
                     oR.CodeStatus = HttpStatusCode.OK;
                     oR.Data = g;
                     return oR;

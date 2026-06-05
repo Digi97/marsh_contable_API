@@ -72,6 +72,23 @@ namespace marsh_contable.Controllers
 
                 using (var ctx = new Models.EntitiesModel())
                 {
+
+                    var userExist = ctx.Usuarios
+                         .Where(u =>
+                             u.Correo == model.Correo && 
+                             u.activo == 1)
+                         .Select(u => new Models.UsuariosViewModel
+                         {
+                             Usuario_id = u.Usuario_id,
+                         }).FirstOrDefault();
+
+                    // Usuario no encontrado
+                    if (userExist != null)
+                    {
+                        throw new Exception("user_already_exist");
+                    }
+
+
                     Models.Usuarios nuevoUsuario = new Models.Usuarios()
                     {
                         Nombre = model.Nombre,
@@ -340,12 +357,12 @@ namespace marsh_contable.Controllers
         [HttpPost]
         [AllowAnonymous]
         [Route("api/v1/login")]
-        public Reply Login ([FromBody] Models.Usuarios model)
+        public Reply Login([FromBody] Models.Usuarios model)
         {
             Reply oR = new Reply();
             oR.CodeStatus = 0;
             General tool = new General();
-          
+
             try
             {
                 // Validar body null
@@ -353,80 +370,112 @@ namespace marsh_contable.Controllers
                 {
                     throw new Exception("invalid_model");
                 }
-             
+
                 // Validar campos vacíos
                 if (string.IsNullOrWhiteSpace(model.Correo) ||
                     string.IsNullOrWhiteSpace(model.Contrasena))
                 {
-                    throw new Exception("invalid_value_form_correo_or_contrasena");   
+                    throw new Exception("invalid_value_form_correo_or_contrasena");
                 }
-
 
                 if (!tool.ValidaCorreo(model.Correo))
                 {
                     throw new Exception("invalid_value_form_Correo");
                 }
 
-                String password = tool.Encriptar(model.Contrasena);
-
                 using (var ctx = new Models.EntitiesModel())
                 {
-                    var usuario = ctx.Usuarios
-                        .Where(u =>
-                            u.Correo == model.Correo &&
-                            u.Contrasena == password &&
-                            u.activo == 1)
-                        .Select(u => new Models.UsuariosViewModel
-                        {
-                            Usuario_id = u.Usuario_id,
-                            Nombre = u.Nombre,
-                            Apellido1 = u.Apellido1,
-                            Apellido2 = u.Apellido2,
-                            Correo = u.Correo,
-                            Roles_id = u.Roles_id,
-                            Id_Empleado = u.Id_Empleado,
-                            activo = u.activo
-                        }).FirstOrDefault();
+    
+                    Models.Usuarios usuarioDB = ctx.Usuarios
+                        .FirstOrDefault(u => u.Correo == model.Correo && u.activo == 1);
 
-                    // Usuario no encontrado
-                    if (usuario == null)
+            
+                    if (usuarioDB == null)
                     {
-                        throw new Exception("invalid_username_or_password");                      
+                        throw new Exception("invalid_username_or_password");
                     }
-                    Models.Usuarios usuarioActualiza = ctx.Usuarios.FirstOrDefault(u => u.Usuario_id == usuario.Usuario_id);
 
-                    //actualizamos la ultima fecha de login                   
-                    usuarioActualiza.Fec_Login = DateTime.Now;
-                    usuario.Fec_Login = DateTime.Now;
+                    if (usuarioDB.Intentos_fallidos >= 3 && usuarioDB.Fecha_bloqueo != null)
+                    {
+                        double minutosTranscurridos = (DateTime.Now - usuarioDB.Fecha_bloqueo.Value).TotalMinutes;
+
+                        if (minutosTranscurridos < 10)
+                        {
+                            int minutosRestantes = (int)Math.Ceiling(10 - minutosTranscurridos);
+                            throw new Exception($"user_blocked_{minutosRestantes}_minutes");
+                        }
+
+                        usuarioDB.Intentos_fallidos = 0;
+                        usuarioDB.Fecha_bloqueo = null;
+                        ctx.SaveChanges();
+                    }
+
+   
+                    string password = tool.Encriptar(model.Contrasena);
+
+                    if (usuarioDB.Contrasena != password)
+                    {
+                        usuarioDB.Intentos_fallidos += 1;
+
+                        if (usuarioDB.Intentos_fallidos >= 3)
+                        {
+                            usuarioDB.Fecha_bloqueo = DateTime.Now;
+                            ctx.SaveChanges();
+                            throw new Exception("user_blocked_10_minutes");
+                        }
+
+                        ctx.SaveChanges();
+
+                        int intentosRestantes = 3 - usuarioDB.Intentos_fallidos;
+                        throw new Exception($"invalid_username_or_password_{intentosRestantes}_attempts_remaining");
+                    }
+
+                    usuarioDB.Intentos_fallidos = 0;
+                    usuarioDB.Fecha_bloqueo = null;
+                    usuarioDB.Fec_Login = DateTime.Now;
                     ctx.SaveChanges();
 
-                    // Login exitoso
+                    var empresa = ctx.Empresa.FirstOrDefault(u => u.Emp_id ==   1);
+
+
+                    var usuarioResponse = new Models.UsuariosViewModel
+                    {
+                        Usuario_id = usuarioDB.Usuario_id,
+                        Nombre = usuarioDB.Nombre,
+                        Apellido1 = usuarioDB.Apellido1,
+                        Apellido2 = usuarioDB.Apellido2,
+                        Correo = usuarioDB.Correo,
+                        Roles_id = usuarioDB.Roles_id,
+                        Id_Empleado = usuarioDB.Id_Empleado,
+                        activo = usuarioDB.activo,
+                        Fec_Login = DateTime.Now,
+                        FormatoFecha = empresa.Formato_fecha,
+                        ImpuestoDefault = (int) empresa.Impuesto_id
+                    };
+
+
+
+
                     oR.CodeStatus = HttpStatusCode.OK;
                     oR.Message = tool.GenerateTokenJWT(model.Correo);
-                    oR.Data = usuario;
+                    oR.Data = usuarioResponse;
                 }
             }
             catch (System.Data.Entity.Validation.DbEntityValidationException ex)
             {
                 string errorDB = "";
                 foreach (var eve in ex.EntityValidationErrors)
-                {
                     foreach (var ve in eve.ValidationErrors)
-                    {
-                        errorDB += ve.ErrorMessage + "";
-                    }
-                }
+                        errorDB += ve.ErrorMessage;
 
                 oR.CodeStatus = HttpStatusCode.InternalServerError;
                 oR.Message = errorDB;
             }
             catch (Exception ex)
             {
-
                 oR.CodeStatus = HttpStatusCode.InternalServerError;
                 oR.Message = ex.Message;
             }
-
             return oR;
         }
 

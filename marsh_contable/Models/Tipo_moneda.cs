@@ -22,6 +22,7 @@ namespace marsh_contable.Models
             this.Ingresos = new HashSet<Ingresos>();
             this.Tipo_cambio = new HashSet<Tipo_cambio>();
             this.Cuentas_Contables = new HashSet<Cuentas_Contables>();
+            this.Gastos = new HashSet<Gastos>();
         }
     
         public int id { get; set; }
@@ -38,5 +39,7 @@ namespace marsh_contable.Models
         public virtual ICollection<Tipo_cambio> Tipo_cambio { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Cuentas_Contables> Cuentas_Contables { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<Gastos> Gastos { get; set; }
     }
 }

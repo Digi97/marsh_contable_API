@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 
 namespace marsh_contable.Models
 {
@@ -8,7 +9,8 @@ namespace marsh_contable.Models
         public int Permisos_id { get; set; }
         public int Roles_id { get; set; }
 
-        public string Permiso { get; set; }
+        public string NombrePermiso { get; set; }
         public string Rol { get; set; }
+
     }
 }

@@ -34,15 +34,18 @@ namespace marsh_contable.Models
         public int Tipo_documento_id { get; set; }
         public int Medio_pago_id { get; set; }
         public int Proveedor_id { get; set; }
+        public Nullable<double> Descuento { get; set; }
+        public Nullable<int> Tipo_moneda_id { get; set; }
     
         public virtual Categoria_gasto Categoria_gasto { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Cuenta_Encabezado> Cuenta_Encabezado { get; set; }
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<Gastos_Detalles> Gastos_Detalles { get; set; }
         public virtual Medio_pago Medio_pago { get; set; }
         public virtual Proveedor Proveedor { get; set; }
         public virtual Tipo_documento Tipo_documento { get; set; }
         public virtual Usuarios Usuarios { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<Gastos_Detalles> Gastos_Detalles { get; set; }
+        public virtual Tipo_moneda Tipo_moneda { get; set; }
     }
 }

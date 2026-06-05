@@ -1,6 +1,7 @@
 ﻿using marsh_contable.Models;
 using marsh_contable.Modulos;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Web.Http;
@@ -1498,7 +1499,42 @@ namespace marsh_contable.Controllers
         [HttpPut]
         [Authorize]
         [Route("api/v1/catalogos/roles/{id}")]
-        public Reply UpdateRoles(int id, [FromBody] Models.Roles model) { Reply oR = new Reply(); oR.CodeStatus = 0; General tool = new General(); try { if (model == null) throw new Exception("invalid_model_request_missing"); if (!tool.ValidaTexto(model.Descripcion)) throw new Exception("invalid_string_form_Descripcion"); using (var ctx = new Models.EntitiesModel()) { Models.Roles e = ctx.Roles.FirstOrDefault(x => x.id == id); if (e == null) throw new Exception("roles_not_found"); e.Descripcion = model.Descripcion; ctx.SaveChanges(); oR.CodeStatus = HttpStatusCode.OK; oR.Data = e.id; return oR; } } catch (Exception ex) { oR.CodeStatus = HttpStatusCode.InternalServerError; oR.Message = ex.Message; return oR; } }
+        public Reply UpdateRoles(int id, [FromBody] Models.RolesViewModel model) {
+            Reply oR = new Reply(); 
+            oR.CodeStatus = 0; 
+            General tool = new General(); 
+            try 
+            { 
+                if (model == null) throw new Exception("invalid_model_request_missing"); 
+                if (!tool.ValidaTexto(model.descripcion)) throw new Exception("invalid_string_form_Descripcion"); 
+                if(model.PermisosRol.Count ==0) throw new Exception("invalid_permission_are_required");
+
+                using (var ctx = new Models.EntitiesModel()) 
+                { 
+                    Models.Roles e = ctx.Roles.FirstOrDefault(x => x.id == id); 
+                    if (e == null) throw new Exception("roles_not_found"); 
+                    e.Descripcion = model.descripcion; 
+                    ctx.SaveChanges();
+
+                   var updatePermiso= UpdatePermisosxRol(id, model.PermisosRol);
+
+                    if(updatePermiso.CodeStatus != HttpStatusCode.OK)
+                    {
+                        throw new Exception(updatePermiso.Message);
+                    }
+
+                    oR.CodeStatus = HttpStatusCode.OK; 
+                    oR.Data = e.id; 
+                    return oR;
+                } 
+            } 
+            catch (Exception ex) 
+            { 
+                oR.CodeStatus = HttpStatusCode.InternalServerError;
+                oR.Message = ex.Message; 
+                return oR; 
+            }
+        }
 
         [HttpGet]
         [Authorize]
@@ -1508,7 +1544,49 @@ namespace marsh_contable.Controllers
         [HttpGet]
         [Authorize]
         [Route("api/v1/catalogos/roles/{id}")]
-        public Reply GetRolesById(int id) { Reply oR = new Reply(); oR.CodeStatus = 0; try { if (id <= 0) throw new Exception("invalid_value_for_id"); using (var ctx = new Models.EntitiesModel()) { var data = ctx.Roles.Where(x => x.id == id).Select(x => new { x.id, x.Descripcion }).FirstOrDefault(); if (data == null) throw new Exception("roles_not_found"); oR.CodeStatus = HttpStatusCode.OK; oR.Data = data; return oR; } } catch (Exception ex) { oR.CodeStatus = HttpStatusCode.InternalServerError; oR.Message = ex.Message; return oR; } }
+        public Reply GetRolesById(int id) { 
+            Reply oR = new Reply(); 
+            oR.CodeStatus = 0;
+            try { 
+                if (id <= 0) throw new Exception("invalid_value_for_id"); 
+                using (var ctx = new Models.EntitiesModel()) 
+                {
+
+
+                    var data = (from r in ctx.Roles
+                               where r.id == id
+                               select new Models.RolesViewModel
+                               {
+                                   id = r.id,
+                                   descripcion = r.Descripcion
+                          
+                               }).FirstOrDefault();
+
+                    if (data != null)
+                    {
+                        data.PermisosRol = (from pxr in ctx.Permisos_x_rol
+                                            join p in ctx.Permisos on pxr.Permisos_id equals p.id
+                                            where pxr.Roles_id == id
+                                            select new Models.PermisosXRolViewModel
+                                            {
+                                                id = pxr.id,
+                                                Permisos_id = pxr.Permisos_id,
+                                                Roles_id = pxr.Roles_id,
+                                                NombrePermiso = p.Nombre
+                                            }).ToList();
+                    }
+                if (data == null) throw new Exception("roles_not_found"); 
+
+
+                    
+                    oR.CodeStatus = HttpStatusCode.OK; 
+                    oR.Data = data; return oR; } } 
+            catch (Exception ex) { 
+                oR.CodeStatus = HttpStatusCode.InternalServerError;
+                oR.Message = ex.Message; 
+                return oR; 
+            }
+        }
         #endregion
 
         #region "Condicion_venta"
@@ -1638,5 +1716,209 @@ namespace marsh_contable.Controllers
             }
             return oR;
         }
+
+
+
+
+        #region "Permisos_x_rol"
+        [HttpPost]
+        [Authorize]
+        [Route("api/v1/catalogos/permisos_x_rol")]
+        public Reply CreatePermisosxRol([FromBody] Models.Permisos_x_rol model) { 
+            Reply oR = new Reply(); 
+            oR.CodeStatus = 0; 
+            General tool = new General(); 
+            try { if (model == null) throw new Exception("invalid_model_request_missing");
+                if (model.Permisos_id == 0)
+                { throw new Exception("invalid_string_form_Descripcion"); }
+                
+                using (var ctx = new Models.EntitiesModel()) { 
+                    Models.Permisos_x_rol e = new Models.Permisos_x_rol() { Permisos_id = model.Permisos_id, Roles_id = model.Roles_id }; 
+                    ctx.Permisos_x_rol.Add(e); 
+                    ctx.SaveChanges(); 
+                    oR.CodeStatus = HttpStatusCode.OK; 
+                    oR.Data = e.id; return oR; } } 
+            catch (Exception ex) { 
+                oR.CodeStatus = HttpStatusCode.InternalServerError; oR.Message = ex.Message; return oR; } }
+
+        [HttpPut]
+        [Authorize]
+        [Route("api/v1/catalogos/permisos_x_rol/{id}")]
+        public Reply UpdatePermisosxRol(int id, [FromBody] List<PermisosXRolViewModel> model) { 
+            
+            Reply oR = new Reply(); 
+            oR.CodeStatus = 0; 
+            General tool = new General(); 
+            try { 
+                if (model == null) throw new Exception("invalid_model_request_missing");
+              
+                using (var ctx = new Models.EntitiesModel()) 
+                {
+                    Models.Permisos_x_rol e = ctx.Permisos_x_rol.FirstOrDefault(x => x.id == id);
+                    var deleteResp = DeletePermisosXRol(id);
+
+                    if(deleteResp.CodeStatus != HttpStatusCode.OK) throw new Exception(deleteResp.Message);
+
+                    foreach (var nuevoPermisos in model)
+                    {
+
+                        Models.Permisos_x_rol create = new Models.Permisos_x_rol() { Permisos_id = nuevoPermisos.Permisos_id, Roles_id = nuevoPermisos.Roles_id };
+                        ctx.Permisos_x_rol.Add(create);
+                        ctx.SaveChanges();
+                    }
+                    oR.CodeStatus = HttpStatusCode.OK; 
+                    oR.Data = id; 
+                    return oR; 
+                }
+            } 
+            catch (Exception ex) { 
+                oR.CodeStatus = HttpStatusCode.InternalServerError; 
+                oR.Message = ex.Message; 
+                return oR; 
+            } 
+        }
+
+
+        public Reply DeletePermisosXRol(int id)//borramos los permisos por ID de rol para su recreacion completa
+        {
+            Reply oR = new Reply();
+            oR.CodeStatus = 0;
+            try
+            {
+                if (id <= 0)
+                {
+                    throw new Exception("invalid_value_for_id");
+                }
+                using (var ctx = new Models.EntitiesModel())
+                {
+                    List<Models.Permisos_x_rol> permisos_x_rol = ctx.Permisos_x_rol
+                     .Where(u => u.Roles_id == id)
+                     .ToList();
+
+                    //if (!permisos_x_rol.Any())
+                    //{
+                    //    throw new Exception("permiso_x_rol_not_found");
+                    //}
+
+                    ctx.Permisos_x_rol.RemoveRange(permisos_x_rol);
+                    ctx.SaveChanges();
+
+                    oR.CodeStatus = HttpStatusCode.OK;
+                    oR.Data = id;
+                    return oR;
+                }
+            }
+            catch (System.Data.Entity.Validation.DbEntityValidationException ex2)
+            {
+                String errorDB = "";
+                foreach (var eve in ex2.EntityValidationErrors)
+                {
+                    foreach (var ve in eve.ValidationErrors)
+                    {
+                        errorDB += ve.ErrorMessage;
+                    }
+                }
+                oR.CodeStatus = HttpStatusCode.InternalServerError;
+                oR.Message = errorDB;
+                return oR;
+            }
+            catch (Exception ex)
+            {
+                oR.CodeStatus = HttpStatusCode.InternalServerError;
+                oR.Message = ex.Message;
+                return oR;
+            }
+        }
+
+
+        [HttpGet]
+        [Authorize]
+        [Route("api/v1/catalogos/permisos_x_rol")]
+        public Reply GetAllPermisosxRol()
+        {
+            Reply oR = new Reply();
+            oR.CodeStatus = 0;
+            try
+            {
+                using (var ctx = new Models.EntitiesModel())
+                {
+                    var data = (from pxr in ctx.Permisos_x_rol
+                                join p in ctx.Permisos on pxr.Permisos_id equals p.id
+                                join r in ctx.Roles on pxr.Roles_id equals r.id
+                                select new
+                                {
+                                    pxr.id,
+                                    pxr.Permisos_id,
+                                    NombrePermiso = p.Nombre,
+                                    DescripcionPermiso = p.Descripcion,
+                                    pxr.Roles_id,
+                                    NombreRol = r.Descripcion
+                                }).ToList();
+
+                    oR.CodeStatus = HttpStatusCode.OK;
+                    oR.Data = data;
+                    return oR;
+                }
+            }
+            catch (Exception ex)
+            {
+                oR.CodeStatus = HttpStatusCode.InternalServerError;
+                oR.Message = ex.Message;
+                return oR;
+            }
+        }
+
+        [HttpGet]
+        [Authorize]
+        [Route("api/v1/catalogos/permisos_x_rol/{id}")]
+        public Reply GetPermisosxRolByRolId(int id)
+        {
+            Reply oR = new Reply();
+            oR.CodeStatus = 0;
+            try
+            {
+                if (id <= 0)
+                {
+                    throw new Exception("invalid_value_for_rolId");
+                }
+
+                using (var ctx = new Models.EntitiesModel())
+                {
+                    var data = (from pxr in ctx.Permisos_x_rol
+                                join p in ctx.Permisos on pxr.Permisos_id equals p.id
+                                join r in ctx.Roles on pxr.Roles_id equals r.id
+                                where pxr.Roles_id == id
+                                select new
+                                {
+                                    pxr.id,
+                                    pxr.Permisos_id,
+                                    NombrePermiso = p.Nombre,
+                                    DescripcionPermiso = p.Descripcion,
+                                    pxr.Roles_id,
+                                    NombreRol = r.Descripcion
+                                }).ToList();
+
+                    if (!data.Any())
+                    {
+                        throw new Exception("permisos_not_found_for_rol");
+                    }
+
+                    oR.CodeStatus = HttpStatusCode.OK;
+                    oR.Data = data;
+                    return oR;
+                }
+            }
+            catch (Exception ex)
+            {
+                oR.CodeStatus = HttpStatusCode.InternalServerError;
+                oR.Message = ex.Message;
+                return oR;
+            }
+        }
+
+        #endregion
+
+
+
     }
 }

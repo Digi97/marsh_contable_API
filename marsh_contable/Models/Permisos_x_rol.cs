@@ -17,6 +17,7 @@ namespace marsh_contable.Models
         public int id { get; set; }
         public int Permisos_id { get; set; }
         public int Roles_id { get; set; }
+        public string NombrePermiso { get; set; }
     
         public virtual Permisos Permisos { get; set; }
         public virtual Roles Roles { get; set; }

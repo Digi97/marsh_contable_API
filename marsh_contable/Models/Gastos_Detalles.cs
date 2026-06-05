@@ -24,10 +24,8 @@ namespace marsh_contable.Models
         public string codigo_comercial { get; set; }
         public System.DateTime Fecha { get; set; }
         public System.DateTime Ultima_fec_actualizacion { get; set; }
-        public int Medio_pago_id { get; set; }
         public int Gastos_id { get; set; }
     
         public virtual Gastos Gastos { get; set; }
-        public virtual Medio_pago Medio_pago { get; set; }
     }
 }

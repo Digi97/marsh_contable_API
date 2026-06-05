@@ -236,9 +236,27 @@
     <Compile Include="Areas\HelpPage\SampleGeneration\SampleDirection.cs" />
     <Compile Include="Areas\HelpPage\SampleGeneration\TextSample.cs" />
     <Compile Include="Areas\HelpPage\XmlDocumentationProvider.cs" />
-    <Compile Include="Controllers\BaseController.cs" />
+    <Compile Include="Controllers\AdjuntosController.cs" />
+    <Compile Include="Controllers\CatalogosController.cs" />
+    <Compile Include="Controllers\ClientesController.cs" />
+    <Compile Include="Controllers\CuentaDetalleController.cs" />
+    <Compile Include="Controllers\CuentaEncabezadoController.cs" />
+    <Compile Include="Controllers\DevolucionesController.cs" />
+    <Compile Include="Controllers\EmpresaController.cs" />
+    <Compile Include="Controllers\FacturaDetallesController.cs" />
+    <Compile Include="Controllers\FacturasController.cs" />
+    <Compile Include="Controllers\GastosController.cs" />
+    <Compile Include="Controllers\GastosDetallesController.cs" />
+    <Compile Include="Controllers\GestionPDetalleController.cs" />
+    <Compile Include="Controllers\GestionPresupuestariaController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
+    <Compile Include="Controllers\IngresosController.cs" />
+    <Compile Include="Controllers\IngresosDetalleController.cs" />
+    <Compile Include="Controllers\ProveedorController.cs" />
+    <Compile Include="Controllers\TelefonosController.cs" />
+    <Compile Include="Controllers\TipoIdentificacionController.cs" />
     <Compile Include="Controllers\TokenValidationHandlerController.cs" />
+    <Compile Include="Controllers\UbicacionController.cs" />
     <Compile Include="Controllers\UsersController.cs" />
     <Compile Include="Controllers\ValuesController.cs" />
     <Compile Include="Global.asax.cs">
@@ -247,9 +265,11 @@
     <Compile Include="Models\Adjuntos.cs">
       <DependentUpon>EntitiesModel.tt</DependentUpon>
     </Compile>
+    <Compile Include="Models\AdjuntosViewModel.cs" />
     <Compile Include="Models\Canton.cs">
       <DependentUpon>EntitiesModel.tt</DependentUpon>
     </Compile>
+    <Compile Include="Models\CantonViewModel.cs" />
     <Compile Include="Models\Categoria_gasto.cs">
       <DependentUpon>EntitiesModel.tt</DependentUpon>
     </Compile>
@@ -259,9 +279,11 @@
     <Compile Include="Models\Centro_Costos.cs">
       <DependentUpon>EntitiesModel.tt</DependentUpon>
     </Compile>
+    <Compile Include="Models\ChangePasswordViewModel.cs" />
     <Compile Include="Models\Clientes.cs">
       <DependentUpon>EntitiesModel.tt</DependentUpon>
     </Compile>
+    <Compile Include="Models\ClientesViewModel.cs" />
     <Compile Include="Models\Codigos_cabys.cs">
       <DependentUpon>EntitiesModel.tt</DependentUpon>
     </Compile>
@@ -274,6 +296,8 @@
     <Compile Include="Models\Condicion_venta.cs">
       <DependentUpon>EntitiesModel.tt</DependentUpon>
     </Compile>
+    <Compile Include="Models\CuentaDetalleViewModel.cs" />
+    <Compile Include="Models\CuentaEncabezadoViewModel.cs" />
     <Compile Include="Models\Cuentas_Contables.cs">
       <DependentUpon>EntitiesModel.tt</DependentUpon>
     </Compile>
@@ -283,15 +307,19 @@
     <Compile Include="Models\Cuenta_Encabezado.cs">
       <DependentUpon>EntitiesModel.tt</DependentUpon>
     </Compile>
+    <Compile Include="Models\DataTableRequest.cs" />
     <Compile Include="Models\Devoluciones.cs">
       <DependentUpon>EntitiesModel.tt</DependentUpon>
     </Compile>
+    <Compile Include="Models\DevolucionesViewModel.cs" />
     <Compile Include="Models\Distrito.cs">
       <DependentUpon>EntitiesModel.tt</DependentUpon>
     </Compile>
+    <Compile Include="Models\DistritoViewModel.cs" />
     <Compile Include="Models\Empresa.cs">
       <DependentUpon>EntitiesModel.tt</DependentUpon>
     </Compile>
+    <Compile Include="Models\EmpresaViewModel.cs" />
     <Compile Include="Models\EntitiesModel.Context.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -310,18 +338,24 @@
     <Compile Include="Models\Estado_Factura.cs">
       <DependentUpon>EntitiesModel.tt</DependentUpon>
     </Compile>
+    <Compile Include="Models\FacturaDetallesViewModel.cs" />
     <Compile Include="Models\Facturas.cs">
       <DependentUpon>EntitiesModel.tt</DependentUpon>
     </Compile>
+    <Compile Include="Models\FacturasViewModel.cs" />
     <Compile Include="Models\Factura_Detalles.cs">
       <DependentUpon>EntitiesModel.tt</DependentUpon>
     </Compile>
     <Compile Include="Models\Gastos.cs">
       <DependentUpon>EntitiesModel.tt</DependentUpon>
     </Compile>
+    <Compile Include="Models\GastosDetallesViewModel.cs" />
+    <Compile Include="Models\GastosViewModel.cs" />
     <Compile Include="Models\Gastos_Detalles.cs">
       <DependentUpon>EntitiesModel.tt</DependentUpon>
     </Compile>
+    <Compile Include="Models\GestionPDetalleViewModel.cs" />
+    <Compile Include="Models\GestionPresupuestariaViewModel.cs" />
     <Compile Include="Models\Gestion_Presupuestaria.cs">
       <DependentUpon>EntitiesModel.tt</DependentUpon>
     </Compile>
@@ -334,34 +368,48 @@
     <Compile Include="Models\Ingresos.cs">
       <DependentUpon>EntitiesModel.tt</DependentUpon>
     </Compile>
+    <Compile Include="Models\IngresosDetalleViewModel.cs" />
+    <Compile Include="Models\IngresosViewModel.cs" />
     <Compile Include="Models\Ingresos_Detalle.cs">
       <DependentUpon>EntitiesModel.tt</DependentUpon>
     </Compile>
     <Compile Include="Models\Medio_pago.cs">
       <DependentUpon>EntitiesModel.tt</DependentUpon>
     </Compile>
+    <Compile Include="Models\Padron.cs">
+      <DependentUpon>EntitiesModel.tt</DependentUpon>
+    </Compile>
     <Compile Include="Models\Permisos.cs">
       <DependentUpon>EntitiesModel.tt</DependentUpon>
     </Compile>
+    <Compile Include="Models\PermisosXRolViewModel.cs" />
     <Compile Include="Models\Permisos_x_rol.cs">
       <DependentUpon>EntitiesModel.tt</DependentUpon>
     </Compile>
     <Compile Include="Models\Proveedor.cs">
       <DependentUpon>EntitiesModel.tt</DependentUpon>
     </Compile>
+    <Compile Include="Models\ProveedorViewModel.cs" />
     <Compile Include="Models\Provincia.cs">
       <DependentUpon>EntitiesModel.tt</DependentUpon>
     </Compile>
+    <Compile Include="Models\ProvinciaViewModel.cs" />
     <Compile Include="Models\Reply.cs" />
     <Compile Include="Models\Roles.cs">
       <DependentUpon>EntitiesModel.tt</DependentUpon>
     </Compile>
+    <Compile Include="Models\RolesViewModel.cs" />
+    <Compile Include="Models\TablasReferenciaViewModel.cs" />
     <Compile Include="Models\Tablas_referencia.cs">
       <DependentUpon>EntitiesModel.tt</DependentUpon>
     </Compile>
     <Compile Include="Models\Telefonos.cs">
       <DependentUpon>EntitiesModel.tt</DependentUpon>
     </Compile>
+    <Compile Include="Models\TelefonosViewModel.cs" />
+    <Compile Include="Models\TipoCambioViewModel.cs" />
+    <Compile Include="Models\TipoCuentasViewModel.cs" />
+    <Compile Include="Models\TipoIdentificacionViewModel.cs" />
     <Compile Include="Models\Tipo_archivo.cs">
       <DependentUpon>EntitiesModel.tt</DependentUpon>
     </Compile>
@@ -464,6 +512,7 @@
   <ItemGroup>
     <Folder Include="App_Data\" />
     <Folder Include="Views\Base\" />
+    <Folder Include="Views\Catalogos\" />
     <Folder Include="Views\TokenValidationHandler\" />
     <Folder Include="Views\Users\" />
   </ItemGroup>

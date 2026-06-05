@@ -45,7 +45,6 @@ namespace marsh_contable.Models
         public virtual DbSet<Factura_Detalles> Factura_Detalles { get; set; }
         public virtual DbSet<Facturas> Facturas { get; set; }
         public virtual DbSet<Gastos> Gastos { get; set; }
-        public virtual DbSet<Gastos_Detalles> Gastos_Detalles { get; set; }
         public virtual DbSet<Gestion_P_detalle> Gestion_P_detalle { get; set; }
         public virtual DbSet<Gestion_Presupuestaria> Gestion_Presupuestaria { get; set; }
         public virtual DbSet<Impuesto> Impuesto { get; set; }
@@ -69,5 +68,6 @@ namespace marsh_contable.Models
         public virtual DbSet<Unidad_medida> Unidad_medida { get; set; }
         public virtual DbSet<Usuarios> Usuarios { get; set; }
         public virtual DbSet<Padron> Padron { get; set; }
+        public virtual DbSet<Gastos_Detalles> Gastos_Detalles { get; set; }
     }
 }
