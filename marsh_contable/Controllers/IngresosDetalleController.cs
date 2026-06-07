@@ -18,6 +18,7 @@ namespace marsh_contable.Controllers
         [HttpPost]
         [Authorize]
         [Route("api/v1/ingresos_detalle")]
+  
         public Reply CreateIngresoDetalle([FromBody] Models.Ingresos_Detalle model)
         {
             Reply oR = new Reply();

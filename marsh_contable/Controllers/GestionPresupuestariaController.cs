@@ -18,6 +18,7 @@ namespace marsh_contable.Controllers
         [HttpPost]
         [Authorize]
         [Route("api/v1/gestion_presupuestaria")]
+        [RequierePermiso(PermisosAplica.UsuarioPresupuestos)]
         public Reply CreateGestionPresupuestaria([FromBody] Models.Gestion_Presupuestaria model)
         {
             Reply oR = new Reply();
@@ -109,6 +110,7 @@ namespace marsh_contable.Controllers
         [HttpPut]
         [Authorize]
         [Route("api/v1/gestion_presupuestaria/{id}")]
+        [RequierePermiso(PermisosAplica.UsuarioPresupuestos)]
         public Reply UpdateGestionPresupuestaria(int id, [FromBody] Models.Gestion_Presupuestaria model)
         {
             Reply oR = new Reply();
@@ -304,6 +306,7 @@ namespace marsh_contable.Controllers
         [HttpDelete]
         [Authorize]
         [Route("api/v1/gestion_presupuestaria/{id}")]
+        [RequierePermiso(PermisosAplica.UsuarioPresupuestos)]
         public Reply DeleteGestionPresupuestaria(int id)
         {
             Reply oR = new Reply();

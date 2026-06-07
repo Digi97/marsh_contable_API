@@ -21,6 +21,7 @@ namespace marsh_contable.Controllers
         [HttpPost]
         [Authorize]
         [Route("api/v1/users")]
+        [RequierePermiso(PermisosAplica.AdministracionUsuarios)]
         public Reply CreateUser([FromBody] Models.Usuarios model)
         {
             Reply oR = new Reply();
@@ -140,6 +141,7 @@ namespace marsh_contable.Controllers
         [HttpPut]
         [Authorize]
         [Route("api/v1/users/{id}")]
+        [RequierePermiso(PermisosAplica.AdministracionUsuarios)]
         public Reply UpdateUser(int id, [FromBody] Models.Usuarios model)
         {
             Reply oR = new Reply();
@@ -438,6 +440,7 @@ namespace marsh_contable.Controllers
                     var empresa = ctx.Empresa.FirstOrDefault(u => u.Emp_id ==   1);
 
 
+
                     var usuarioResponse = new Models.UsuariosViewModel
                     {
                         Usuario_id = usuarioDB.Usuario_id,
@@ -453,11 +456,20 @@ namespace marsh_contable.Controllers
                         ImpuestoDefault = (int) empresa.Impuesto_id
                     };
 
+                    var permisos = (from pxr in ctx.Permisos_x_rol
+                                    join p in ctx.Permisos on pxr.Permisos_id equals p.id
+                                    where pxr.Roles_id == usuarioDB.Roles_id
+                                    select new
+                                    {
+                                        p.id
+                                    }).ToList();
+                    var permisosJWT = permisos.Select(p => p.id).ToList();
+                    usuarioResponse.Permisos = permisosJWT; //predefinido para permisos 
 
 
 
                     oR.CodeStatus = HttpStatusCode.OK;
-                    oR.Message = tool.GenerateTokenJWT(model.Correo);
+                    oR.Message = tool.GenerateTokenJWT(model.Correo, permisosJWT);
                     oR.Data = usuarioResponse;
                 }
             }

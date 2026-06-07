@@ -9,7 +9,7 @@ using System.Web.Http.Cors;
 
 namespace marsh_contable.Controllers
 {
-  
+
     public class CatalogosController : ApiController
     {
 
@@ -20,6 +20,8 @@ namespace marsh_contable.Controllers
         [HttpPost]
         [Authorize]
         [Route("api/v1/catalogos/codigo_actividad")]
+        [RequierePermiso(PermisosAplica.UsuarioMantenimiento)]
+
         public Reply CreateCodigoActividad([FromBody] Models.codigo_actividad model)
         {
             Reply oR = new Reply();
@@ -49,10 +51,10 @@ namespace marsh_contable.Controllers
                 {
                     Models.codigo_actividad ca = new Models.codigo_actividad()
                     {
-                       
+
                         codigo_actividad1 = codigo_actividad,
                         nombre_actividad = model.nombre_actividad,
-                 
+
                     };
 
                     ctx.codigo_actividad.Add(ca);
@@ -88,15 +90,16 @@ namespace marsh_contable.Controllers
                 oR.Message = ex.Message;
                 return oR;
             }
-               
-           }
-            
-        
+
+        }
+
+
 
 
         [HttpPut]
         [Authorize]
         [Route("api/v1/catalogos/codigo_actividad/{id}")]
+        [RequierePermiso(PermisosAplica.UsuarioMantenimiento)]
         public Reply UpdateCodigoActividad(int id, [FromBody] Models.codigo_actividad model)
         {
             Reply oR = new Reply();
@@ -117,8 +120,8 @@ namespace marsh_contable.Controllers
                 {
                     throw new Exception("invalid_string_form_nombre_actividad");
                 }
-         
-     
+
+
                 using (var ctx = new Models.EntitiesModel())
                 {
                     Models.codigo_actividad ca = ctx.codigo_actividad.FirstOrDefault(u => u.id == id);
@@ -128,9 +131,9 @@ namespace marsh_contable.Controllers
                         throw new Exception("codigo_actividad_not_found");
                     }
 
-                ca.codigo_actividad1 = model.codigo_actividad1;
-                ca.nombre_actividad = model.nombre_actividad;
-                   
+                    ca.codigo_actividad1 = model.codigo_actividad1;
+                    ca.nombre_actividad = model.nombre_actividad;
+
 
                     ctx.SaveChanges();
 
@@ -178,7 +181,7 @@ namespace marsh_contable.Controllers
             {
                 using (var ctx = new Models.EntitiesModel())
                 {
-            
+
                     var ca = ctx.codigo_actividad
               .Select(x => new {
                   x.id,
@@ -192,7 +195,7 @@ namespace marsh_contable.Controllers
                 }
             }
 
-            catch(System.Data.Entity.Validation.DbEntityValidationException ex2)
+            catch (System.Data.Entity.Validation.DbEntityValidationException ex2)
             {
                 String errorDB = "";
                 foreach (var eve in ex2.EntityValidationErrors)
@@ -213,7 +216,7 @@ namespace marsh_contable.Controllers
                 oR.Message = ex.Message;
                 return oR;
             }
-            
+
         }
 
 
@@ -238,11 +241,11 @@ namespace marsh_contable.Controllers
                     var ca = ctx.codigo_actividad
                        .Where(x => x.id == id)
                         .Select(x => new {
-                        x.id,
-                        x.codigo_actividad1,
-                        x.nombre_actividad
+                            x.id,
+                            x.codigo_actividad1,
+                            x.nombre_actividad
                         }).ToList();
-        
+
 
                     if (ca == null)
                     {
@@ -270,7 +273,7 @@ namespace marsh_contable.Controllers
             }
             catch (Exception ex)
             {
-       
+
                 oR.CodeStatus = HttpStatusCode.InternalServerError;
                 oR.Message = ex.Message;
             }
@@ -283,6 +286,7 @@ namespace marsh_contable.Controllers
         [HttpPost]
         [Authorize]
         [Route("api/v1/catalogos/cuentas_contables")]
+        [RequierePermiso(PermisosAplica.UsuarioMantenimiento)]
         public Reply CreateCuentasContables([FromBody] Models.Cuentas_Contables model)
         {
             Reply oR = new Reply();
@@ -334,6 +338,7 @@ namespace marsh_contable.Controllers
         [HttpPut]
         [Authorize]
         [Route("api/v1/catalogos/cuentas_contables/{id}")]
+        [RequierePermiso(PermisosAplica.UsuarioMantenimiento)]
         public Reply UpdateCuentasContables(int id, [FromBody] Models.Cuentas_Contables model)
         {
             Reply oR = new Reply();
@@ -473,6 +478,7 @@ namespace marsh_contable.Controllers
         [HttpPost]
         [Authorize]
         [Route("api/v1/catalogos/codigos_cabys")]
+        [RequierePermiso(PermisosAplica.UsuarioMantenimiento)]
         public Reply CreateCodigosCabys([FromBody] Models.Codigos_cabys model)
         {
             Reply oR = new Reply();
@@ -516,6 +522,7 @@ namespace marsh_contable.Controllers
         [HttpPut]
         [Authorize]
         [Route("api/v1/catalogos/codigos_cabys/{id}")]
+        [RequierePermiso(PermisosAplica.UsuarioMantenimiento)]
         public Reply UpdateCodigosCabys(int id, [FromBody] Models.Codigos_cabys model)
         {
             Reply oR = new Reply();
@@ -557,7 +564,7 @@ namespace marsh_contable.Controllers
         [HttpGet]
         [Authorize]
         [Route("api/v1/catalogos/codigos_cabys")]
-        
+
         public Reply GetAllCodigosCabysPaged()
         {
             Reply oR = new Reply();
@@ -723,6 +730,7 @@ namespace marsh_contable.Controllers
         [HttpPost]
         [Authorize]
         [Route("api/v1/catalogos/codigo_comercial")]
+        [RequierePermiso(PermisosAplica.UsuarioMantenimiento)]
         public Reply CreateCodigoComercial([FromBody] Models.Codigo_comercial model)
         {
             Reply oR = new Reply();
@@ -760,6 +768,7 @@ namespace marsh_contable.Controllers
         [HttpPut]
         [Authorize]
         [Route("api/v1/catalogos/codigo_comercial/{id}")]
+        [RequierePermiso(PermisosAplica.UsuarioMantenimiento)]
         public Reply UpdateCodigoComercial(int id, [FromBody] Models.Codigo_comercial model)
         {
             Reply oR = new Reply();
@@ -865,6 +874,7 @@ namespace marsh_contable.Controllers
         [HttpPost]
         [Authorize]
         [Route("api/v1/catalogos/centro_costos")]
+        [RequierePermiso(PermisosAplica.UsuarioMantenimiento)]
         public Reply CreateCentroCostos([FromBody] Models.Centro_Costos model)
         {
             Reply oR = new Reply();
@@ -1015,6 +1025,7 @@ namespace marsh_contable.Controllers
         [HttpPost]
         [Authorize]
         [Route("api/v1/catalogos/tipo_moneda")]
+        [RequierePermiso(PermisosAplica.UsuarioMantenimiento)]
         public Reply CreateTipoMoneda([FromBody] Models.Tipo_moneda model)
         {
             Reply oR = new Reply();
@@ -1052,6 +1063,7 @@ namespace marsh_contable.Controllers
         [HttpPut]
         [Authorize]
         [Route("api/v1/catalogos/tipo_moneda/{id}")]
+        [RequierePermiso(PermisosAplica.UsuarioMantenimiento)]
         public Reply UpdateTipoMoneda(int id, [FromBody] Models.Tipo_moneda model)
         {
             Reply oR = new Reply();
@@ -1157,6 +1169,7 @@ namespace marsh_contable.Controllers
         [HttpPost]
         [Authorize]
         [Route("api/v1/catalogos/tipo_documento")]
+        [RequierePermiso(PermisosAplica.UsuarioMantenimiento)]
         public Reply CreateTipoDocumento([FromBody] Models.Tipo_documento model)
         {
             Reply oR = new Reply();
@@ -1194,6 +1207,7 @@ namespace marsh_contable.Controllers
         [HttpPut]
         [Authorize]
         [Route("api/v1/catalogos/tipo_documento/{id}")]
+        [RequierePermiso(PermisosAplica.UsuarioMantenimiento)]
         public Reply UpdateTipoDocumento(int id, [FromBody] Models.Tipo_documento model)
         {
             Reply oR = new Reply();
@@ -1307,6 +1321,7 @@ namespace marsh_contable.Controllers
         [HttpPost]
         [Authorize]
         [Route("api/v1/catalogos/categoria_gasto")]
+        [RequierePermiso(PermisosAplica.UsuarioMantenimiento)]
         public Reply CreateCategoriaGasto([FromBody] Models.Categoria_gasto model)
         {
             Reply oR = new Reply(); oR.CodeStatus = 0; General tool = new General();
@@ -1328,6 +1343,7 @@ namespace marsh_contable.Controllers
         [HttpPut]
         [Authorize]
         [Route("api/v1/catalogos/categoria_gasto/{id}")]
+        [RequierePermiso(PermisosAplica.UsuarioMantenimiento)]
         public Reply UpdateCategoriaGasto(int id, [FromBody] Models.Categoria_gasto model)
         {
             Reply oR = new Reply(); oR.CodeStatus = 0; General tool = new General();
@@ -1362,11 +1378,13 @@ namespace marsh_contable.Controllers
         [HttpPost]
         [Authorize]
         [Route("api/v1/catalogos/tipo_archivo")]
+        [RequierePermiso(PermisosAplica.UsuarioMantenimiento)]
         public Reply CreateTipoArchivo([FromBody] Models.Tipo_archivo model) { Reply oR = new Reply(); oR.CodeStatus = 0; General tool = new General(); try { if (model == null) throw new Exception("invalid_model_request_missing"); if (!tool.ValidaTexto(model.Nombre)) throw new Exception("invalid_string_form_Nombre"); using (var ctx = new Models.EntitiesModel()) { Models.Tipo_archivo e = new Models.Tipo_archivo() { Nombre = model.Nombre }; ctx.Tipo_archivo.Add(e); ctx.SaveChanges(); oR.CodeStatus = HttpStatusCode.OK; oR.Data = e.id; return oR; } } catch (Exception ex) { oR.CodeStatus = HttpStatusCode.InternalServerError; oR.Message = ex.Message; return oR; } }
 
         [HttpPut]
         [Authorize]
         [Route("api/v1/catalogos/tipo_archivo/{id}")]
+        [RequierePermiso(PermisosAplica.UsuarioMantenimiento)]
         public Reply UpdateTipoArchivo(int id, [FromBody] Models.Tipo_archivo model) { Reply oR = new Reply(); oR.CodeStatus = 0; General tool = new General(); try { if (model == null) throw new Exception("invalid_model_request_missing"); if (!tool.ValidaTexto(model.Nombre)) throw new Exception("invalid_string_form_Nombre"); using (var ctx = new Models.EntitiesModel()) { Models.Tipo_archivo e = ctx.Tipo_archivo.FirstOrDefault(x => x.id == id); if (e == null) throw new Exception("tipo_archivo_not_found"); e.Nombre = model.Nombre; ctx.SaveChanges(); oR.CodeStatus = HttpStatusCode.OK; oR.Data = e.id; return oR; } } catch (Exception ex) { oR.CodeStatus = HttpStatusCode.InternalServerError; oR.Message = ex.Message; return oR; } }
 
         [HttpGet]
@@ -1384,11 +1402,13 @@ namespace marsh_contable.Controllers
         [HttpPost]
         [Authorize]
         [Route("api/v1/catalogos/estado_factura")]
+        [RequierePermiso(PermisosAplica.UsuarioMantenimiento)]
         public Reply CreateEstadoFactura([FromBody] Models.Estado_Factura model) { Reply oR = new Reply(); oR.CodeStatus = 0; General tool = new General(); try { if (model == null) throw new Exception("invalid_model_request_missing"); if (!tool.ValidaTexto(model.Nombre)) throw new Exception("invalid_string_form_Nombre"); using (var ctx = new Models.EntitiesModel()) { Models.Estado_Factura e = new Models.Estado_Factura() { Nombre = model.Nombre }; ctx.Estado_Factura.Add(e); ctx.SaveChanges(); oR.CodeStatus = HttpStatusCode.OK; oR.Data = e.id; return oR; } } catch (Exception ex) { oR.CodeStatus = HttpStatusCode.InternalServerError; oR.Message = ex.Message; return oR; } }
 
         [HttpPut]
         [Authorize]
         [Route("api/v1/catalogos/estado_factura/{id}")]
+        [RequierePermiso(PermisosAplica.UsuarioMantenimiento)]
         public Reply UpdateEstadoFactura(int id, [FromBody] Models.Estado_Factura model) { Reply oR = new Reply(); oR.CodeStatus = 0; General tool = new General(); try { if (model == null) throw new Exception("invalid_model_request_missing"); if (!tool.ValidaTexto(model.Nombre)) throw new Exception("invalid_string_form_Nombre"); using (var ctx = new Models.EntitiesModel()) { Models.Estado_Factura e = ctx.Estado_Factura.FirstOrDefault(x => x.id == id); if (e == null) throw new Exception("estado_factura_not_found"); e.Nombre = model.Nombre; ctx.SaveChanges(); oR.CodeStatus = HttpStatusCode.OK; oR.Data = e.id; return oR; } } catch (Exception ex) { oR.CodeStatus = HttpStatusCode.InternalServerError; oR.Message = ex.Message; return oR; } }
 
         [HttpGet]
@@ -1406,11 +1426,13 @@ namespace marsh_contable.Controllers
         [HttpPost]
         [Authorize]
         [Route("api/v1/catalogos/unidad_medida")]
+        [RequierePermiso(PermisosAplica.UsuarioMantenimiento)]
         public Reply CreateUnidadMedida([FromBody] Models.Unidad_medida model) { Reply oR = new Reply(); oR.CodeStatus = 0; General tool = new General(); try { if (model == null) throw new Exception("invalid_model_request_missing"); if (!tool.ValidaTexto(model.Codigo)) throw new Exception("invalid_string_form_Codigo"); if (!tool.ValidaTexto(model.Nombre)) throw new Exception("invalid_string_form_Nombre"); using (var ctx = new Models.EntitiesModel()) { Models.Unidad_medida e = new Models.Unidad_medida() { Codigo = model.Codigo, Nombre = model.Nombre }; ctx.Unidad_medida.Add(e); ctx.SaveChanges(); oR.CodeStatus = HttpStatusCode.OK; oR.Data = e.id; return oR; } } catch (Exception ex) { oR.CodeStatus = HttpStatusCode.InternalServerError; oR.Message = ex.Message; return oR; } }
 
         [HttpPut]
         [Authorize]
         [Route("api/v1/catalogos/unidad_medida/{id}")]
+        [RequierePermiso(PermisosAplica.UsuarioMantenimiento)]
         public Reply UpdateUnidadMedida(int id, [FromBody] Models.Unidad_medida model) { Reply oR = new Reply(); oR.CodeStatus = 0; General tool = new General(); try { if (model == null) throw new Exception("invalid_model_request_missing"); if (!tool.ValidaTexto(model.Codigo)) throw new Exception("invalid_string_form_Codigo"); if (!tool.ValidaTexto(model.Nombre)) throw new Exception("invalid_string_form_Nombre"); using (var ctx = new Models.EntitiesModel()) { Models.Unidad_medida e = ctx.Unidad_medida.FirstOrDefault(x => x.id == id); if (e == null) throw new Exception("unidad_medida_not_found"); e.Codigo = model.Codigo; e.Nombre = model.Nombre; ctx.SaveChanges(); oR.CodeStatus = HttpStatusCode.OK; oR.Data = e.id; return oR; } } catch (Exception ex) { oR.CodeStatus = HttpStatusCode.InternalServerError; oR.Message = ex.Message; return oR; } }
 
         [HttpGet]
@@ -1428,11 +1450,13 @@ namespace marsh_contable.Controllers
         [HttpPost]
         [Authorize]
         [Route("api/v1/catalogos/medio_pago")]
+        [RequierePermiso(PermisosAplica.UsuarioMantenimiento)]
         public Reply CreateMedioPago([FromBody] Models.Medio_pago model) { Reply oR = new Reply(); oR.CodeStatus = 0; General tool = new General(); try { if (model == null) throw new Exception("invalid_model_request_missing"); if (!tool.ValidaTexto(model.codigo)) throw new Exception("invalid_string_form_codigo"); if (!tool.ValidaTexto(model.descripcion)) throw new Exception("invalid_string_form_descripcion"); using (var ctx = new Models.EntitiesModel()) { Models.Medio_pago e = new Models.Medio_pago() { codigo = model.codigo, descripcion = model.descripcion }; ctx.Medio_pago.Add(e); ctx.SaveChanges(); oR.CodeStatus = HttpStatusCode.OK; oR.Data = e.id; return oR; } } catch (Exception ex) { oR.CodeStatus = HttpStatusCode.InternalServerError; oR.Message = ex.Message; return oR; } }
 
         [HttpPut]
         [Authorize]
         [Route("api/v1/catalogos/medio_pago/{id}")]
+        [RequierePermiso(PermisosAplica.UsuarioMantenimiento)]
         public Reply UpdateMedioPago(int id, [FromBody] Models.Medio_pago model) { Reply oR = new Reply(); oR.CodeStatus = 0; General tool = new General(); try { if (model == null) throw new Exception("invalid_model_request_missing"); if (!tool.ValidaTexto(model.codigo)) throw new Exception("invalid_string_form_codigo"); if (!tool.ValidaTexto(model.descripcion)) throw new Exception("invalid_string_form_descripcion"); using (var ctx = new Models.EntitiesModel()) { Models.Medio_pago e = ctx.Medio_pago.FirstOrDefault(x => x.id == id); if (e == null) throw new Exception("medio_pago_not_found"); e.codigo = model.codigo; e.descripcion = model.descripcion; ctx.SaveChanges(); oR.CodeStatus = HttpStatusCode.OK; oR.Data = e.id; return oR; } } catch (Exception ex) { oR.CodeStatus = HttpStatusCode.InternalServerError; oR.Message = ex.Message; return oR; } }
 
         [HttpGet]
@@ -1450,11 +1474,13 @@ namespace marsh_contable.Controllers
         [HttpPost]
         [Authorize]
         [Route("api/v1/catalogos/permisos")]
+            [RequierePermiso(PermisosAplica.UsuarioMantenimiento)]
         public Reply CreatePermisos([FromBody] Models.Permisos model) { Reply oR = new Reply(); oR.CodeStatus = 0; General tool = new General(); try { if (model == null) throw new Exception("invalid_model_request_missing"); if (!tool.ValidaTexto(model.Nombre)) throw new Exception("invalid_string_form_Nombre"); if (!tool.ValidaTexto(model.Descripcion)) throw new Exception("invalid_string_form_Descripcion"); using (var ctx = new Models.EntitiesModel()) { Models.Permisos e = new Models.Permisos() { Nombre = model.Nombre, Descripcion = model.Descripcion }; ctx.Permisos.Add(e); ctx.SaveChanges(); oR.CodeStatus = HttpStatusCode.OK; oR.Data = e.id; return oR; } } catch (Exception ex) { oR.CodeStatus = HttpStatusCode.InternalServerError; oR.Message = ex.Message; return oR; } }
 
         [HttpPut]
         [Authorize]
         [Route("api/v1/catalogos/permisos/{id}")]
+        [RequierePermiso(PermisosAplica.UsuarioMantenimiento)]
         public Reply UpdatePermisos(int id, [FromBody] Models.Permisos model) { Reply oR = new Reply(); oR.CodeStatus = 0; General tool = new General(); try { if (model == null) throw new Exception("invalid_model_request_missing"); if (!tool.ValidaTexto(model.Nombre)) throw new Exception("invalid_string_form_Nombre"); if (!tool.ValidaTexto(model.Descripcion)) throw new Exception("invalid_string_form_Descripcion"); using (var ctx = new Models.EntitiesModel()) { Models.Permisos e = ctx.Permisos.FirstOrDefault(x => x.id == id); if (e == null) throw new Exception("permisos_not_found"); e.Nombre = model.Nombre; e.Descripcion = model.Descripcion; ctx.SaveChanges(); oR.CodeStatus = HttpStatusCode.OK; oR.Data = e.id; return oR; } } catch (Exception ex) { oR.CodeStatus = HttpStatusCode.InternalServerError; oR.Message = ex.Message; return oR; } }
 
         [HttpGet]
@@ -1472,11 +1498,13 @@ namespace marsh_contable.Controllers
         [HttpPost]
         [Authorize]
         [Route("api/v1/catalogos/categoria_presupuestaria")]
+        [RequierePermiso(PermisosAplica.UsuarioMantenimiento)]
         public Reply CreateCategoriaPresupuestaria([FromBody] Models.Categoria_presupuestaria model) { Reply oR = new Reply(); oR.CodeStatus = 0; General tool = new General(); try { if (model == null) throw new Exception("invalid_model_request_missing"); if (!tool.ValidaTexto(model.nombre)) throw new Exception("invalid_string_form_nombre"); if (!tool.ValidaTexto(model.tipo_categoria)) throw new Exception("invalid_string_form_tipo_categoria"); using (var ctx = new Models.EntitiesModel()) { Models.Categoria_presupuestaria e = new Models.Categoria_presupuestaria() { nombre = model.nombre, tipo_categoria = model.tipo_categoria }; ctx.Categoria_presupuestaria.Add(e); ctx.SaveChanges(); oR.CodeStatus = HttpStatusCode.OK; oR.Data = e.id; return oR; } } catch (Exception ex) { oR.CodeStatus = HttpStatusCode.InternalServerError; oR.Message = ex.Message; return oR; } }
 
         [HttpPut]
         [Authorize]
         [Route("api/v1/catalogos/categoria_presupuestaria/{id}")]
+        [RequierePermiso(PermisosAplica.UsuarioMantenimiento)]
         public Reply UpdateCategoriaPresupuestaria(int id, [FromBody] Models.Categoria_presupuestaria model) { Reply oR = new Reply(); oR.CodeStatus = 0; General tool = new General(); try { if (model == null) throw new Exception("invalid_model_request_missing"); if (!tool.ValidaTexto(model.nombre)) throw new Exception("invalid_string_form_nombre"); if (!tool.ValidaTexto(model.tipo_categoria)) throw new Exception("invalid_string_form_tipo_categoria"); using (var ctx = new Models.EntitiesModel()) { Models.Categoria_presupuestaria e = ctx.Categoria_presupuestaria.FirstOrDefault(x => x.id == id); if (e == null) throw new Exception("categoria_presupuestaria_not_found"); e.nombre = model.nombre; e.tipo_categoria = model.tipo_categoria; ctx.SaveChanges(); oR.CodeStatus = HttpStatusCode.OK; oR.Data = e.id; return oR; } } catch (Exception ex) { oR.CodeStatus = HttpStatusCode.InternalServerError; oR.Message = ex.Message; return oR; } }
 
         [HttpGet]
@@ -1494,11 +1522,13 @@ namespace marsh_contable.Controllers
         [HttpPost]
         [Authorize]
         [Route("api/v1/catalogos/roles")]
+        [RequierePermiso(PermisosAplica.UsuarioMantenimiento)]
         public Reply CreateRoles([FromBody] Models.Roles model) { Reply oR = new Reply(); oR.CodeStatus = 0; General tool = new General(); try { if (model == null) throw new Exception("invalid_model_request_missing"); if (!tool.ValidaTexto(model.Descripcion)) throw new Exception("invalid_string_form_Descripcion"); using (var ctx = new Models.EntitiesModel()) { Models.Roles e = new Models.Roles() { Descripcion = model.Descripcion }; ctx.Roles.Add(e); ctx.SaveChanges(); oR.CodeStatus = HttpStatusCode.OK; oR.Data = e.id; return oR; } } catch (Exception ex) { oR.CodeStatus = HttpStatusCode.InternalServerError; oR.Message = ex.Message; return oR; } }
 
         [HttpPut]
         [Authorize]
         [Route("api/v1/catalogos/roles/{id}")]
+        [RequierePermiso(PermisosAplica.UsuarioMantenimiento)]
         public Reply UpdateRoles(int id, [FromBody] Models.RolesViewModel model) {
             Reply oR = new Reply(); 
             oR.CodeStatus = 0; 
@@ -1593,11 +1623,13 @@ namespace marsh_contable.Controllers
         [HttpPost]
         [Authorize]
         [Route("api/v1/catalogos/condicion_venta")]
+        [RequierePermiso(PermisosAplica.UsuarioMantenimiento)]
         public Reply CreateCondicionVenta([FromBody] Models.Condicion_venta model) { Reply oR = new Reply(); oR.CodeStatus = 0; General tool = new General(); try { if (model == null) throw new Exception("invalid_model_request_missing"); if (!tool.ValidaTexto(model.Codigo)) throw new Exception("invalid_string_form_Codigo"); if (!tool.ValidaTexto(model.Descripcion)) throw new Exception("invalid_string_form_Descripcion"); using (var ctx = new Models.EntitiesModel()) { Models.Condicion_venta e = new Models.Condicion_venta() { Codigo = model.Codigo, Descripcion = model.Descripcion }; ctx.Condicion_venta.Add(e); ctx.SaveChanges(); oR.CodeStatus = HttpStatusCode.OK; oR.Data = e.id; return oR; } } catch (Exception ex) { oR.CodeStatus = HttpStatusCode.InternalServerError; oR.Message = ex.Message; return oR; } }
 
         [HttpPut]
         [Authorize]
         [Route("api/v1/catalogos/condicion_venta/{id}")]
+        [RequierePermiso(PermisosAplica.UsuarioMantenimiento)]
         public Reply UpdateCondicionVenta(int id, [FromBody] Models.Condicion_venta model) { Reply oR = new Reply(); oR.CodeStatus = 0; General tool = new General(); try { if (model == null) throw new Exception("invalid_model_request_missing"); if (!tool.ValidaTexto(model.Codigo)) throw new Exception("invalid_string_form_Codigo"); if (!tool.ValidaTexto(model.Descripcion)) throw new Exception("invalid_string_form_Descripcion"); using (var ctx = new Models.EntitiesModel()) { Models.Condicion_venta e = ctx.Condicion_venta.FirstOrDefault(x => x.id == id); if (e == null) throw new Exception("condicion_venta_not_found"); e.Codigo = model.Codigo; e.Descripcion = model.Descripcion; ctx.SaveChanges(); oR.CodeStatus = HttpStatusCode.OK; oR.Data = e.id; return oR; } } catch (Exception ex) { oR.CodeStatus = HttpStatusCode.InternalServerError; oR.Message = ex.Message; return oR; } }
 
         [HttpGet]
@@ -1615,11 +1647,13 @@ namespace marsh_contable.Controllers
         [HttpPost]
         [Authorize]
         [Route("api/v1/catalogos/impuesto")]
+        [RequierePermiso(PermisosAplica.UsuarioMantenimiento)]
         public Reply CreateImpuesto([FromBody] Models.Impuesto model) { Reply oR = new Reply(); oR.CodeStatus = 0; General tool = new General(); try { if (model == null) throw new Exception("invalid_model_request_missing"); if (!tool.ValidaTexto(model.Nombre)) throw new Exception("invalid_string_form_Nombre"); if (!tool.validaNumeros(model.Porcentaje.ToString())) throw new Exception("invalid_value_form_Porcentaje"); if (!tool.validaNumeros(model.codigo)) throw new Exception("invalid_string_form_codigo"); using (var ctx = new Models.EntitiesModel()) { Models.Impuesto e = new Models.Impuesto() { Nombre = model.Nombre, Porcentaje = model.Porcentaje, codigo = model.codigo, TarifaIVACodigo = model.TarifaIVACodigo, TarifaIVANombre = model.TarifaIVANombre }; ctx.Impuesto.Add(e); ctx.SaveChanges(); oR.CodeStatus = HttpStatusCode.OK; oR.Data = e.id; return oR; } } catch (Exception ex) { oR.CodeStatus = HttpStatusCode.InternalServerError; oR.Message = ex.Message; return oR; } }
 
         [HttpPut]
         [Authorize]
         [Route("api/v1/catalogos/impuesto/{id}")]
+        [RequierePermiso(PermisosAplica.UsuarioMantenimiento)]
         public Reply UpdateImpuesto(int id, [FromBody] Models.Impuesto model) { Reply oR = new Reply(); oR.CodeStatus = 0; General tool = new General(); try { if (model == null) throw new Exception("invalid_model_request_missing"); if (!tool.ValidaTexto(model.Nombre)) throw new Exception("invalid_string_form_Nombre"); if (!tool.validaNumeros(model.Porcentaje.ToString())) throw new Exception("invalid_value_form_Porcentaje"); if (!tool.validaNumeros(model.codigo)) throw new Exception("invalid_string_form_codigo"); using (var ctx = new Models.EntitiesModel()) { Models.Impuesto e = ctx.Impuesto.FirstOrDefault(x => x.id == id); if (e == null) throw new Exception("impuesto_not_found"); e.Nombre = model.Nombre; e.Porcentaje = model.Porcentaje; e.codigo = model.codigo; e.TarifaIVACodigo = model.TarifaIVACodigo; e.TarifaIVANombre = model.TarifaIVANombre; ctx.SaveChanges(); oR.CodeStatus = HttpStatusCode.OK; oR.Data = e.id; return oR; } } catch (Exception ex) { oR.CodeStatus = HttpStatusCode.InternalServerError; oR.Message = ex.Message; return oR; } }
 
         [HttpGet]
@@ -1637,11 +1671,13 @@ namespace marsh_contable.Controllers
         [HttpPost]
         [Authorize]
         [Route("api/v1/catalogos/tipo_cuenta_contable")]
+        [RequierePermiso(PermisosAplica.UsuarioMantenimiento)]
         public Reply CreateTipoCuentaContable([FromBody] Models.Tipo_Cuenta_Contable model) { Reply oR = new Reply(); oR.CodeStatus = 0; General tool = new General(); try { if (model == null) throw new Exception("invalid_model_request_missing"); if (!tool.ValidaTexto(model.Nombre)) throw new Exception("invalid_string_form_Nombre"); if (!tool.ValidaTexto(model.Naturaleza)) throw new Exception("invalid_string_form_Naturaleza"); using (var ctx = new Models.EntitiesModel()) { Models.Tipo_Cuenta_Contable e = new Models.Tipo_Cuenta_Contable() { Nombre = model.Nombre, Naturaleza = model.Naturaleza }; ctx.Tipo_Cuenta_Contable.Add(e); ctx.SaveChanges(); oR.CodeStatus = HttpStatusCode.OK; oR.Data = e.id; return oR; } } catch (Exception ex) { oR.CodeStatus = HttpStatusCode.InternalServerError; oR.Message = ex.Message; return oR; } }
 
         [HttpPut]
         [Authorize]
         [Route("api/v1/catalogos/tipo_cuenta_contable/{id}")]
+        [RequierePermiso(PermisosAplica.UsuarioMantenimiento)]
         public Reply UpdateTipoCuentaContable(int id, [FromBody] Models.Tipo_Cuenta_Contable model) { Reply oR = new Reply(); oR.CodeStatus = 0; General tool = new General(); try { if (model == null) throw new Exception("invalid_model_request_missing"); if (!tool.ValidaTexto(model.Nombre)) throw new Exception("invalid_string_form_Nombre"); if (!tool.ValidaTexto(model.Naturaleza)) throw new Exception("invalid_string_form_Naturaleza"); using (var ctx = new Models.EntitiesModel()) { Models.Tipo_Cuenta_Contable e = ctx.Tipo_Cuenta_Contable.FirstOrDefault(x => x.id == id); if (e == null) throw new Exception("tipo_cuenta_contable_not_found"); e.Nombre = model.Nombre; e.Naturaleza = model.Naturaleza; ctx.SaveChanges(); oR.CodeStatus = HttpStatusCode.OK; oR.Data = e.id; return oR; } } catch (Exception ex) { oR.CodeStatus = HttpStatusCode.InternalServerError; oR.Message = ex.Message; return oR; } }
 
         [HttpGet]
@@ -1724,6 +1760,7 @@ namespace marsh_contable.Controllers
         [HttpPost]
         [Authorize]
         [Route("api/v1/catalogos/permisos_x_rol")]
+        [RequierePermiso(PermisosAplica.UsuarioMantenimiento)]
         public Reply CreatePermisosxRol([FromBody] Models.Permisos_x_rol model) { 
             Reply oR = new Reply(); 
             oR.CodeStatus = 0; 
@@ -1744,6 +1781,7 @@ namespace marsh_contable.Controllers
         [HttpPut]
         [Authorize]
         [Route("api/v1/catalogos/permisos_x_rol/{id}")]
+        [RequierePermiso(PermisosAplica.UsuarioMantenimiento)]
         public Reply UpdatePermisosxRol(int id, [FromBody] List<PermisosXRolViewModel> model) { 
             
             Reply oR = new Reply(); 

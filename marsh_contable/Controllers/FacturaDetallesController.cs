@@ -18,6 +18,7 @@ namespace marsh_contable.Controllers
         [HttpPost]
         [Authorize]
         [Route("api/v1/factura_detalles")]
+        [RequierePermiso(PermisosAplica.UsuarioFacturacion)]
         public Reply CreateFacturaDetalle([FromBody] Models.Factura_Detalles model)
         {
             Reply oR = new Reply();
@@ -95,6 +96,7 @@ namespace marsh_contable.Controllers
         [HttpPut]
         [Authorize]
         [Route("api/v1/factura_detalles/{id}")]
+        [RequierePermiso(PermisosAplica.UsuarioFacturacion)]
         public Reply UpdateFacturaDetalle(int id, [FromBody] Models.Factura_Detalles model)
         {
             Reply oR = new Reply();

@@ -18,6 +18,7 @@ namespace marsh_contable.Controllers
         [HttpPost]
         [Authorize]
         [Route("api/v1/proveedor")]
+        [RequierePermiso(PermisosAplica.UsuarioMantenimientoProveedores)]
         public Reply CreateProveedor([FromBody] Models.Proveedor model)
         {
             Reply oR = new Reply();
@@ -142,6 +143,7 @@ namespace marsh_contable.Controllers
         [HttpPut]
         [Authorize]
         [Route("api/v1/proveedor/{id}")]
+        [RequierePermiso(PermisosAplica.UsuarioMantenimientoProveedores)]
         public Reply UpdateProveedor(int id, [FromBody] Models.Proveedor model)
         {
             Reply oR = new Reply();
@@ -451,6 +453,7 @@ namespace marsh_contable.Controllers
         [HttpDelete]
         [Authorize]
         [Route("api/v1/proveedor/{id}")]
+        [RequierePermiso(PermisosAplica.UsuarioMantenimientoProveedores)]
         public Reply DeleteProveedor(int id)
         {
             Reply oR = new Reply();

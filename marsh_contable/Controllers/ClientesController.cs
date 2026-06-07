@@ -18,6 +18,7 @@ namespace marsh_contable.Controllers
         [HttpPost]
         [Authorize]
         [Route("api/v1/clientes")]
+        [RequierePermiso(PermisosAplica.UsuarioMantenimientoClientes)]
         public Reply CreateCliente([FromBody] Models.Clientes model)
         {
             Reply oR = new Reply();
@@ -145,6 +146,7 @@ namespace marsh_contable.Controllers
         [HttpPut]
         [Authorize]
         [Route("api/v1/clientes/{id}")]
+        [RequierePermiso(PermisosAplica.UsuarioMantenimientoClientes)]
         public Reply UpdateCliente(int id, [FromBody] Models.Clientes model)
         {
             Reply oR = new Reply();
@@ -453,6 +455,7 @@ namespace marsh_contable.Controllers
         [HttpDelete]
         [Authorize]
         [Route("api/v1/clientes/{id}")]
+        [RequierePermiso(PermisosAplica.UsuarioMantenimientoClientes)]
         public Reply DeleteCliente(int id)
         {
             Reply oR = new Reply();

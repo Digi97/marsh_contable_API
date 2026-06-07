@@ -17,6 +17,7 @@ namespace marsh_contable.Controllers
         [HttpPost]
         [Authorize]
         [Route("api/v1/gastos")]
+        [RequierePermiso(PermisosAplica.UsuarioGastosFacturas)]
         public Reply CreateGasto([FromBody] Models.Gastos model)
         {
             Reply oR = new Reply();
@@ -132,6 +133,7 @@ namespace marsh_contable.Controllers
         [HttpPut]
         [Authorize]
         [Route("api/v1/gastos/{id}")]
+        [RequierePermiso(PermisosAplica.UsuarioGastosFacturas)]
         public Reply UpdateGasto(int id, [FromBody] Models.Gastos model)
         {
             Reply oR = new Reply();

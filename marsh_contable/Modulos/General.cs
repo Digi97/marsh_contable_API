@@ -6,7 +6,8 @@ using System.Text.RegularExpressions;
 using System.Configuration;
 using System.Security.Claims;
 using Microsoft.IdentityModel.Tokens;
-
+using System.Collections.Generic;
+using System.Linq;
 
 namespace marsh_contable.Modulos
 {
@@ -317,35 +318,46 @@ namespace marsh_contable.Modulos
             const string pwdFormat = @"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).+$";
             return Regex.IsMatch(text, pwdFormat);
 
-        }       
-        
+        }
 
-        public string GenerateTokenJWT(string username)
+
+        public string GenerateTokenJWT(string username, List<int> permisos = null)
         {
             var SecretKey = ConfigurationManager.AppSettings["JWT_SECRET_KEY"];
             var audienceToken = ConfigurationManager.AppSettings["JWT_AUDIENCE_TOKEN"];
             var issuerToken = ConfigurationManager.AppSettings["JWT_ISSUER_TOKEN"];
             var expireTime = ConfigurationManager.AppSettings["JWT_EXPIRE_MINUTES"];
-
-
             var securityKey = new SymmetricSecurityKey(System.Text.Encoding.Default.GetBytes(SecretKey));
             var signingCredentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
 
-            ClaimsIdentity claimsIdentity = new ClaimsIdentity(new[] { new Claim(ClaimTypes.Name, username)});
+            // Claims base
+            var claims = new List<Claim>
+    {
+        new Claim(ClaimTypes.Name, username)
+    };
 
-            // var tokenHandler = new System.IdentityModel.Tokens.Jwt.JwtSecurityTokenHandler();
+            // Agregar cada permiso como claim individual
+            if (permisos != null && permisos.Any())
+            {
+                foreach (var permiso in permisos)
+                {
+                    claims.Add(new Claim("permiso", permiso.ToString()));
+                }
+            }
+
+            ClaimsIdentity claimsIdentity = new ClaimsIdentity(claims);
+
             var tokenHandler = new System.IdentityModel.Tokens.Jwt.JwtSecurityTokenHandler();
             var JwtSecurityToken = tokenHandler.CreateJwtSecurityToken(
-                audience:audienceToken,
-                issuer:issuerToken,
+                audience: audienceToken,
+                issuer: issuerToken,
                 subject: claimsIdentity,
                 notBefore: DateTime.UtcNow,
-                expires:DateTime.UtcNow.AddMinutes(Convert.ToInt32(expireTime)),                
-                signingCredentials:signingCredentials
-                );
-            var jwtTokenString = tokenHandler.WriteToken(JwtSecurityToken);
-            return jwtTokenString;
+                expires: DateTime.UtcNow.AddMinutes(Convert.ToInt32(expireTime)),
+                signingCredentials: signingCredentials
+            );
 
+            return tokenHandler.WriteToken(JwtSecurityToken);
         }
 
 

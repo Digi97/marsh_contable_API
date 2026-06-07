@@ -23,5 +23,7 @@ namespace marsh_contable.Models
         public string Rol { get; set; }
         public string FormatoFecha { get; set; }//obtenemos de empresa
         public int ImpuestoDefault { get; set; } //obtenemos de empresa
+                                                 // Lista de permisos del rol
+        public List<int> Permisos { get; set; }
     }
 }

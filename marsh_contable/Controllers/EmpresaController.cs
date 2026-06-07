@@ -94,6 +94,7 @@ namespace marsh_contable.Controllers
 
         [HttpPut]
         [Route("api/v1/empresa/{id}")]
+        [RequierePermiso(PermisosAplica.UsuarioMantenimiento)]
         public Reply UpdateEmpresa(int id, [FromBody] Models.EmpresaViewModel model)
         {
             Reply oR = new Reply();
