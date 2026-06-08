@@ -34,7 +34,6 @@ namespace marsh_contable.Models
         public double Impuesto { get; set; }
         public double Total { get; set; }
         public double Descuento { get; set; }
-        public int Impuesto_id { get; set; }
         public double cambio_venta { get; set; }
         public double cambio_compra { get; set; }
         public int Clientes_id { get; set; }
@@ -48,7 +47,6 @@ namespace marsh_contable.Models
         public virtual Estado_Factura Estado_Factura { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Factura_Detalles> Factura_Detalles { get; set; }
-        public virtual Impuesto Impuesto1 { get; set; }
         public virtual Tipo_documento Tipo_documento { get; set; }
         public virtual Tipo_moneda Tipo_moneda { get; set; }
         public virtual Medio_pago Medio_pago { get; set; }

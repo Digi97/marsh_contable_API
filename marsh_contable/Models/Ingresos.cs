@@ -41,11 +41,11 @@ namespace marsh_contable.Models
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Devoluciones> Devoluciones { get; set; }
         public virtual Estado_Factura Estado_Factura { get; set; }
-        public virtual Facturas Facturas { get; set; }
         public virtual Tipo_moneda Tipo_moneda { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Ingresos_Detalle> Ingresos_Detalle { get; set; }
         public virtual Medio_pago Medio_pago { get; set; }
         public virtual Usuarios Usuarios { get; set; }
+        public virtual Facturas Facturas { get; set; }
     }
 }

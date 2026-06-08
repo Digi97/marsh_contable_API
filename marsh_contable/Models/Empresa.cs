@@ -36,6 +36,7 @@ namespace marsh_contable.Models
         public Nullable<int> codigo_actividad_id { get; set; }
         public int tipo_identificacion_id { get; set; }
         public Nullable<int> Impuesto_id { get; set; }
+        public Nullable<int> sede { get; set; }
     
         public virtual codigo_actividad codigo_actividad { get; set; }
         public virtual Impuesto Impuesto { get; set; }

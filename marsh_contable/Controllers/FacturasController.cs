@@ -8,6 +8,8 @@ using System.Net;
 using marsh_contable.Models;
 using System.Configuration;
 using marsh_contable.Modulos;
+using Facturacion_C_Sharp;
+using Facturacion_C_Sharp.Lib;
 
 namespace marsh_contable.Controllers
 {
@@ -57,12 +59,19 @@ namespace marsh_contable.Controllers
 
                 using (var ctx = new Models.EntitiesModel())
                 {
+
+                    int siguienteConsecutivo = ctx.Facturas
+                    .Where(x => x.Tipo_documento_id == (int)TipoDocumentoId.FacturaElectronica)
+                    .Select(x => x.consecutivo)
+                    .DefaultIfEmpty(0)
+                    .Max() + 1;
+
                     Models.Facturas f = new Models.Facturas()
                     {
                         Clave = model.Clave,
                         Consecutivo_electronico = model.Consecutivo_electronico,
                         fecha = DateTime.Now,
-                        consecutivo = model.consecutivo,
+                        consecutivo = siguienteConsecutivo,
                         Tipo_moneda_id = model.Tipo_moneda_id,
                         Estado_Factura_id = model.Estado_Factura_id,
                         Tipo_documento_id = model.Tipo_documento_id,
@@ -70,7 +79,6 @@ namespace marsh_contable.Controllers
                         Impuesto = model.Impuesto,
                         Total = model.Total,
                         Descuento = model.Descuento,
-                        Impuesto_id = model.Impuesto_id,
                         cambio_venta = model.cambio_venta,
                         cambio_compra = model.cambio_compra,
                         Clientes_id = model.Clientes_id,
@@ -79,6 +87,19 @@ namespace marsh_contable.Controllers
                     };
                     ctx.Facturas.Add(f);
                     ctx.SaveChanges();
+
+                    FacturaDetallesController factDetalles = new FacturaDetallesController();
+                    foreach (var detalles in model.Factura_Detalles)
+                    {
+                        detalles.Facturas_id = f.id;
+                        var result = factDetalles.CreateFacturaDetalle(detalles, ctx);
+                        if (result.CodeStatus != HttpStatusCode.OK)
+                        {
+
+                            throw new Exception(result.Message);
+                        }
+
+                    }
 
                     oR.CodeStatus = HttpStatusCode.OK;
                     oR.Data = f.id;
@@ -145,7 +166,7 @@ namespace marsh_contable.Controllers
                     f.Impuesto = model.Impuesto;
                     f.Total = model.Total;
                     f.Descuento = model.Descuento;
-                    f.Impuesto_id = model.Impuesto_id;
+                 
                     f.cambio_venta = model.cambio_venta;
                     f.cambio_compra = model.cambio_compra;
                     f.Clientes_id = model.Clientes_id;
@@ -213,7 +234,7 @@ namespace marsh_contable.Controllers
                                      Impuesto = f.Impuesto,
                                      Total = f.Total,
                                      Descuento = f.Descuento,
-                                     Impuesto_id = f.Impuesto_id,
+                           
                                      cambio_venta = f.cambio_venta,
                                      cambio_compra = f.cambio_compra,
                                      Clientes_id = f.Clientes_id,
@@ -278,7 +299,7 @@ namespace marsh_contable.Controllers
                                  Impuesto = x.Impuesto,
                                  Total = x.Total,
                                  Descuento = x.Descuento,
-                                 Impuesto_id = x.Impuesto_id,
+                         
                                  cambio_venta = x.cambio_venta,
                                  cambio_compra = x.cambio_compra,
                                  Clientes_id = x.Clientes_id,
@@ -308,6 +329,76 @@ namespace marsh_contable.Controllers
                 return oR;
             }
         }
+
+        [HttpGet]
+        [Authorize]
+        [Route("api/v1/facturas/clave")]
+        public Reply GetKeyConsecutive()
+        {
+            Reply oR = new Reply();
+            General tool = new General();
+            oR.CodeStatus = 0;
+            try
+            {
+                using (var ctx = new Models.EntitiesModel())
+                {
+                    // Obtener el consecutivo: MAX(consecutivo) + 1 donde Tipo_documento_id = 1
+                    int siguienteConsecutivo = ctx.Facturas
+                        .Where(x => x.Tipo_documento_id == (int)TipoDocumentoId.FacturaElectronica)
+                        .Select(x => x.consecutivo)
+                        .DefaultIfEmpty(0)
+                        .Max() + 1;
+
+                    Models.EmpresaViewModel empresa = ctx.Empresa
+                                            .Where(u => u.Emp_id == 1)
+                                            .Select(u => new Models.EmpresaViewModel
+                                            {
+                                              
+                                                Nombre_empresa = u.Nombre_empresa,
+                                                Correo_empresa = u.Correo_empresa,
+                                                Ruta_nas = u.Ruta_nas,
+                                                Numero_sucursal = u.Numero_sucursal,
+                                                Ruta_llave_factura = u.Ruta_llave_factura,
+                                                pin_llave = u.pin_llave,
+                                                terminal = u.terminal,
+                                                codigo_seguridad = u.codigo_seguridad,
+                                                identificacion = u.identificacion,
+                                                codigo_actividad_id = u.codigo_actividad_id,
+                                                tipo_identificacion_id = u.tipo_identificacion_id,
+                                                Sede = (int)u.sede
+                                              })
+                                            .FirstOrDefault();
+
+                    if (empresa == null)
+                    {
+                        throw new Exception("empresa_not_found");
+                    }
+
+                    empresa.pin_llave = (empresa.pin_llave == String.Empty ? "" : tool.Desencriptar(empresa.pin_llave));
+
+
+
+                    var consecutivo = tool.NumeroConsecutivo(tool.FormatearSede(empresa.Numero_sucursal), tool.FormatearTerminal(empresa.terminal), tool.FormatearTipoDocumento(TipoDocumentoId.FacturaElectronica), siguienteConsecutivo.ToString());
+                    var claveNumerica = tool.ClaveNumerica("506", empresa.identificacion, consecutivo, "1", empresa.codigo_seguridad);
+
+                    if (siguienteConsecutivo == 0)
+                    {
+                        throw new Exception("factura_not_found");
+                    }
+                    oR.CodeStatus = HttpStatusCode.OK;
+                    oR.Data = new ClaveViewModel { Consecutivo = consecutivo, Clave = claveNumerica};
+                    return oR;
+                }
+            }
+            catch (Exception ex)
+            {
+                oR.CodeStatus = HttpStatusCode.InternalServerError;
+                oR.Message = ex.Message;
+                return oR;
+            }
+        }
+
+
 
 
         // Facturas filtradas por cliente

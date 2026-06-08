@@ -18,9 +18,9 @@ namespace marsh_contable.Models
         public Medio_pago()
         {
             this.Cuenta_Encabezado = new HashSet<Cuenta_Encabezado>();
-            this.Facturas = new HashSet<Facturas>();
             this.Gastos = new HashSet<Gastos>();
             this.Ingresos = new HashSet<Ingresos>();
+            this.Facturas = new HashSet<Facturas>();
         }
     
         public int id { get; set; }
@@ -30,10 +30,10 @@ namespace marsh_contable.Models
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Cuenta_Encabezado> Cuenta_Encabezado { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<Facturas> Facturas { get; set; }
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Gastos> Gastos { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Ingresos> Ingresos { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<Facturas> Facturas { get; set; }
     }
 }

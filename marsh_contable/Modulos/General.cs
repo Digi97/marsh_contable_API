@@ -427,5 +427,44 @@ namespace marsh_contable.Modulos
 
 
 
+        public String NumeroConsecutivo(String sede,  String terminalPuntodeVenta, string tipoDocumento, string numero)
+        {
+            return sede + terminalPuntodeVenta + tipoDocumento + numero.PadLeft(10, '0');
+        }
+
+        public String ClaveNumerica(string pais, string cedEmison, string numeroConsecutivo, string situacionDocumento, string codigoSeguridad)
+        {
+            var fecha = String.Format("{0:ddMMyy}", DateTime.Now);
+            return pais + fecha + cedEmison + numeroConsecutivo + situacionDocumento + codigoSeguridad.PadLeft(8, '0');
+        }
+
+
+
+        public string FormatearSede(int sede)
+        {
+            if (sede < 0 || sede > 999)
+                throw new Exception("invalid_value_sede_must_be_between_0_and_999");
+
+            return sede.ToString().PadLeft(3, '0');
+        }
+
+        public string FormatearTerminal(int terminal)
+        {
+            if (terminal < 0 || terminal > 99999)
+                throw new Exception("invalid_value_terminal_must_be_between_0_and_99999");
+
+            return terminal.ToString().PadLeft(5, '0');
+        }
+        public string FormatearTipoDocumento(TipoDocumentoId tipoDocumento)
+        {
+            int valor = (int)tipoDocumento;
+
+            if (!Enum.IsDefined(typeof(TipoDocumentoId), valor))
+                throw new Exception("invalid_value_tipo_documento");
+
+            return valor.ToString().PadLeft(2, '0');
+        }
+
+
     }
 }

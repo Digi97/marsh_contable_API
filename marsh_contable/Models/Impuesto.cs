@@ -19,7 +19,6 @@ namespace marsh_contable.Models
         {
             this.Codigos_cabys = new HashSet<Codigos_cabys>();
             this.Empresa = new HashSet<Empresa>();
-            this.Facturas = new HashSet<Facturas>();
         }
     
         public int id { get; set; }
@@ -33,7 +32,5 @@ namespace marsh_contable.Models
         public virtual ICollection<Codigos_cabys> Codigos_cabys { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Empresa> Empresa { get; set; }
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<Facturas> Facturas { get; set; }
     }
 }

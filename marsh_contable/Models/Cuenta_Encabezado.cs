@@ -48,9 +48,9 @@ namespace marsh_contable.Models
         public virtual Cuentas_Contables Cuentas_Contables { get; set; }
         public virtual Gastos Gastos { get; set; }
         public virtual Tipo_cuentas Tipo_cuentas { get; set; }
-        public virtual Facturas Facturas { get; set; }
         public virtual Medio_pago Medio_pago { get; set; }
         public virtual Tipo_moneda Tipo_moneda { get; set; }
         public virtual Usuarios Usuarios { get; set; }
+        public virtual Facturas Facturas { get; set; }
     }
 }

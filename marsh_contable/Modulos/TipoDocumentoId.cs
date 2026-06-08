@@ -5,7 +5,7 @@ using System.Web;
 
 namespace marsh_contable.Modulos
 {
-    public enum TipoDocumento
+    public enum TipoDocumentoId
     {
         FacturaElectronica = 1,
         NotaDebitoElectronica = 2,

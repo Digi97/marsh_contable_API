@@ -208,6 +208,7 @@
           <Property Name="codigo_actividad_id" Type="int" />
           <Property Name="tipo_identificacion_id" Type="int" Nullable="false" />
           <Property Name="Impuesto_id" Type="int" />
+          <Property Name="sede" Type="int" />
         </EntityType>
         <EntityType Name="Estado_Factura">
           <Key>
@@ -252,7 +253,6 @@
           <Property Name="Impuesto" Type="float" Nullable="false" />
           <Property Name="Total" Type="float" Nullable="false" />
           <Property Name="Descuento" Type="float" Nullable="false" />
-          <Property Name="Impuesto_id" Type="int" Nullable="false" />
           <Property Name="cambio_venta" Type="float" Nullable="false" />
           <Property Name="cambio_compra" Type="float" Nullable="false" />
           <Property Name="Clientes_id" Type="int" Nullable="false" />
@@ -1011,18 +1011,6 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <Association Name="fk_Factura_Impuesto1">
-          <End Role="Impuesto" Type="Self.Impuesto" Multiplicity="1" />
-          <End Role="Facturas" Type="Self.Facturas" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="Impuesto">
-              <PropertyRef Name="id" />
-            </Principal>
-            <Dependent Role="Facturas">
-              <PropertyRef Name="Impuesto_id" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
         <Association Name="fk_Factura_Tipo_documento1">
           <End Role="Tipo_documento" Type="Self.Tipo_documento" Multiplicity="1" />
           <End Role="Facturas" Type="Self.Facturas" Multiplicity="*" />
@@ -1576,10 +1564,6 @@
             <End Role="Estado_Factura" EntitySet="Estado_Factura" />
             <End Role="Ingresos" EntitySet="Ingresos" />
           </AssociationSet>
-          <AssociationSet Name="fk_Factura_Impuesto1" Association="Self.fk_Factura_Impuesto1">
-            <End Role="Impuesto" EntitySet="Impuesto" />
-            <End Role="Facturas" EntitySet="Facturas" />
-          </AssociationSet>
           <AssociationSet Name="fk_Factura_Tipo_documento1" Association="Self.fk_Factura_Tipo_documento1">
             <End Role="Tipo_documento" EntitySet="Tipo_documento" />
             <End Role="Facturas" EntitySet="Facturas" />
@@ -1790,9 +1774,9 @@
           <NavigationProperty Name="Distrito" Relationship="Self.fk_Clientes_Distrito1" FromRole="Clientes" ToRole="Distrito" />
           <NavigationProperty Name="tipo_identificacion" Relationship="Self.fk_Clientes_tipo_identificacion1" FromRole="Clientes" ToRole="tipo_identificacion" />
           <NavigationProperty Name="Cuenta_Encabezado" Relationship="Self.fk_CXC_Encabezado_Clientes1" FromRole="Clientes" ToRole="Cuenta_Encabezado" />
-          <NavigationProperty Name="Facturas" Relationship="Self.fk_Facturas_Clientes1" FromRole="Clientes" ToRole="Facturas" />
           <NavigationProperty Name="Ingresos" Relationship="Self.fk_Facturas_Clientes10" FromRole="Clientes" ToRole="Ingresos" />
           <NavigationProperty Name="Telefonos" Relationship="Self.fk_Telefonos_Clientes1" FromRole="Clientes" ToRole="Telefonos" />
+          <NavigationProperty Name="Facturas" Relationship="marsh_contableModel.fk_Facturas_Clientes1" FromRole="Clientes" ToRole="Facturas" />
         </EntityType>
         <EntityType Name="codigo_actividad">
           <Key>
@@ -1834,7 +1818,7 @@
           <Property Name="id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
           <Property Name="Codigo" Type="String" MaxLength="2" FixedLength="false" Unicode="false" Nullable="false" />
           <Property Name="Descripcion" Type="String" MaxLength="150" FixedLength="false" Unicode="false" Nullable="false" />
-          <NavigationProperty Name="Facturas" Relationship="Self.fk_Facturas_Condicion_venta1" FromRole="Condicion_venta" ToRole="Facturas" />
+          <NavigationProperty Name="Facturas" Relationship="marsh_contableModel.fk_Facturas_Condicion_venta1" FromRole="Condicion_venta" ToRole="Facturas" />
         </EntityType>
         <EntityType Name="Cuenta_Detalle">
           <Key>
@@ -1880,10 +1864,10 @@
           <NavigationProperty Name="Cuentas_Contables" Relationship="Self.fk_Cuenta_Encabezado_Cuentas_Contables1" FromRole="Cuenta_Encabezado" ToRole="Cuentas_Contables" />
           <NavigationProperty Name="Gastos" Relationship="Self.fk_Cuenta_Encabezado_Gastos1" FromRole="Cuenta_Encabezado" ToRole="Gastos" />
           <NavigationProperty Name="Tipo_cuentas" Relationship="Self.fk_Cuenta_Encabezado_Tipo_cuentas1" FromRole="Cuenta_Encabezado" ToRole="Tipo_cuentas" />
-          <NavigationProperty Name="Facturas" Relationship="Self.fk_CXC_Encabezado_Facturas1" FromRole="Cuenta_Encabezado" ToRole="Facturas" />
           <NavigationProperty Name="Medio_pago" Relationship="Self.fk_CXC_Encabezado_Medio_pago1" FromRole="Cuenta_Encabezado" ToRole="Medio_pago" />
           <NavigationProperty Name="Tipo_moneda" Relationship="Self.fk_CXC_Encabezado_Tipo_moneda1" FromRole="Cuenta_Encabezado" ToRole="Tipo_moneda" />
           <NavigationProperty Name="Usuarios" Relationship="Self.fk_CXC_Encabezado_Usuarios1" FromRole="Cuenta_Encabezado" ToRole="Usuarios" />
+          <NavigationProperty Name="Facturas" Relationship="marsh_contableModel.fk_CXC_Encabezado_Facturas1" FromRole="Cuenta_Encabezado" ToRole="Facturas" />
         </EntityType>
         <EntityType Name="Cuentas_Contables">
           <Key>
@@ -1955,6 +1939,7 @@
           <NavigationProperty Name="tipo_identificacion" Relationship="Self.fk_Empresa_tipo_identificacion1" FromRole="Empresa" ToRole="tipo_identificacion" />
           <NavigationProperty Name="Usuarios" Relationship="Self.fk_Usuario_Empresa1" FromRole="Empresa" ToRole="Usuarios" />
           <NavigationProperty Name="Padron" Relationship="marsh_contableModel.FK_Padron_Empresa" FromRole="Empresa" ToRole="Padron" />
+          <Property Name="sede" Type="Int32" />
         </EntityType>
         <EntityType Name="Estado_Factura">
           <Key>
@@ -1962,8 +1947,8 @@
           </Key>
           <Property Name="id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
           <Property Name="Nombre" Type="String" MaxLength="100" FixedLength="false" Unicode="false" Nullable="false" />
-          <NavigationProperty Name="Facturas" Relationship="Self.fk_Factura_Estado_Factura1" FromRole="Estado_Factura" ToRole="Facturas" />
           <NavigationProperty Name="Ingresos" Relationship="Self.fk_Factura_Estado_Factura10" FromRole="Estado_Factura" ToRole="Ingresos" />
+          <NavigationProperty Name="Facturas" Relationship="marsh_contableModel.fk_Factura_Estado_Factura1" FromRole="Estado_Factura" ToRole="Facturas" />
         </EntityType>
         <EntityType Name="Factura_Detalles">
           <Key>
@@ -1986,41 +1971,8 @@
           <Property Name="Ultima_fec_actualizacion" Type="DateTime" Nullable="false" Precision="3" />
           <NavigationProperty Name="Codigo_comercial" Relationship="Self.fk_Factura_Detalles_Codigo_comercial1" FromRole="Factura_Detalles" ToRole="Codigo_comercial" />
           <NavigationProperty Name="Codigos_cabys" Relationship="Self.fk_Factura_Detalles_Codigos_cabys1" FromRole="Factura_Detalles" ToRole="Codigos_cabys" />
-          <NavigationProperty Name="Facturas" Relationship="Self.fk_Factura_Detalles_Facturas1" FromRole="Factura_Detalles" ToRole="Facturas" />
           <NavigationProperty Name="Unidad_medida" Relationship="Self.fk_Factura_Detalles_Unidad_medida1" FromRole="Factura_Detalles" ToRole="Unidad_medida" />
-        </EntityType>
-        <EntityType Name="Facturas">
-          <Key>
-            <PropertyRef Name="id" />
-          </Key>
-          <Property Name="id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
-          <Property Name="Clave" Type="String" MaxLength="50" FixedLength="false" Unicode="false" Nullable="false" />
-          <Property Name="Consecutivo_electronico" Type="String" MaxLength="45" FixedLength="false" Unicode="false" Nullable="false" />
-          <Property Name="fecha" Type="DateTime" Nullable="false" Precision="3" />
-          <Property Name="consecutivo" Type="Int32" Nullable="false" />
-          <Property Name="Tipo_moneda_id" Type="Int32" Nullable="false" />
-          <Property Name="Estado_Factura_id" Type="Int32" Nullable="false" />
-          <Property Name="Tipo_documento_id" Type="Int32" Nullable="false" />
-          <Property Name="Subtotal" Type="Double" Nullable="false" />
-          <Property Name="Impuesto" Type="Double" Nullable="false" />
-          <Property Name="Total" Type="Double" Nullable="false" />
-          <Property Name="Descuento" Type="Double" Nullable="false" />
-          <Property Name="Impuesto_id" Type="Int32" Nullable="false" />
-          <Property Name="cambio_venta" Type="Double" Nullable="false" />
-          <Property Name="cambio_compra" Type="Double" Nullable="false" />
-          <Property Name="Clientes_id" Type="Int32" Nullable="false" />
-          <Property Name="Condicion_venta_id" Type="Int32" Nullable="false" />
-          <Property Name="Medio_pago_id" Type="Int32" Nullable="false" />
-          <NavigationProperty Name="Clientes" Relationship="Self.fk_Facturas_Clientes1" FromRole="Facturas" ToRole="Clientes" />
-          <NavigationProperty Name="Condicion_venta" Relationship="Self.fk_Facturas_Condicion_venta1" FromRole="Facturas" ToRole="Condicion_venta" />
-          <NavigationProperty Name="Cuenta_Encabezado" Relationship="Self.fk_CXC_Encabezado_Facturas1" FromRole="Facturas" ToRole="Cuenta_Encabezado" />
-          <NavigationProperty Name="Estado_Factura" Relationship="Self.fk_Factura_Estado_Factura1" FromRole="Facturas" ToRole="Estado_Factura" />
-          <NavigationProperty Name="Factura_Detalles" Relationship="Self.fk_Factura_Detalles_Facturas1" FromRole="Facturas" ToRole="Factura_Detalles" />
-          <NavigationProperty Name="Impuesto1" Relationship="Self.fk_Factura_Impuesto1" FromRole="Facturas" ToRole="Impuesto" />
-          <NavigationProperty Name="Tipo_documento" Relationship="Self.fk_Factura_Tipo_documento1" FromRole="Facturas" ToRole="Tipo_documento" />
-          <NavigationProperty Name="Tipo_moneda" Relationship="Self.fk_Factura_Tipo_moneda1" FromRole="Facturas" ToRole="Tipo_moneda" />
-          <NavigationProperty Name="Medio_pago" Relationship="Self.fk_Facturas_Medio_pago1" FromRole="Facturas" ToRole="Medio_pago" />
-          <NavigationProperty Name="Ingresos" Relationship="Self.fk_Ingresos_Facturas1" FromRole="Facturas" ToRole="Ingresos" />
+          <NavigationProperty Name="Facturas" Relationship="marsh_contableModel.fk_Factura_Detalles_Facturas1" FromRole="Factura_Detalles" ToRole="Facturas" />
         </EntityType>
         <EntityType Name="Gastos">
           <Key>
@@ -2099,7 +2051,6 @@
           <Property Name="codigo" Type="String" MaxLength="2" FixedLength="false" Unicode="false" Nullable="false" />
           <NavigationProperty Name="Codigos_cabys" Relationship="Self.fk_Codigos_cabys_Impuesto1" FromRole="Impuesto" ToRole="Codigos_cabys" />
           <NavigationProperty Name="Empresa" Relationship="Self.fk_Empresa_Impuesto1" FromRole="Impuesto" ToRole="Empresa" />
-          <NavigationProperty Name="Facturas" Relationship="Self.fk_Factura_Impuesto1" FromRole="Impuesto" ToRole="Facturas" />
           <Property Name="TarifaIVACodigo" Type="String" MaxLength="2" FixedLength="false" Unicode="false" />
           <Property Name="TarifaIVANombre" Type="String" MaxLength="150" FixedLength="false" Unicode="false" />
         </EntityType>
@@ -2125,11 +2076,11 @@
           <NavigationProperty Name="Clientes" Relationship="Self.fk_Facturas_Clientes10" FromRole="Ingresos" ToRole="Clientes" />
           <NavigationProperty Name="Devoluciones" Relationship="Self.fk_Devoluciones_Ingresos1" FromRole="Ingresos" ToRole="Devoluciones" />
           <NavigationProperty Name="Estado_Factura" Relationship="Self.fk_Factura_Estado_Factura10" FromRole="Ingresos" ToRole="Estado_Factura" />
-          <NavigationProperty Name="Facturas" Relationship="Self.fk_Ingresos_Facturas1" FromRole="Ingresos" ToRole="Facturas" />
           <NavigationProperty Name="Tipo_moneda" Relationship="Self.fk_Factura_Tipo_moneda10" FromRole="Ingresos" ToRole="Tipo_moneda" />
           <NavigationProperty Name="Ingresos_Detalle" Relationship="Self.fk_Ingresos_Detalle_Ingresos1" FromRole="Ingresos" ToRole="Ingresos_Detalle" />
           <NavigationProperty Name="Medio_pago" Relationship="Self.fk_Ingresos_Medio_pago1" FromRole="Ingresos" ToRole="Medio_pago" />
           <NavigationProperty Name="Usuarios" Relationship="Self.fk_Ingresos_Usuarios1" FromRole="Ingresos" ToRole="Usuarios" />
+          <NavigationProperty Name="Facturas" Relationship="marsh_contableModel.fk_Ingresos_Facturas1" FromRole="Ingresos" ToRole="Facturas" />
         </EntityType>
         <EntityType Name="Ingresos_Detalle">
           <Key>
@@ -2158,9 +2109,9 @@
           <Property Name="codigo" Type="String" MaxLength="5" FixedLength="false" Unicode="false" Nullable="false" />
           <Property Name="descripcion" Type="String" MaxLength="150" FixedLength="false" Unicode="false" Nullable="false" />
           <NavigationProperty Name="Cuenta_Encabezado" Relationship="Self.fk_CXC_Encabezado_Medio_pago1" FromRole="Medio_pago" ToRole="Cuenta_Encabezado" />
-          <NavigationProperty Name="Facturas" Relationship="Self.fk_Facturas_Medio_pago1" FromRole="Medio_pago" ToRole="Facturas" />
           <NavigationProperty Name="Gastos" Relationship="Self.fk_Gastos_Medio_pago1" FromRole="Medio_pago" ToRole="Gastos" />
           <NavigationProperty Name="Ingresos" Relationship="Self.fk_Ingresos_Medio_pago1" FromRole="Medio_pago" ToRole="Ingresos" />
+          <NavigationProperty Name="Facturas" Relationship="marsh_contableModel.fk_Facturas_Medio_pago1" FromRole="Medio_pago" ToRole="Facturas" />
         </EntityType>
         <EntityType Name="Permisos">
           <Key>
@@ -2292,8 +2243,8 @@
           <Property Name="id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
           <Property Name="Codigo_doc" Type="String" MaxLength="45" FixedLength="false" Unicode="false" Nullable="false" />
           <Property Name="Nombre" Type="String" MaxLength="100" FixedLength="false" Unicode="false" Nullable="false" />
-          <NavigationProperty Name="Facturas" Relationship="Self.fk_Factura_Tipo_documento1" FromRole="Tipo_documento" ToRole="Facturas" />
           <NavigationProperty Name="Gastos" Relationship="Self.fk_Gastos_Tipo_documento1" FromRole="Tipo_documento" ToRole="Gastos" />
+          <NavigationProperty Name="Facturas" Relationship="marsh_contableModel.fk_Factura_Tipo_documento1" FromRole="Tipo_documento" ToRole="Facturas" />
         </EntityType>
         <EntityType Name="tipo_identificacion">
           <Key>
@@ -2314,11 +2265,11 @@
           <Property Name="codigo_moneda" Type="String" MaxLength="3" FixedLength="false" Unicode="false" Nullable="false" />
           <Property Name="Nombre" Type="String" MaxLength="45" FixedLength="false" Unicode="false" Nullable="false" />
           <NavigationProperty Name="Cuenta_Encabezado" Relationship="Self.fk_CXC_Encabezado_Tipo_moneda1" FromRole="Tipo_moneda" ToRole="Cuenta_Encabezado" />
-          <NavigationProperty Name="Facturas" Relationship="Self.fk_Factura_Tipo_moneda1" FromRole="Tipo_moneda" ToRole="Facturas" />
           <NavigationProperty Name="Ingresos" Relationship="Self.fk_Factura_Tipo_moneda10" FromRole="Tipo_moneda" ToRole="Ingresos" />
           <NavigationProperty Name="Tipo_cambio" Relationship="Self.fk_Tipo_cambio_Tipo_moneda1" FromRole="Tipo_moneda" ToRole="Tipo_cambio" />
           <NavigationProperty Name="Cuentas_Contables" Relationship="marsh_contableModel.FK_Cuentas_Contables_Tipo_moneda" FromRole="Tipo_moneda" ToRole="Cuentas_Contables" />
           <NavigationProperty Name="Gastos" Relationship="marsh_contableModel.FK_Gastos_Tipo_moneda" FromRole="Tipo_moneda" ToRole="Gastos" />
+          <NavigationProperty Name="Facturas" Relationship="marsh_contableModel.fk_Factura_Tipo_moneda1" FromRole="Tipo_moneda" ToRole="Facturas" />
         </EntityType>
         <EntityType Name="Unidad_medida">
           <Key>
@@ -2522,18 +2473,6 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <Association Name="fk_Facturas_Clientes1">
-          <End Role="Clientes" Type="Self.Clientes" Multiplicity="1" />
-          <End Role="Facturas" Type="Self.Facturas" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="Clientes">
-              <PropertyRef Name="id" />
-            </Principal>
-            <Dependent Role="Facturas">
-              <PropertyRef Name="Clientes_id" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
         <Association Name="fk_Facturas_Clientes10">
           <End Role="Clientes" Type="Self.Clientes" Multiplicity="1" />
           <End Role="Ingresos" Type="Self.Ingresos" Multiplicity="*" />
@@ -2622,18 +2561,6 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <Association Name="fk_Facturas_Condicion_venta1">
-          <End Role="Condicion_venta" Type="Self.Condicion_venta" Multiplicity="1" />
-          <End Role="Facturas" Type="Self.Facturas" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="Condicion_venta">
-              <PropertyRef Name="id" />
-            </Principal>
-            <Dependent Role="Facturas">
-              <PropertyRef Name="Condicion_venta_id" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
         <Association Name="fk_Cuenta_Detalle_Cuenta_Encabezado1">
           <End Role="Cuenta_Encabezado" Type="Self.Cuenta_Encabezado" Multiplicity="1" />
           <End Role="Cuenta_Detalle" Type="Self.Cuenta_Detalle" Multiplicity="*" />
@@ -2679,18 +2606,6 @@
             </Principal>
             <Dependent Role="Cuenta_Encabezado">
               <PropertyRef Name="Tipo_cuentas_id" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
-        <Association Name="fk_CXC_Encabezado_Facturas1">
-          <End Role="Facturas" Type="Self.Facturas" Multiplicity="1" />
-          <End Role="Cuenta_Encabezado" Type="Self.Cuenta_Encabezado" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="Facturas">
-              <PropertyRef Name="id" />
-            </Principal>
-            <Dependent Role="Cuenta_Encabezado">
-              <PropertyRef Name="Facturas_id" />
             </Dependent>
           </ReferentialConstraint>
         </Association>
@@ -2818,18 +2733,6 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <Association Name="fk_Factura_Estado_Factura1">
-          <End Role="Estado_Factura" Type="Self.Estado_Factura" Multiplicity="1" />
-          <End Role="Facturas" Type="Self.Facturas" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="Estado_Factura">
-              <PropertyRef Name="id" />
-            </Principal>
-            <Dependent Role="Facturas">
-              <PropertyRef Name="Estado_Factura_id" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
         <Association Name="fk_Factura_Estado_Factura10">
           <End Role="Estado_Factura" Type="Self.Estado_Factura" Multiplicity="1" />
           <End Role="Ingresos" Type="Self.Ingresos" Multiplicity="*" />
@@ -2842,18 +2745,6 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <Association Name="fk_Factura_Detalles_Facturas1">
-          <End Role="Facturas" Type="Self.Facturas" Multiplicity="1" />
-          <End Role="Factura_Detalles" Type="Self.Factura_Detalles" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="Facturas">
-              <PropertyRef Name="id" />
-            </Principal>
-            <Dependent Role="Factura_Detalles">
-              <PropertyRef Name="Facturas_id" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
         <Association Name="fk_Factura_Detalles_Unidad_medida1">
           <End Role="Unidad_medida" Type="Self.Unidad_medida" Multiplicity="1" />
           <End Role="Factura_Detalles" Type="Self.Factura_Detalles" Multiplicity="*" />
@@ -2863,66 +2754,6 @@
             </Principal>
             <Dependent Role="Factura_Detalles">
               <PropertyRef Name="Unidad_medida_id" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
-        <Association Name="fk_Factura_Impuesto1">
-          <End Role="Impuesto" Type="Self.Impuesto" Multiplicity="1" />
-          <End Role="Facturas" Type="Self.Facturas" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="Impuesto">
-              <PropertyRef Name="id" />
-            </Principal>
-            <Dependent Role="Facturas">
-              <PropertyRef Name="Impuesto_id" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
-        <Association Name="fk_Factura_Tipo_documento1">
-          <End Role="Tipo_documento" Type="Self.Tipo_documento" Multiplicity="1" />
-          <End Role="Facturas" Type="Self.Facturas" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="Tipo_documento">
-              <PropertyRef Name="id" />
-            </Principal>
-            <Dependent Role="Facturas">
-              <PropertyRef Name="Tipo_documento_id" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
-        <Association Name="fk_Factura_Tipo_moneda1">
-          <End Role="Tipo_moneda" Type="Self.Tipo_moneda" Multiplicity="1" />
-          <End Role="Facturas" Type="Self.Facturas" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="Tipo_moneda">
-              <PropertyRef Name="id" />
-            </Principal>
-            <Dependent Role="Facturas">
-              <PropertyRef Name="Tipo_moneda_id" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
-        <Association Name="fk_Facturas_Medio_pago1">
-          <End Role="Medio_pago" Type="Self.Medio_pago" Multiplicity="1" />
-          <End Role="Facturas" Type="Self.Facturas" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="Medio_pago">
-              <PropertyRef Name="id" />
-            </Principal>
-            <Dependent Role="Facturas">
-              <PropertyRef Name="Medio_pago_id" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
-        <Association Name="fk_Ingresos_Facturas1">
-          <End Role="Facturas" Type="Self.Facturas" Multiplicity="1" />
-          <End Role="Ingresos" Type="Self.Ingresos" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="Facturas">
-              <PropertyRef Name="id" />
-            </Principal>
-            <Dependent Role="Ingresos">
-              <PropertyRef Name="Facturas_id" />
             </Dependent>
           </ReferentialConstraint>
         </Association>
@@ -3161,7 +2992,6 @@
           <EntitySet Name="Empresa" EntityType="Self.Empresa" />
           <EntitySet Name="Estado_Factura" EntityType="Self.Estado_Factura" />
           <EntitySet Name="Factura_Detalles" EntityType="Self.Factura_Detalles" />
-          <EntitySet Name="Facturas" EntityType="Self.Facturas" />
           <EntitySet Name="Gastos" EntityType="Self.Gastos" />
           <EntitySet Name="Gestion_P_detalle" EntityType="Self.Gestion_P_detalle" />
           <EntitySet Name="Gestion_Presupuestaria" EntityType="Self.Gestion_Presupuestaria" />
@@ -3237,10 +3067,6 @@
             <End Role="Clientes" EntitySet="Clientes" />
             <End Role="Cuenta_Encabezado" EntitySet="Cuenta_Encabezado" />
           </AssociationSet>
-          <AssociationSet Name="fk_Facturas_Clientes1" Association="Self.fk_Facturas_Clientes1">
-            <End Role="Clientes" EntitySet="Clientes" />
-            <End Role="Facturas" EntitySet="Facturas" />
-          </AssociationSet>
           <AssociationSet Name="fk_Facturas_Clientes10" Association="Self.fk_Facturas_Clientes10">
             <End Role="Clientes" EntitySet="Clientes" />
             <End Role="Ingresos" EntitySet="Ingresos" />
@@ -3269,10 +3095,6 @@
             <End Role="Codigos_cabys" EntitySet="Codigos_cabys" />
             <End Role="Factura_Detalles" EntitySet="Factura_Detalles" />
           </AssociationSet>
-          <AssociationSet Name="fk_Facturas_Condicion_venta1" Association="Self.fk_Facturas_Condicion_venta1">
-            <End Role="Condicion_venta" EntitySet="Condicion_venta" />
-            <End Role="Facturas" EntitySet="Facturas" />
-          </AssociationSet>
           <AssociationSet Name="fk_Cuenta_Detalle_Cuenta_Encabezado1" Association="Self.fk_Cuenta_Detalle_Cuenta_Encabezado1">
             <End Role="Cuenta_Encabezado" EntitySet="Cuenta_Encabezado" />
             <End Role="Cuenta_Detalle" EntitySet="Cuenta_Detalle" />
@@ -3287,10 +3109,6 @@
           </AssociationSet>
           <AssociationSet Name="fk_Cuenta_Encabezado_Tipo_cuentas1" Association="Self.fk_Cuenta_Encabezado_Tipo_cuentas1">
             <End Role="Tipo_cuentas" EntitySet="Tipo_cuentas" />
-            <End Role="Cuenta_Encabezado" EntitySet="Cuenta_Encabezado" />
-          </AssociationSet>
-          <AssociationSet Name="fk_CXC_Encabezado_Facturas1" Association="Self.fk_CXC_Encabezado_Facturas1">
-            <End Role="Facturas" EntitySet="Facturas" />
             <End Role="Cuenta_Encabezado" EntitySet="Cuenta_Encabezado" />
           </AssociationSet>
           <AssociationSet Name="fk_CXC_Encabezado_Medio_pago1" Association="Self.fk_CXC_Encabezado_Medio_pago1">
@@ -3333,41 +3151,13 @@
             <End Role="Empresa" EntitySet="Empresa" />
             <End Role="Usuarios" EntitySet="Usuarios" />
           </AssociationSet>
-          <AssociationSet Name="fk_Factura_Estado_Factura1" Association="Self.fk_Factura_Estado_Factura1">
-            <End Role="Estado_Factura" EntitySet="Estado_Factura" />
-            <End Role="Facturas" EntitySet="Facturas" />
-          </AssociationSet>
           <AssociationSet Name="fk_Factura_Estado_Factura10" Association="Self.fk_Factura_Estado_Factura10">
             <End Role="Estado_Factura" EntitySet="Estado_Factura" />
             <End Role="Ingresos" EntitySet="Ingresos" />
           </AssociationSet>
-          <AssociationSet Name="fk_Factura_Detalles_Facturas1" Association="Self.fk_Factura_Detalles_Facturas1">
-            <End Role="Facturas" EntitySet="Facturas" />
-            <End Role="Factura_Detalles" EntitySet="Factura_Detalles" />
-          </AssociationSet>
           <AssociationSet Name="fk_Factura_Detalles_Unidad_medida1" Association="Self.fk_Factura_Detalles_Unidad_medida1">
             <End Role="Unidad_medida" EntitySet="Unidad_medida" />
             <End Role="Factura_Detalles" EntitySet="Factura_Detalles" />
-          </AssociationSet>
-          <AssociationSet Name="fk_Factura_Impuesto1" Association="Self.fk_Factura_Impuesto1">
-            <End Role="Impuesto" EntitySet="Impuesto" />
-            <End Role="Facturas" EntitySet="Facturas" />
-          </AssociationSet>
-          <AssociationSet Name="fk_Factura_Tipo_documento1" Association="Self.fk_Factura_Tipo_documento1">
-            <End Role="Tipo_documento" EntitySet="Tipo_documento" />
-            <End Role="Facturas" EntitySet="Facturas" />
-          </AssociationSet>
-          <AssociationSet Name="fk_Factura_Tipo_moneda1" Association="Self.fk_Factura_Tipo_moneda1">
-            <End Role="Tipo_moneda" EntitySet="Tipo_moneda" />
-            <End Role="Facturas" EntitySet="Facturas" />
-          </AssociationSet>
-          <AssociationSet Name="fk_Facturas_Medio_pago1" Association="Self.fk_Facturas_Medio_pago1">
-            <End Role="Medio_pago" EntitySet="Medio_pago" />
-            <End Role="Facturas" EntitySet="Facturas" />
-          </AssociationSet>
-          <AssociationSet Name="fk_Ingresos_Facturas1" Association="Self.fk_Ingresos_Facturas1">
-            <End Role="Facturas" EntitySet="Facturas" />
-            <End Role="Ingresos" EntitySet="Ingresos" />
           </AssociationSet>
           <AssociationSet Name="fk_Gastos_Medio_pago1" Association="Self.fk_Gastos_Medio_pago1">
             <End Role="Medio_pago" EntitySet="Medio_pago" />
@@ -3459,6 +3249,43 @@
             <End Role="Tipo_moneda" EntitySet="Tipo_moneda" />
             <End Role="Gastos" EntitySet="Gastos" />
           </AssociationSet>
+          <EntitySet Name="Facturas" EntityType="marsh_contableModel.Facturas" />
+          <AssociationSet Name="fk_Facturas_Clientes1" Association="marsh_contableModel.fk_Facturas_Clientes1">
+            <End Role="Clientes" EntitySet="Clientes" />
+            <End Role="Facturas" EntitySet="Facturas" />
+          </AssociationSet>
+          <AssociationSet Name="fk_Facturas_Condicion_venta1" Association="marsh_contableModel.fk_Facturas_Condicion_venta1">
+            <End Role="Condicion_venta" EntitySet="Condicion_venta" />
+            <End Role="Facturas" EntitySet="Facturas" />
+          </AssociationSet>
+          <AssociationSet Name="fk_CXC_Encabezado_Facturas1" Association="marsh_contableModel.fk_CXC_Encabezado_Facturas1">
+            <End Role="Facturas" EntitySet="Facturas" />
+            <End Role="Cuenta_Encabezado" EntitySet="Cuenta_Encabezado" />
+          </AssociationSet>
+          <AssociationSet Name="fk_Factura_Estado_Factura1" Association="marsh_contableModel.fk_Factura_Estado_Factura1">
+            <End Role="Estado_Factura" EntitySet="Estado_Factura" />
+            <End Role="Facturas" EntitySet="Facturas" />
+          </AssociationSet>
+          <AssociationSet Name="fk_Factura_Detalles_Facturas1" Association="marsh_contableModel.fk_Factura_Detalles_Facturas1">
+            <End Role="Facturas" EntitySet="Facturas" />
+            <End Role="Factura_Detalles" EntitySet="Factura_Detalles" />
+          </AssociationSet>
+          <AssociationSet Name="fk_Factura_Tipo_documento1" Association="marsh_contableModel.fk_Factura_Tipo_documento1">
+            <End Role="Tipo_documento" EntitySet="Tipo_documento" />
+            <End Role="Facturas" EntitySet="Facturas" />
+          </AssociationSet>
+          <AssociationSet Name="fk_Factura_Tipo_moneda1" Association="marsh_contableModel.fk_Factura_Tipo_moneda1">
+            <End Role="Tipo_moneda" EntitySet="Tipo_moneda" />
+            <End Role="Facturas" EntitySet="Facturas" />
+          </AssociationSet>
+          <AssociationSet Name="fk_Facturas_Medio_pago1" Association="marsh_contableModel.fk_Facturas_Medio_pago1">
+            <End Role="Medio_pago" EntitySet="Medio_pago" />
+            <End Role="Facturas" EntitySet="Facturas" />
+          </AssociationSet>
+          <AssociationSet Name="fk_Ingresos_Facturas1" Association="marsh_contableModel.fk_Ingresos_Facturas1">
+            <End Role="Facturas" EntitySet="Facturas" />
+            <End Role="Ingresos" EntitySet="Ingresos" />
+          </AssociationSet>
         </EntityContainer>
         <Association Name="FK_Cuentas_Contables_Tipo_moneda">
           <End Type="marsh_contableModel.Tipo_moneda" Role="Tipo_moneda" Multiplicity="1" />
@@ -3534,6 +3361,145 @@
             </Principal>
             <Dependent Role="Gastos">
               <PropertyRef Name="Tipo_moneda_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <EntityType Name="Facturas">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="Clave" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="Consecutivo_electronico" Type="String" Nullable="false" MaxLength="45" FixedLength="false" Unicode="false" />
+          <Property Name="fecha" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="consecutivo" Type="Int32" Nullable="false" />
+          <Property Name="Tipo_moneda_id" Type="Int32" Nullable="false" />
+          <Property Name="Estado_Factura_id" Type="Int32" Nullable="false" />
+          <Property Name="Tipo_documento_id" Type="Int32" Nullable="false" />
+          <Property Name="Subtotal" Type="Double" Nullable="false" />
+          <Property Name="Impuesto" Type="Double" Nullable="false" />
+          <Property Name="Total" Type="Double" Nullable="false" />
+          <Property Name="Descuento" Type="Double" Nullable="false" />
+          <Property Name="cambio_venta" Type="Double" Nullable="false" />
+          <Property Name="cambio_compra" Type="Double" Nullable="false" />
+          <Property Name="Clientes_id" Type="Int32" Nullable="false" />
+          <Property Name="Condicion_venta_id" Type="Int32" Nullable="false" />
+          <Property Name="Medio_pago_id" Type="Int32" Nullable="false" />
+          <NavigationProperty Name="Clientes" Relationship="marsh_contableModel.fk_Facturas_Clientes1" FromRole="Facturas" ToRole="Clientes" />
+          <NavigationProperty Name="Condicion_venta" Relationship="marsh_contableModel.fk_Facturas_Condicion_venta1" FromRole="Facturas" ToRole="Condicion_venta" />
+          <NavigationProperty Name="Cuenta_Encabezado" Relationship="marsh_contableModel.fk_CXC_Encabezado_Facturas1" FromRole="Facturas" ToRole="Cuenta_Encabezado" />
+          <NavigationProperty Name="Estado_Factura" Relationship="marsh_contableModel.fk_Factura_Estado_Factura1" FromRole="Facturas" ToRole="Estado_Factura" />
+          <NavigationProperty Name="Factura_Detalles" Relationship="marsh_contableModel.fk_Factura_Detalles_Facturas1" FromRole="Facturas" ToRole="Factura_Detalles" />
+          <NavigationProperty Name="Tipo_documento" Relationship="marsh_contableModel.fk_Factura_Tipo_documento1" FromRole="Facturas" ToRole="Tipo_documento" />
+          <NavigationProperty Name="Tipo_moneda" Relationship="marsh_contableModel.fk_Factura_Tipo_moneda1" FromRole="Facturas" ToRole="Tipo_moneda" />
+          <NavigationProperty Name="Medio_pago" Relationship="marsh_contableModel.fk_Facturas_Medio_pago1" FromRole="Facturas" ToRole="Medio_pago" />
+          <NavigationProperty Name="Ingresos" Relationship="marsh_contableModel.fk_Ingresos_Facturas1" FromRole="Facturas" ToRole="Ingresos" />
+        </EntityType>
+        <Association Name="fk_Facturas_Clientes1">
+          <End Type="marsh_contableModel.Clientes" Role="Clientes" Multiplicity="1" />
+          <End Type="marsh_contableModel.Facturas" Role="Facturas" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Clientes">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="Facturas">
+              <PropertyRef Name="Clientes_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="fk_Facturas_Condicion_venta1">
+          <End Type="marsh_contableModel.Condicion_venta" Role="Condicion_venta" Multiplicity="1" />
+          <End Type="marsh_contableModel.Facturas" Role="Facturas" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Condicion_venta">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="Facturas">
+              <PropertyRef Name="Condicion_venta_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="fk_CXC_Encabezado_Facturas1">
+          <End Type="marsh_contableModel.Facturas" Role="Facturas" Multiplicity="1" />
+          <End Type="marsh_contableModel.Cuenta_Encabezado" Role="Cuenta_Encabezado" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Facturas">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="Cuenta_Encabezado">
+              <PropertyRef Name="Facturas_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="fk_Factura_Estado_Factura1">
+          <End Type="marsh_contableModel.Estado_Factura" Role="Estado_Factura" Multiplicity="1" />
+          <End Type="marsh_contableModel.Facturas" Role="Facturas" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Estado_Factura">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="Facturas">
+              <PropertyRef Name="Estado_Factura_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="fk_Factura_Detalles_Facturas1">
+          <End Type="marsh_contableModel.Facturas" Role="Facturas" Multiplicity="1" />
+          <End Type="marsh_contableModel.Factura_Detalles" Role="Factura_Detalles" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Facturas">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="Factura_Detalles">
+              <PropertyRef Name="Facturas_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="fk_Factura_Tipo_documento1">
+          <End Type="marsh_contableModel.Tipo_documento" Role="Tipo_documento" Multiplicity="1" />
+          <End Type="marsh_contableModel.Facturas" Role="Facturas" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Tipo_documento">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="Facturas">
+              <PropertyRef Name="Tipo_documento_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="fk_Factura_Tipo_moneda1">
+          <End Type="marsh_contableModel.Tipo_moneda" Role="Tipo_moneda" Multiplicity="1" />
+          <End Type="marsh_contableModel.Facturas" Role="Facturas" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Tipo_moneda">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="Facturas">
+              <PropertyRef Name="Tipo_moneda_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="fk_Facturas_Medio_pago1">
+          <End Type="marsh_contableModel.Medio_pago" Role="Medio_pago" Multiplicity="1" />
+          <End Type="marsh_contableModel.Facturas" Role="Facturas" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Medio_pago">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="Facturas">
+              <PropertyRef Name="Medio_pago_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="fk_Ingresos_Facturas1">
+          <End Type="marsh_contableModel.Facturas" Role="Facturas" Multiplicity="1" />
+          <End Type="marsh_contableModel.Ingresos" Role="Ingresos" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Facturas">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="Ingresos">
+              <PropertyRef Name="Facturas_id" />
             </Dependent>
           </ReferentialConstraint>
         </Association>
@@ -3740,6 +3706,7 @@
           <EntitySetMapping Name="Empresa">
             <EntityTypeMapping TypeName="marsh_contableModel.Empresa">
               <MappingFragment StoreEntitySet="Empresa">
+                <ScalarProperty Name="sede" ColumnName="sede" />
                 <ScalarProperty Name="Emp_id" ColumnName="Emp_id" />
                 <ScalarProperty Name="Nombre_empresa" ColumnName="Nombre_empresa" />
                 <ScalarProperty Name="Correo_empresa" ColumnName="Correo_empresa" />
@@ -3784,30 +3751,6 @@
                 <ScalarProperty Name="Codigo_comercial_id" ColumnName="Codigo_comercial_id" />
                 <ScalarProperty Name="Fecha" ColumnName="Fecha" />
                 <ScalarProperty Name="Ultima_fec_actualizacion" ColumnName="Ultima_fec_actualizacion" />
-              </MappingFragment>
-            </EntityTypeMapping>
-          </EntitySetMapping>
-          <EntitySetMapping Name="Facturas">
-            <EntityTypeMapping TypeName="marsh_contableModel.Facturas">
-              <MappingFragment StoreEntitySet="Facturas">
-                <ScalarProperty Name="id" ColumnName="id" />
-                <ScalarProperty Name="Clave" ColumnName="Clave" />
-                <ScalarProperty Name="Consecutivo_electronico" ColumnName="Consecutivo_electronico" />
-                <ScalarProperty Name="fecha" ColumnName="fecha" />
-                <ScalarProperty Name="consecutivo" ColumnName="consecutivo" />
-                <ScalarProperty Name="Tipo_moneda_id" ColumnName="Tipo_moneda_id" />
-                <ScalarProperty Name="Estado_Factura_id" ColumnName="Estado_Factura_id" />
-                <ScalarProperty Name="Tipo_documento_id" ColumnName="Tipo_documento_id" />
-                <ScalarProperty Name="Subtotal" ColumnName="Subtotal" />
-                <ScalarProperty Name="Impuesto" ColumnName="Impuesto" />
-                <ScalarProperty Name="Total" ColumnName="Total" />
-                <ScalarProperty Name="Descuento" ColumnName="Descuento" />
-                <ScalarProperty Name="Impuesto_id" ColumnName="Impuesto_id" />
-                <ScalarProperty Name="cambio_venta" ColumnName="cambio_venta" />
-                <ScalarProperty Name="cambio_compra" ColumnName="cambio_compra" />
-                <ScalarProperty Name="Clientes_id" ColumnName="Clientes_id" />
-                <ScalarProperty Name="Condicion_venta_id" ColumnName="Condicion_venta_id" />
-                <ScalarProperty Name="Medio_pago_id" ColumnName="Medio_pago_id" />
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
@@ -4126,6 +4069,29 @@
                 <ScalarProperty Name="Total" ColumnName="Total" />
                 <ScalarProperty Name="Impuesto" ColumnName="Impuesto" />
                 <ScalarProperty Name="Subtotal" ColumnName="Subtotal" />
+                <ScalarProperty Name="id" ColumnName="id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Facturas">
+            <EntityTypeMapping TypeName="marsh_contableModel.Facturas">
+              <MappingFragment StoreEntitySet="Facturas">
+                <ScalarProperty Name="Medio_pago_id" ColumnName="Medio_pago_id" />
+                <ScalarProperty Name="Condicion_venta_id" ColumnName="Condicion_venta_id" />
+                <ScalarProperty Name="Clientes_id" ColumnName="Clientes_id" />
+                <ScalarProperty Name="cambio_compra" ColumnName="cambio_compra" />
+                <ScalarProperty Name="cambio_venta" ColumnName="cambio_venta" />
+                <ScalarProperty Name="Descuento" ColumnName="Descuento" />
+                <ScalarProperty Name="Total" ColumnName="Total" />
+                <ScalarProperty Name="Impuesto" ColumnName="Impuesto" />
+                <ScalarProperty Name="Subtotal" ColumnName="Subtotal" />
+                <ScalarProperty Name="Tipo_documento_id" ColumnName="Tipo_documento_id" />
+                <ScalarProperty Name="Estado_Factura_id" ColumnName="Estado_Factura_id" />
+                <ScalarProperty Name="Tipo_moneda_id" ColumnName="Tipo_moneda_id" />
+                <ScalarProperty Name="consecutivo" ColumnName="consecutivo" />
+                <ScalarProperty Name="fecha" ColumnName="fecha" />
+                <ScalarProperty Name="Consecutivo_electronico" ColumnName="Consecutivo_electronico" />
+                <ScalarProperty Name="Clave" ColumnName="Clave" />
                 <ScalarProperty Name="id" ColumnName="id" />
               </MappingFragment>
             </EntityTypeMapping>
