@@ -116,6 +116,7 @@
         <AssociationConnector Association="marsh_contableModel.fk_Factura_Tipo_moneda1" />
         <AssociationConnector Association="marsh_contableModel.fk_Facturas_Medio_pago1" />
         <AssociationConnector Association="marsh_contableModel.fk_Ingresos_Facturas1" />
+        <AssociationConnector Association="marsh_contableModel.FK_Empresa_Provincia" />
       </Diagram>
     </edmx:Diagrams>
   </edmx:Designer>

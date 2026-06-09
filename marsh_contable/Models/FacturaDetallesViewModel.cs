@@ -24,5 +24,6 @@ namespace marsh_contable.Models
         public string Unidad_medida { get; set; }
         public string Codigo_comercial { get; set; }
         public string Codigo_cabys_descripcion { get; set; }
+        public Impuesto Impuesto_detalle { get; set; }
     }
 }

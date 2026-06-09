@@ -18,6 +18,7 @@ namespace marsh_contable.Models
         public Provincia()
         {
             this.Canton = new HashSet<Canton>();
+            this.Empresa = new HashSet<Empresa>();
         }
     
         public int id { get; set; }
@@ -25,5 +26,7 @@ namespace marsh_contable.Models
     
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Canton> Canton { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<Empresa> Empresa { get; set; }
     }
 }

@@ -18,9 +18,9 @@ namespace Facturacion_C_Sharp.Lib.DocumentoItems
         private String codigoPais;
         private String numTelefono;
 
-        public TelefonoBase(TipoTelefono tipoTelefono, string codigoPais, string numTelefono)
+        public TelefonoBase(string codigoPais, string numTelefono)
         {
-            this.tipoTelefono = tipoTelefono;
+            this.tipoTelefono = TipoTelefono.Telefono;//definido poro defecto
             this.codigoPais = codigoPais;
             this.numTelefono = numTelefono;
         }

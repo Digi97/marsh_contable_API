@@ -29,6 +29,7 @@ namespace marsh_contable.Models
         public int Codigo_comercial_id { get; set; }
         public System.DateTime Fecha { get; set; }
         public System.DateTime Ultima_fec_actualizacion { get; set; }
+        public Nullable<int> Impuesto_id { get; set; }
     
         public virtual Codigo_comercial Codigo_comercial { get; set; }
         public virtual Codigos_cabys Codigos_cabys { get; set; }

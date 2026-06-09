@@ -60,9 +60,31 @@ namespace Facturacion_C_Sharp.Lib.DocumentoItems
 
         private Exoneracion exoneracion;
 
-        public Impuesto(CodigoImpuesto codigo, decimal tarifa, decimal monto, Exoneracion exoneracion = null)
+        public static CodigoImpuesto StringToCodigo(String codigo)
         {
-            this.codigo = codigo;
+            switch (codigo)
+            {
+                case "01": return CodigoImpuesto.Impuesto_General_sobre_las_Ventas;
+                case "02": return CodigoImpuesto.Impuesto_Selectivo_de_Consumo;
+                case "03": return CodigoImpuesto.Impuesto_Único_a_los_combustibles;
+                case "04": return CodigoImpuesto.Impuesto_específico_de_bebidas_alcohólicas;
+                case "05": return CodigoImpuesto.Impuesto_Específico_sobre_las_bebidas_envasadas_sin_contenido_alcóholico_y_jabones_de_tocador;
+                case "06": return CodigoImpuesto.Impuesto_a_los_Productos_de_Tabaco;
+                case "07": return CodigoImpuesto.Servicio;
+                case "08": return CodigoImpuesto.Impuesto_General_sobre_las_ventas_diplomáticos;
+                case "09": return CodigoImpuesto.Impuesto_general_sobre_las_ventas_Compras_autorizadas;
+                case "10": return CodigoImpuesto.Impuesto_general_sobre_las_ventas_instituciones_públicas_y_otros_organismos;
+                case "11": return CodigoImpuesto.Impuesto_Selectivo_de_Consumo_Compras_Autorizadas;
+                case "12": return CodigoImpuesto.Impuesto_específico_al_cemento;
+                case "98": return CodigoImpuesto.Otros98;
+                case "99": return CodigoImpuesto.Otros99;
+                default: return CodigoImpuesto.Impuesto_General_sobre_las_Ventas;
+            }
+        }
+
+        public Impuesto(String codigo, decimal tarifa, decimal monto, Exoneracion exoneracion = null)
+        {
+            this.codigo = StringToCodigo( codigo);
             this.tarifa = tarifa;
             this.monto = monto;
             this.exoneracion = exoneracion;

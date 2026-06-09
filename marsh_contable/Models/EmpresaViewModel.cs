@@ -22,7 +22,15 @@ namespace marsh_contable.Models
         public Nullable<int> codigo_actividad_id { get; set; }
         public int tipo_identificacion_id { get; set; }
         public Nullable<int> Impuesto_id { get; set; }
-        public int Sede { get; set; }
+        public string Tipo_Identificacion { get; set; }
+
+        public string Provincia_emisor { get; set; }
+        public string Canton_emisor { get; set; }
+        public string Distrito_emisor { get; set; }
+        public string OtrasSenas_Emisor { get; set; }
+
+        public string Telefono_Emisor { get; set; }
+        public string Codigo_Telefono_Emisor { get; set; }
 
 
     }

@@ -52,8 +52,8 @@ namespace marsh_contable.Controllers
                     identificacion = u.identificacion,
                     codigo_actividad_id =u.codigo_actividad_id,
                     tipo_identificacion_id = u.tipo_identificacion_id,
-                    Impuesto_id = u.Impuesto_id,
-                    Sede = (int)u.sede
+                    Impuesto_id = u.Impuesto_id
+               
                         })
                         .FirstOrDefault();
 

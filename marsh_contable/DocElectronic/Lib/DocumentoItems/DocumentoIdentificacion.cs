@@ -64,9 +64,9 @@ namespace Facturacion_C_Sharp.Lib.DocumentoItems
             set => numeroCrudo = value;
         }
 
-        public DocumentoIdentificacion(TipoIdentificacion tipoIdentificacion, string numero)
+        public DocumentoIdentificacion(String tipoIdentificacion, string numero)
         {
-            this.tipoIdentificacion = tipoIdentificacion;
+            this.tipoIdentificacion = StringToTipoIdentificacion(tipoIdentificacion);
             this.numeroCrudo = numero;
             this.numeroFormato12 = numero.PadLeft(12, '0');
         }

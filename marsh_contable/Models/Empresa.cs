@@ -37,6 +37,17 @@ namespace marsh_contable.Models
         public int tipo_identificacion_id { get; set; }
         public Nullable<int> Impuesto_id { get; set; }
         public Nullable<int> sede { get; set; }
+        public string Correo_smtp { get; set; }
+        public string Contrasena_smtp { get; set; }
+        public string Proveedor_SMTP { get; set; }
+        public string Puerto_SMTP { get; set; }
+        public string Asunto_SMTP { get; set; }
+        public Nullable<int> Distrito_id { get; set; }
+        public Nullable<int> Canton_id { get; set; }
+        public Nullable<int> Provincia_id { get; set; }
+        public string OtrasSenas { get; set; }
+        public string Telefono { get; set; }
+        public string Codigo_telefono { get; set; }
     
         public virtual codigo_actividad codigo_actividad { get; set; }
         public virtual Impuesto Impuesto { get; set; }
@@ -45,5 +56,6 @@ namespace marsh_contable.Models
         public virtual ICollection<Usuarios> Usuarios { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Padron> Padron { get; set; }
+        public virtual Provincia Provincia { get; set; }
     }
 }

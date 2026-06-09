@@ -209,6 +209,17 @@
           <Property Name="tipo_identificacion_id" Type="int" Nullable="false" />
           <Property Name="Impuesto_id" Type="int" />
           <Property Name="sede" Type="int" />
+          <Property Name="Correo_smtp" Type="varchar" MaxLength="150" />
+          <Property Name="Contrasena_smtp" Type="varchar" MaxLength="200" />
+          <Property Name="Proveedor_SMTP" Type="varchar" MaxLength="150" />
+          <Property Name="Puerto_SMTP" Type="varchar" MaxLength="5" />
+          <Property Name="Asunto_SMTP" Type="varchar" MaxLength="150" />
+          <Property Name="Distrito_id" Type="int" />
+          <Property Name="Canton_id" Type="int" />
+          <Property Name="Provincia_id" Type="int" />
+          <Property Name="OtrasSenas" Type="varchar" MaxLength="150" />
+          <Property Name="Telefono" Type="varchar" MaxLength="10" />
+          <Property Name="Codigo_telefono" Type="varchar" MaxLength="5" />
         </EntityType>
         <EntityType Name="Estado_Factura">
           <Key>
@@ -236,6 +247,7 @@
           <Property Name="Codigo_comercial_id" Type="int" Nullable="false" />
           <Property Name="Fecha" Type="datetime" Nullable="false" />
           <Property Name="Ultima_fec_actualizacion" Type="datetime" Nullable="false" />
+          <Property Name="Impuesto_id" Type="int" />
         </EntityType>
         <EntityType Name="Facturas">
           <Key>
@@ -899,6 +911,18 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
+        <Association Name="FK_Empresa_Provincia">
+          <End Role="Provincia" Type="Self.Provincia" Multiplicity="0..1" />
+          <End Role="Empresa" Type="Self.Empresa" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Provincia">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="Empresa">
+              <PropertyRef Name="Provincia_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
         <Association Name="fk_Empresa_tipo_identificacion1">
           <End Role="tipo_identificacion" Type="Self.tipo_identificacion" Multiplicity="1" />
           <End Role="Empresa" Type="Self.Empresa" Multiplicity="*" />
@@ -1528,6 +1552,10 @@
             <End Role="Impuesto" EntitySet="Impuesto" />
             <End Role="Empresa" EntitySet="Empresa" />
           </AssociationSet>
+          <AssociationSet Name="FK_Empresa_Provincia" Association="Self.FK_Empresa_Provincia">
+            <End Role="Provincia" EntitySet="Provincia" />
+            <End Role="Empresa" EntitySet="Empresa" />
+          </AssociationSet>
           <AssociationSet Name="fk_Empresa_tipo_identificacion1" Association="Self.fk_Empresa_tipo_identificacion1">
             <End Role="tipo_identificacion" EntitySet="tipo_identificacion" />
             <End Role="Empresa" EntitySet="Empresa" />
@@ -1940,6 +1968,18 @@
           <NavigationProperty Name="Usuarios" Relationship="Self.fk_Usuario_Empresa1" FromRole="Empresa" ToRole="Usuarios" />
           <NavigationProperty Name="Padron" Relationship="marsh_contableModel.FK_Padron_Empresa" FromRole="Empresa" ToRole="Padron" />
           <Property Name="sede" Type="Int32" />
+          <Property Name="Correo_smtp" Type="String" MaxLength="150" FixedLength="false" Unicode="false" />
+          <Property Name="Contrasena_smtp" Type="String" MaxLength="200" FixedLength="false" Unicode="false" />
+          <Property Name="Proveedor_SMTP" Type="String" MaxLength="150" FixedLength="false" Unicode="false" />
+          <Property Name="Puerto_SMTP" Type="String" MaxLength="5" FixedLength="false" Unicode="false" />
+          <Property Name="Asunto_SMTP" Type="String" MaxLength="150" FixedLength="false" Unicode="false" />
+          <Property Name="Distrito_id" Type="Int32" />
+          <Property Name="Canton_id" Type="Int32" />
+          <Property Name="Provincia_id" Type="Int32" />
+          <Property Name="OtrasSenas" Type="String" MaxLength="150" FixedLength="false" Unicode="false" />
+          <Property Name="Telefono" Type="String" MaxLength="10" FixedLength="false" Unicode="false" />
+          <Property Name="Codigo_telefono" Type="String" MaxLength="5" FixedLength="false" Unicode="false" />
+          <NavigationProperty Name="Provincia" Relationship="marsh_contableModel.FK_Empresa_Provincia" FromRole="Empresa" ToRole="Provincia" />
         </EntityType>
         <EntityType Name="Estado_Factura">
           <Key>
@@ -1973,6 +2013,7 @@
           <NavigationProperty Name="Codigos_cabys" Relationship="Self.fk_Factura_Detalles_Codigos_cabys1" FromRole="Factura_Detalles" ToRole="Codigos_cabys" />
           <NavigationProperty Name="Unidad_medida" Relationship="Self.fk_Factura_Detalles_Unidad_medida1" FromRole="Factura_Detalles" ToRole="Unidad_medida" />
           <NavigationProperty Name="Facturas" Relationship="marsh_contableModel.fk_Factura_Detalles_Facturas1" FromRole="Factura_Detalles" ToRole="Facturas" />
+          <Property Name="Impuesto_id" Type="Int32" />
         </EntityType>
         <EntityType Name="Gastos">
           <Key>
@@ -2165,6 +2206,7 @@
           <Property Name="id" Type="Int32" Nullable="false" />
           <Property Name="Nombre" Type="String" MaxLength="45" FixedLength="false" Unicode="false" Nullable="false" />
           <NavigationProperty Name="Canton" Relationship="Self.fk_Canton_Provincia1" FromRole="Provincia" ToRole="Canton" />
+          <NavigationProperty Name="Empresa" Relationship="marsh_contableModel.FK_Empresa_Provincia" FromRole="Provincia" ToRole="Empresa" />
         </EntityType>
         <EntityType Name="Roles">
           <Key>
@@ -3286,6 +3328,10 @@
             <End Role="Facturas" EntitySet="Facturas" />
             <End Role="Ingresos" EntitySet="Ingresos" />
           </AssociationSet>
+          <AssociationSet Name="FK_Empresa_Provincia" Association="marsh_contableModel.FK_Empresa_Provincia">
+            <End Role="Provincia" EntitySet="Provincia" />
+            <End Role="Empresa" EntitySet="Empresa" />
+          </AssociationSet>
         </EntityContainer>
         <Association Name="FK_Cuentas_Contables_Tipo_moneda">
           <End Type="marsh_contableModel.Tipo_moneda" Role="Tipo_moneda" Multiplicity="1" />
@@ -3503,6 +3549,18 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
+        <Association Name="FK_Empresa_Provincia">
+          <End Type="marsh_contableModel.Provincia" Role="Provincia" Multiplicity="0..1" />
+          <End Type="marsh_contableModel.Empresa" Role="Empresa" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Provincia">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="Empresa">
+              <PropertyRef Name="Provincia_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
       </Schema>
     </edmx:ConceptualModels>
     <!-- C-S mapping content -->
@@ -3706,6 +3764,17 @@
           <EntitySetMapping Name="Empresa">
             <EntityTypeMapping TypeName="marsh_contableModel.Empresa">
               <MappingFragment StoreEntitySet="Empresa">
+                <ScalarProperty Name="Codigo_telefono" ColumnName="Codigo_telefono" />
+                <ScalarProperty Name="Telefono" ColumnName="Telefono" />
+                <ScalarProperty Name="OtrasSenas" ColumnName="OtrasSenas" />
+                <ScalarProperty Name="Provincia_id" ColumnName="Provincia_id" />
+                <ScalarProperty Name="Canton_id" ColumnName="Canton_id" />
+                <ScalarProperty Name="Distrito_id" ColumnName="Distrito_id" />
+                <ScalarProperty Name="Asunto_SMTP" ColumnName="Asunto_SMTP" />
+                <ScalarProperty Name="Puerto_SMTP" ColumnName="Puerto_SMTP" />
+                <ScalarProperty Name="Proveedor_SMTP" ColumnName="Proveedor_SMTP" />
+                <ScalarProperty Name="Contrasena_smtp" ColumnName="Contrasena_smtp" />
+                <ScalarProperty Name="Correo_smtp" ColumnName="Correo_smtp" />
                 <ScalarProperty Name="sede" ColumnName="sede" />
                 <ScalarProperty Name="Emp_id" ColumnName="Emp_id" />
                 <ScalarProperty Name="Nombre_empresa" ColumnName="Nombre_empresa" />
@@ -3736,6 +3805,7 @@
           <EntitySetMapping Name="Factura_Detalles">
             <EntityTypeMapping TypeName="marsh_contableModel.Factura_Detalles">
               <MappingFragment StoreEntitySet="Factura_Detalles">
+                <ScalarProperty Name="Impuesto_id" ColumnName="Impuesto_id" />
                 <ScalarProperty Name="id" ColumnName="id" />
                 <ScalarProperty Name="Facturas_id" ColumnName="Facturas_id" />
                 <ScalarProperty Name="Subtotal" ColumnName="Subtotal" />

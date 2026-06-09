@@ -30,5 +30,17 @@ namespace marsh_contable.Models
         public string Cliente { get; set; }
         public string Condicion_venta { get; set; }
         public string Medio_pago { get; set; }
+
+        public string Tipo_identificacion { get; set; }
+        public string Cliente_cedula { get; set; }
+        public String Telefono_numero { get; set; }
+        public String Telefono_codigo_pais { get; set; }
+
+        public String Cliente_Provincia {get;set ;}
+        public String Cliente_Canton { get; set; }
+        public String Cliente_distrito { get; set; }
+        public String Cliente_OtrasSenas { get; set; }
+        public String Cliente_Correo { get; set; }
+        
     }
 }
