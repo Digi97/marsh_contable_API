@@ -449,9 +449,6 @@ namespace marsh_contable.Controllers
                         Apellido2 = usuarioDB.Apellido2,
                         Correo = usuarioDB.Correo,
                         Roles_id = usuarioDB.Roles_id,
-                        Id_Empleado = usuarioDB.Id_Empleado,
-                        activo = usuarioDB.activo,
-                        Fec_Login = DateTime.Now,
                         FormatoFecha = empresa.Formato_fecha,
                         ImpuestoDefault = (int) empresa.Impuesto_id
                     };
@@ -467,9 +464,26 @@ namespace marsh_contable.Controllers
                     usuarioResponse.Permisos = permisosJWT; //predefinido para permisos 
 
 
+                    string jwt = tool.GenerateTokenJWT(model.Correo, permisosJWT);
+
+                    // ── Generar sessionId opaco para el cliente
+                    string sessionId = Guid.NewGuid().ToString("N");
+
+                    int expireMinutes = Convert.ToInt32(
+                        ConfigurationManager.AppSettings["JWT_EXPIRE_MINUTES"]
+                    );
+
+                    // ── Guardar JWT en caché del servidor con el sessionId como clave
+                    HttpRuntime.Cache.Insert(
+                        key: $"session_{sessionId}",
+                        value: jwt,
+                        dependencies: null,
+                        absoluteExpiration: DateTime.Now.AddMinutes(expireMinutes),
+                        slidingExpiration: System.Web.Caching.Cache.NoSlidingExpiration
+                    );
 
                     oR.CodeStatus = HttpStatusCode.OK;
-                    oR.Message = tool.GenerateTokenJWT(model.Correo, permisosJWT);
+                    oR.Message = sessionId;// tool.GenerateTokenJWT(model.Correo, permisosJWT);
                     oR.Data = usuarioResponse;
                 }
             }
@@ -489,6 +503,36 @@ namespace marsh_contable.Controllers
                 oR.Message = ex.Message;
             }
             return oR;
+        }
+
+
+        [HttpPost]
+        [Authorize]
+        [Route("api/v1/logout")]
+        public Reply Logout()
+        {
+            Reply oR = new Reply();
+            oR.CodeStatus = 0;
+            try
+            {
+                string sessionId = null;
+
+                if (Request.Headers.Contains("X-Session-Id"))
+                    sessionId = Request.Headers.GetValues("X-Session-Id").FirstOrDefault();
+
+                if (!string.IsNullOrEmpty(sessionId))
+                    HttpRuntime.Cache.Remove($"session_{sessionId}");
+
+                oR.CodeStatus = HttpStatusCode.OK;
+                oR.Message = "logout_successful";
+                return oR;
+            }
+            catch (Exception ex)
+            {
+                oR.CodeStatus = HttpStatusCode.InternalServerError;
+                oR.Message = ex.Message;
+                return oR;
+            }
         }
 
 

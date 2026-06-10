@@ -41,8 +41,29 @@ namespace Facturacion_C_Sharp.Lib
             Transferencia = 04,
             [Description( "05" )]
             Recaudado_por_Terceros,
+            [Description("06")]
+            Sinpe_Movil,
+            [Description("07")]
+            Plataforma_Digital,
             [Description( "99" )]
             Otros = 99
+        }
+
+        public static MedioPago medioPagoCodigo(String codigo)
+        {
+            switch (codigo)
+            {
+                case "01": return MedioPago.Efectivo;
+                case "02": return MedioPago.Tarjeta;
+                case "03": return MedioPago.Cheque;
+                case "04": return MedioPago.Transferencia;
+                case "05": return MedioPago.Recaudado_por_Terceros;
+                case "06": return MedioPago.Sinpe_Movil;
+                case "07": return MedioPago.Plataforma_Digital;
+                
+                case "99": return MedioPago.Otros;
+                default: return MedioPago.Efectivo;
+            }
         }
 
         public enum TipoDocumento
@@ -106,6 +127,8 @@ namespace Facturacion_C_Sharp.Lib
         private ResumenFactura resumenFactura;
         private SituacionDocumento situacionDocumento;
 
+        private String clave;
+        private String consecutivo;
         private String pais = "506";
         private String sede = "001";
         //Terminal o punto de venta
@@ -119,22 +142,20 @@ namespace Facturacion_C_Sharp.Lib
         public Documento ( DateTime fechaEmision,
                          Emisor emisor,
                          CondicionVenta condicionVenta,
-                         MedioPago medioPago,
-                         String numero,
-                         TipoDocumento tipoDocumento,
-                         String codigoSeguridad,
+                         String medioPago,                        
+                         TipoDocumento tipoDocumento,                        
                          Item[] items,
                          ResumenFactura resumenFactura,
                          SituacionDocumento situacionDocumento,
-
-                         //Parametros opcionales
+                         string clave,
+                         string consecutivo,
                          Receptor receptor = null,
                          Normativa normativa = null,
                          Referencia[] referencias = null,
-                         string plazoCredito = "",
-                         string pais = "506",
-                         string sede = "001",
-                         string terminalPuntodeVenta = "00001" )
+                         string plazoCredito = ""
+                  
+                       
+            )
         {
             if( normativa == null )
             {
@@ -145,17 +166,19 @@ namespace Facturacion_C_Sharp.Lib
             this.receptor = receptor;
             this.condicionVenta = condicionVenta;
             this.plazoCredito = plazoCredito;
-            this.medioPago = medioPago;
-            this.numero = numero;
+            this.medioPago = medioPagoCodigo(medioPago);
+            //this.numero = numero;
             this.tipoDocumento = tipoDocumento;
-            this.codigoSeguridad = codigoSeguridad;
+          //  this.codigoSeguridad = codigoSeguridad;
             this.items = items;
             this.referencias = referencias;
             this.resumenFactura = resumenFactura;
             this.situacionDocumento = situacionDocumento;
-            this.pais = pais;
-            this.sede = sede;
-            this.terminalPuntodeVenta = terminalPuntodeVenta;
+            this.clave = clave;
+            this.consecutivo = consecutivo;
+            //this.pais = pais;
+            //this.sede = sede;
+            //this.terminalPuntodeVenta = terminalPuntodeVenta;
         }
 
         public DateTime FechaEmision
@@ -222,6 +245,15 @@ namespace Facturacion_C_Sharp.Lib
         {
             get => sede; set => sede = value;
         }
+
+        public string Clave
+        {
+            get => Clave; set => Clave = value;
+        }
+        public string Consecutivo
+        {
+            get => Consecutivo; set => Consecutivo = value;
+        }
         public string TerminalPuntodeVenta
         {
             get => terminalPuntodeVenta; set => terminalPuntodeVenta = value;
@@ -239,13 +271,15 @@ namespace Facturacion_C_Sharp.Lib
 
         public String NumeroConsecutivo ( )
         {
-            return sede + terminalPuntodeVenta + tipoDocumento.ToDescriptionString( ) + numero.PadLeft( 10, '0' );
+            //return sede + terminalPuntodeVenta + tipoDocumento.ToDescriptionString( ) + numero.PadLeft( 10, '0' );
+            return Consecutivo;
         }
 
         public String ClaveNumerica ( )
         {
-            var fecha = String.Format( "{0:ddMMyy}", fechaEmision );
-            return pais + fecha + emisor.Identificacion.NumeroFormato12 + NumeroConsecutivo( ) + situacionDocumento.ToDescriptionString( ) + codigoSeguridad.PadLeft( 8, '0' );
+            //    var fecha = String.Format( "{0:ddMMyy}", fechaEmision );
+            //    return pais + fecha + emisor.Identificacion.NumeroFormato12 + NumeroConsecutivo( ) + situacionDocumento.ToDescriptionString( ) + codigoSeguridad.PadLeft( 8, '0' );
+            return Clave;
         }
         public String TagDocumento ( )
         {
