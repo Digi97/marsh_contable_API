@@ -444,9 +444,7 @@ namespace marsh_contable.Controllers
                     var usuarioResponse = new Models.UsuariosViewModel
                     {
                         Usuario_id = usuarioDB.Usuario_id,
-                        Nombre = usuarioDB.Nombre,
-                        Apellido1 = usuarioDB.Apellido1,
-                        Apellido2 = usuarioDB.Apellido2,
+                        Nombre = usuarioDB.Nombre + " " + usuarioDB.Apellido1 + " "+ usuarioDB.Apellido2,
                         Correo = usuarioDB.Correo,
                         Roles_id = usuarioDB.Roles_id,
                         FormatoFecha = empresa.Formato_fecha,

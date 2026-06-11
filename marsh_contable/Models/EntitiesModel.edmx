@@ -248,6 +248,7 @@
           <Property Name="Fecha" Type="datetime" Nullable="false" />
           <Property Name="Ultima_fec_actualizacion" Type="datetime" Nullable="false" />
           <Property Name="Impuesto_id" Type="int" />
+          <Property Name="Tipo_Descuento_id" Type="int" />
         </EntityType>
         <EntityType Name="Facturas">
           <Key>
@@ -535,6 +536,7 @@
           <Property Name="id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
           <Property Name="codigo_moneda" Type="varchar" MaxLength="3" Nullable="false" />
           <Property Name="Nombre" Type="varchar" MaxLength="45" Nullable="false" />
+          <Property Name="Simbolo" Type="varchar" MaxLength="2" />
         </EntityType>
         <EntityType Name="Unidad_medida">
           <Key>
@@ -2014,6 +2016,7 @@
           <NavigationProperty Name="Unidad_medida" Relationship="Self.fk_Factura_Detalles_Unidad_medida1" FromRole="Factura_Detalles" ToRole="Unidad_medida" />
           <NavigationProperty Name="Facturas" Relationship="marsh_contableModel.fk_Factura_Detalles_Facturas1" FromRole="Factura_Detalles" ToRole="Facturas" />
           <Property Name="Impuesto_id" Type="Int32" />
+          <Property Name="Tipo_Descuento_id" Type="Int32" />
         </EntityType>
         <EntityType Name="Gastos">
           <Key>
@@ -2312,6 +2315,7 @@
           <NavigationProperty Name="Cuentas_Contables" Relationship="marsh_contableModel.FK_Cuentas_Contables_Tipo_moneda" FromRole="Tipo_moneda" ToRole="Cuentas_Contables" />
           <NavigationProperty Name="Gastos" Relationship="marsh_contableModel.FK_Gastos_Tipo_moneda" FromRole="Tipo_moneda" ToRole="Gastos" />
           <NavigationProperty Name="Facturas" Relationship="marsh_contableModel.fk_Factura_Tipo_moneda1" FromRole="Tipo_moneda" ToRole="Facturas" />
+          <Property Name="Simbolo" Type="String" MaxLength="2" FixedLength="false" Unicode="false" />
         </EntityType>
         <EntityType Name="Unidad_medida">
           <Key>
@@ -3805,6 +3809,7 @@
           <EntitySetMapping Name="Factura_Detalles">
             <EntityTypeMapping TypeName="marsh_contableModel.Factura_Detalles">
               <MappingFragment StoreEntitySet="Factura_Detalles">
+                <ScalarProperty Name="Tipo_Descuento_id" ColumnName="Tipo_Descuento_id" />
                 <ScalarProperty Name="Impuesto_id" ColumnName="Impuesto_id" />
                 <ScalarProperty Name="id" ColumnName="id" />
                 <ScalarProperty Name="Facturas_id" ColumnName="Facturas_id" />
@@ -4077,6 +4082,7 @@
           <EntitySetMapping Name="Tipo_moneda">
             <EntityTypeMapping TypeName="marsh_contableModel.Tipo_moneda">
               <MappingFragment StoreEntitySet="Tipo_moneda">
+                <ScalarProperty Name="Simbolo" ColumnName="Simbolo" />
                 <ScalarProperty Name="id" ColumnName="id" />
                 <ScalarProperty Name="codigo_moneda" ColumnName="codigo_moneda" />
                 <ScalarProperty Name="Nombre" ColumnName="Nombre" />

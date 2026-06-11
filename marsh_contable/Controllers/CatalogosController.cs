@@ -1039,7 +1039,7 @@ namespace marsh_contable.Controllers
 
                 using (var ctx = new Models.EntitiesModel())
                 {
-                    Models.Tipo_moneda tm = new Models.Tipo_moneda() { codigo_moneda = model.codigo_moneda, Nombre = model.Nombre };
+                    Models.Tipo_moneda tm = new Models.Tipo_moneda() { codigo_moneda = model.codigo_moneda, Nombre = model.Nombre, Simbolo = model.Simbolo };
                     ctx.Tipo_moneda.Add(tm);
                     ctx.SaveChanges();
                     oR.CodeStatus = HttpStatusCode.OK;
@@ -1081,6 +1081,7 @@ namespace marsh_contable.Controllers
                     if (tm == null) throw new Exception("tipo_moneda_not_found");
                     tm.codigo_moneda = model.codigo_moneda;
                     tm.Nombre = model.Nombre;
+                    tm.Simbolo = model.Simbolo;
                     ctx.SaveChanges();
                     oR.CodeStatus = HttpStatusCode.OK;
                     oR.Data = tm.id;
@@ -1111,7 +1112,7 @@ namespace marsh_contable.Controllers
             {
                 using (var ctx = new Models.EntitiesModel())
                 {
-                    var data = ctx.Tipo_moneda.Select(x => new { x.id, x.codigo_moneda, x.Nombre }).ToList();
+                    var data = ctx.Tipo_moneda.Select(x => new { x.id, x.codigo_moneda, x.Nombre, x.Simbolo }).ToList();
                     oR.CodeStatus = HttpStatusCode.OK;
                     oR.Data = data;
                     return oR;
@@ -1143,7 +1144,7 @@ namespace marsh_contable.Controllers
                 using (var ctx = new Models.EntitiesModel())
                 {
                     var data = ctx.Tipo_moneda.Where(x => x.id == id)
-                        .Select(x => new { x.id, x.codigo_moneda, x.Nombre }).FirstOrDefault();
+                        .Select(x => new { x.id, x.codigo_moneda, x.Nombre, x.Simbolo }).FirstOrDefault();
                     if (data == null) throw new Exception("tipo_moneda_not_found");
                     oR.CodeStatus = HttpStatusCode.OK;
                     oR.Data = data;

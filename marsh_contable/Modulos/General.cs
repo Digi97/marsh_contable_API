@@ -465,6 +465,11 @@ namespace marsh_contable.Modulos
             return valor.ToString().PadLeft(2, '0');
         }
 
+        public string RandomHexColor()
+        {
+            var random = new Random();
+            return string.Format("#{0:X6}", random.Next(0x1000000));
+        }
 
 
 
