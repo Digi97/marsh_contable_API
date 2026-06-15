@@ -208,7 +208,6 @@
           <Property Name="codigo_actividad_id" Type="int" />
           <Property Name="tipo_identificacion_id" Type="int" Nullable="false" />
           <Property Name="Impuesto_id" Type="int" />
-          <Property Name="sede" Type="int" />
           <Property Name="Correo_smtp" Type="varchar" MaxLength="150" />
           <Property Name="Contrasena_smtp" Type="varchar" MaxLength="200" />
           <Property Name="Proveedor_SMTP" Type="varchar" MaxLength="150" />
@@ -220,6 +219,8 @@
           <Property Name="OtrasSenas" Type="varchar" MaxLength="150" />
           <Property Name="Telefono" Type="varchar" MaxLength="10" />
           <Property Name="Codigo_telefono" Type="varchar" MaxLength="5" />
+          <Property Name="Usuario_hacienda" Type="varchar" MaxLength="200" />
+          <Property Name="Contrasena_hacienda" Type="varchar" MaxLength="200" />
         </EntityType>
         <EntityType Name="Estado_Factura">
           <Key>
@@ -1969,7 +1970,6 @@
           <NavigationProperty Name="tipo_identificacion" Relationship="Self.fk_Empresa_tipo_identificacion1" FromRole="Empresa" ToRole="tipo_identificacion" />
           <NavigationProperty Name="Usuarios" Relationship="Self.fk_Usuario_Empresa1" FromRole="Empresa" ToRole="Usuarios" />
           <NavigationProperty Name="Padron" Relationship="marsh_contableModel.FK_Padron_Empresa" FromRole="Empresa" ToRole="Padron" />
-          <Property Name="sede" Type="Int32" />
           <Property Name="Correo_smtp" Type="String" MaxLength="150" FixedLength="false" Unicode="false" />
           <Property Name="Contrasena_smtp" Type="String" MaxLength="200" FixedLength="false" Unicode="false" />
           <Property Name="Proveedor_SMTP" Type="String" MaxLength="150" FixedLength="false" Unicode="false" />
@@ -1982,6 +1982,8 @@
           <Property Name="Telefono" Type="String" MaxLength="10" FixedLength="false" Unicode="false" />
           <Property Name="Codigo_telefono" Type="String" MaxLength="5" FixedLength="false" Unicode="false" />
           <NavigationProperty Name="Provincia" Relationship="marsh_contableModel.FK_Empresa_Provincia" FromRole="Empresa" ToRole="Provincia" />
+          <Property Name="Usuario_hacienda" Type="String" MaxLength="200" FixedLength="false" Unicode="false" />
+          <Property Name="Contrasena_hacienda" Type="String" MaxLength="200" FixedLength="false" Unicode="false" />
         </EntityType>
         <EntityType Name="Estado_Factura">
           <Key>
@@ -3768,6 +3770,8 @@
           <EntitySetMapping Name="Empresa">
             <EntityTypeMapping TypeName="marsh_contableModel.Empresa">
               <MappingFragment StoreEntitySet="Empresa">
+                <ScalarProperty Name="Contrasena_hacienda" ColumnName="Contrasena_hacienda" />
+                <ScalarProperty Name="Usuario_hacienda" ColumnName="Usuario_hacienda" />
                 <ScalarProperty Name="Codigo_telefono" ColumnName="Codigo_telefono" />
                 <ScalarProperty Name="Telefono" ColumnName="Telefono" />
                 <ScalarProperty Name="OtrasSenas" ColumnName="OtrasSenas" />
@@ -3779,7 +3783,6 @@
                 <ScalarProperty Name="Proveedor_SMTP" ColumnName="Proveedor_SMTP" />
                 <ScalarProperty Name="Contrasena_smtp" ColumnName="Contrasena_smtp" />
                 <ScalarProperty Name="Correo_smtp" ColumnName="Correo_smtp" />
-                <ScalarProperty Name="sede" ColumnName="sede" />
                 <ScalarProperty Name="Emp_id" ColumnName="Emp_id" />
                 <ScalarProperty Name="Nombre_empresa" ColumnName="Nombre_empresa" />
                 <ScalarProperty Name="Correo_empresa" ColumnName="Correo_empresa" />

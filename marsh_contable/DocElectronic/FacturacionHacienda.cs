@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Xml;
 using System.Xml.Schema;
@@ -62,29 +63,37 @@ namespace Facturacion_C_Sharp
             this.configuracion = configuracion;
         }
 
-        public void Autenticar ( )
+        public void Autenticar()
         {
-            var request = new RestRequest( configuracion.Authentication_endpoint, Method.Post );
-            request.AddParameter( "name", "value" );
-            request.AddParameter( "grant_type", "password" );
-            request.AddParameter( "username", configuracion.Api_username );
-            request.AddParameter( "password", configuracion.Api_password );
-            request.AddParameter( "client_id", configuracion.Api_client_id );
-            request.AddParameter( "client_secret", "" );
-            request.AddParameter( "scope", "" );
-
-            // execute the request
-            response = restClient.Execute( request );
-            var status = response.StatusCode;
-
-            if( status != System.Net.HttpStatusCode.OK )
+            using (var httpClient = new System.Net.Http.HttpClient())
             {
-                mensajeError = "Err: " + response.ErrorMessage;
-                throw new ExecpcionFacturacionHacienda( "Error autentificacion: " + response.ErrorMessage );
-            }
-            JObject json = JObject.Parse( response.Content );
+                var parametros = new Dictionary<string, string>
+        {
+            { "grant_type", "password"                    },
+            { "username",   configuracion.Api_username    },
+            { "password",   configuracion.Api_password    },
+            { "client_id",  configuracion.Api_client_id   }
+        };
 
-            token = json[ "access_token" ].ToString( );
+                var content = new System.Net.Http.FormUrlEncodedContent(parametros);
+                var httpResponse = httpClient.PostAsync(
+                    configuracion.Authentication_endpoint,
+                    content
+                ).Result;
+
+                string responseContent = httpResponse.Content.ReadAsStringAsync().Result;
+
+                System.Diagnostics.Debug.WriteLine($"=== AUTH STATUS: {httpResponse.StatusCode}");
+                System.Diagnostics.Debug.WriteLine($"=== AUTH CONTENT: {responseContent}");
+
+                if (httpResponse.StatusCode != System.Net.HttpStatusCode.OK)
+                    throw new ExecpcionFacturacionHacienda($"Error autenticacion: {responseContent}");
+
+                JObject json = JObject.Parse(responseContent);
+                token = json["access_token"].ToString();
+
+                System.Diagnostics.Debug.WriteLine($"=== TOKEN OBTENIDO OK, LENGTH: {token.Length}");
+            }
         }
 
         public Configuracion Configuracion
@@ -101,28 +110,60 @@ namespace Facturacion_C_Sharp
             set => mensajeError = value;
         }
 
-        public bool EnviarDocumento ( Documento documento )
+        public bool EnviarDocumento(Documento documento)
         {
-            Autenticar( );
-            var request = new RestRequest( configuracion.Documents_endpoint + "/recepcion", Method.Post );
-            request.AddHeader( "Authorization", "bearer " + token );
+            Autenticar();
 
-            //request.AddJsonBody(documento.JsonPayload(pathXML).ToString());
+            token = token?.Trim()
+                          .Replace("\n", "")
+                          .Replace("\r", "");
 
-            request.AddHeader( "Accept", "application/json" );
-            //request.Parameters.Clear();
-            request.AddParameter( "application/json", documento.JsonPayload( ).ToString( ), ParameterType.RequestBody );
-
-
-            // execute the request
-            response = restClient.Execute( request );
-
-            if( response.StatusCode == System.Net.HttpStatusCode.OK || response.StatusCode == System.Net.HttpStatusCode.Accepted )
+            try
             {
-                return true;
-            } else
+                using (var httpClient = new System.Net.Http.HttpClient())
+                {
+                    string jsonBody = documento.JsonPayload().ToString();
+
+                    // ── Crear el request manualmente
+                    var request = new System.Net.Http.HttpRequestMessage(
+                        System.Net.Http.HttpMethod.Post,
+                        configuracion.Documents_endpoint
+                    );
+
+                    // ── Body
+                    request.Content = new System.Net.Http.StringContent(
+                        jsonBody,
+                        System.Text.Encoding.UTF8,
+                        "application/json"
+                    );
+
+                    // ── Headers con TryAddWithoutValidation
+                    // Esto evita que HttpClient parsee/valide internamente el token
+                    request.Headers.TryAddWithoutValidation("Authorization", $"Bearer {token}");
+                    request.Headers.TryAddWithoutValidation("User-Agent", "Mozilla/5.0");
+                    request.Headers.TryAddWithoutValidation("Accept", "application/json");
+
+     
+                    var httpResponse = httpClient.SendAsync(request).Result;
+                    string responseBody = httpResponse.Content.ReadAsStringAsync().Result;
+
+     
+
+                    if (httpResponse.StatusCode == System.Net.HttpStatusCode.OK ||
+                        httpResponse.StatusCode == System.Net.HttpStatusCode.Accepted)
+                    {
+                        return true;
+                    }
+                    else
+                    {
+                        mensajeError = $"Status: {httpResponse.StatusCode}, Mensaje: {responseBody}";
+                        return false;
+                    }
+                }
+            }
+            catch (Exception ex)
             {
-                mensajeError = "Status: " + response.StatusDescription + ", Mensaje: " + response.Content;
+                mensajeError = ex.Message;
                 return false;
             }
         }

@@ -29,16 +29,18 @@ namespace Facturacion_C_Sharp.Lib
 
             // Política de firma de factura-e 3.1
             parametros.SignaturePolicyInfo = new SignaturePolicyInfo( );
-            parametros.SignaturePolicyInfo.PolicyIdentifier = "https://www.hacienda.go.cr/ATV/ComprobanteElectronico/docs/esquemas/2016/v4/Resolucion%20Comprobantes%20Electronicos%20%20DGT-R-48-2016.pdf";
-            parametros.SignaturePolicyInfo.PolicyHash = "V8lVVNGDCPen6VELRD1Ja8HARFk=";
+            parametros.SignaturePolicyInfo.PolicyIdentifier = "https://atv.hacienda.go.cr/ATV/ComprobanteElectronico/docs/esquemas/2024/v4.4/Resoluci%C3%B3n_General_sobre_disposiciones_t%C3%A9cnicas_comprobantes_electr%C3%B3nicos_para_efectos_tributarios.pdf";
+            parametros.SignaturePolicyInfo.PolicyHash = "BBuIiFf85XFetYyFlAz4Z+bsyJFu1YgnIPZ25CYduUs=";//"V8lVVNGDCPen6VELRD1Ja8HARFk=";
             parametros.SignaturePackaging = SignaturePackaging.ENVELOPED;
             parametros.DataFormat = new DataFormat( );
             parametros.DataFormat.MimeType = "text/xml";
             parametros.SignerRole = new SignerRole( );
             parametros.SignerRole.ClaimedRoles.Add( "emisor" );
-            parametros.Signer = new Signer( new X509Certificate2( p12, password ) );
+            parametros.Signer = new Signer( new X509Certificate2( p12, password, X509KeyStorageFlags.MachineKeySet |
+        X509KeyStorageFlags.PersistKeySet |
+        X509KeyStorageFlags.Exportable) );
 
-
+                
             Stream stream = new MemoryStream( );
             docXML.Save( stream );
             // Rewind the stream ready to read from it elsewhere

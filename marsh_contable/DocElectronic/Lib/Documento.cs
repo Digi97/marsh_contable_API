@@ -76,6 +76,7 @@ namespace Facturacion_C_Sharp.Lib
             Nota_de_crédito = 03,
             [Description( "04" )]
             Tiquete_Electrónico = 04,
+            
 
             [Description( "05" )]
             Aceptación_del_comprobante_electrónico = 05,
@@ -83,7 +84,11 @@ namespace Facturacion_C_Sharp.Lib
             Aceptación_parcial_del_comprobante_electrónico = 06,
             [Description( "07" )]
             Rechazo_del_comprobante_electrónico = 07,
-            
+
+            [Description("08")]
+            Factura_Electronica_Compra = 08,
+            [Description("09")]
+            Factura_Electronica_Exportacion = 09,
 
             [Description( "99" )]
             Otros = 99
@@ -248,11 +253,11 @@ namespace Facturacion_C_Sharp.Lib
 
         public string Clave
         {
-            get => Clave; set => Clave = value;
+            get => clave; set => clave = value;
         }
         public string Consecutivo
         {
-            get => Consecutivo; set => Consecutivo = value;
+            get => consecutivo; set => consecutivo = value;
         }
         public string TerminalPuntodeVenta
         {
@@ -305,16 +310,22 @@ namespace Facturacion_C_Sharp.Lib
             switch( tipoDocumento )
             {
                 case TipoDocumento.Factura_Electronica:
-                    xmlns = "https://tribunet.hacienda.go.cr/docs/esquemas/2017/v4.2/facturaElectronica";
+                    xmlns = "https://cdn.comprobanteselectronicos.go.cr/xml-schemas/v4.4/facturaElectronica";
                     break;
                 case TipoDocumento.Nota_de_crédito:
-                    xmlns = "https://tribunet.hacienda.go.cr/docs/esquemas/2017/v4.2/notaCreditoElectronica";
+                    xmlns = "https://cdn.comprobanteselectronicos.go.cr/xml-schemas/v4.4/notaCreditoElectronica";
                     break;
                 case TipoDocumento.Nota_de_débito:
-                    xmlns = "https://tribunet.hacienda.go.cr/docs/esquemas/2017/v4.2/notaDebitoElectronica";
+                    xmlns = "https://cdn.comprobanteselectronicos.go.cr/xml-schemas/v4.4/notaDebitoElectronica";
                     break;
                 case TipoDocumento.Tiquete_Electrónico:
-                    xmlns = "https://tribunet.hacienda.go.cr/docs/esquemas/2017/v4.2/tiqueteElectronico";
+                    xmlns = "https://cdn.comprobanteselectronicos.go.cr/xml-schemas/v4.4/tiqueteElectronico";
+                    break;
+                case TipoDocumento.Factura_Electronica_Compra:
+                    xmlns = "https://cdn.comprobanteselectronicos.go.cr/xml-schemas/v4.4/factura/facturaElectronicaCompra";
+                    break;
+                case TipoDocumento.Factura_Electronica_Exportacion:
+                    xmlns = "https://cdn.comprobanteselectronicos.go.cr/xml-schemas/v4.4/factura/facturaElectronicaExportacion";
                     break;
                 default:
                     xmlns = "ERROR TIPO DE DOCUMENTO";
@@ -449,7 +460,16 @@ namespace Facturacion_C_Sharp.Lib
 
         public void FirmarDocumento ( Configuracion configuracion )
         {
-           var docFirmado = FirmadorXML.Firmar( this, configuracion.RutaLlaveCriptografica, configuracion.PinLlaveCriptografica );
+
+
+            if (!System.IO.File.Exists(configuracion.RutaLlaveCriptografica))
+                throw new Exception($"archivo_p12_no_encontrado: {configuracion.RutaLlaveCriptografica}");
+
+            if (string.IsNullOrEmpty(configuracion.PinLlaveCriptografica))
+                throw new Exception("pin_llave_invalido");
+
+
+            var docFirmado = FirmadorXML.Firmar( this, configuracion.RutaLlaveCriptografica, configuracion.PinLlaveCriptografica );
 
             //guargar en base 64
             byte[] asBytes = docFirmado.GetDocumentBytes( );

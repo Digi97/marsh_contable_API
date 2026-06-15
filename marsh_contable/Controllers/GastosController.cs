@@ -61,6 +61,11 @@ namespace marsh_contable.Controllers
                 }
 
 
+                if (model.Tipo_moneda_id == 0)
+                {
+                    throw new Exception("currency_is_required");
+                }
+
 
 
                 using (var ctx = new Models.EntitiesModel())
@@ -81,7 +86,7 @@ namespace marsh_contable.Controllers
                             Medio_pago_id = model.Medio_pago_id,
                             Proveedor_id = model.Proveedor_id,
                             Descuento = model.Descuento,
-                            Tipo_moneda_id = model.Tipo_moneda_id
+                            Tipo_moneda_id = (int)model.Tipo_moneda_id
                         };
                         ctx.Gastos.Add(g);
                         ctx.SaveChanges();
@@ -149,6 +154,10 @@ namespace marsh_contable.Controllers
                 {
                     throw new Exception("invalid_string_form_Descripcion");
                 }
+                if (model.Tipo_moneda_id == 0)
+                {
+                    throw new Exception("currency_is_required");
+                }
 
                 using (var ctx = new Models.EntitiesModel())
                 {
@@ -168,6 +177,7 @@ namespace marsh_contable.Controllers
                     g.Proveedor_id = model.Proveedor_id;
                     g.Ultima_Fec_Actualizacion = DateTime.Now;
                     g.Descuento = model.Descuento;
+                    g.Tipo_moneda_id = model.Tipo_moneda_id;
                     ctx.SaveChanges();
 
                     oR.CodeStatus = HttpStatusCode.OK;
@@ -201,7 +211,7 @@ namespace marsh_contable.Controllers
         [HttpGet]
         [Authorize]
         [Route("api/v1/gastos")]
-        public Reply GetAllClientesPaged()
+        public Reply GetAllGastosPaged()
         {
             Reply oR = new Reply();
             oR.CodeStatus = 0;
@@ -311,7 +321,8 @@ namespace marsh_contable.Controllers
                                      Medio_pago = mp.descripcion,
                                      Proveedor = p.Nombre + " " + p.Apellido1 + " " +p.Apellido2,
                                      Usuario = u.Nombre + " " + u.Apellido1 + u.Apellido2,
-                                     tipo_moneda = m.codigo_moneda
+                                     tipo_moneda = m.Simbolo,
+                                    
 
                                  }).ToList();
                    

@@ -8,7 +8,7 @@ using System.Net;
 using marsh_contable.Models;
 using System.Configuration;
 using marsh_contable.Modulos;
-
+using System.Net.Http;
 
 namespace marsh_contable.Controllers
 {
@@ -45,15 +45,29 @@ namespace marsh_contable.Controllers
                     Numero_sucursal = u.Numero_sucursal,
                     Formato_fecha = u.Formato_fecha,
                     Ruta_llave_factura = u.Ruta_llave_factura,
-                    pin_llave = u.pin_llave,
+                   // pin_llave = u.pin_llave,
                     ruta_logo = u.ruta_logo,
                     terminal = u.terminal,
                     codigo_seguridad = u.codigo_seguridad,
                     identificacion = u.identificacion,
                     codigo_actividad_id =u.codigo_actividad_id,
                     tipo_identificacion_id = u.tipo_identificacion_id,
-                    Impuesto_id = u.Impuesto_id
-               
+                    Impuesto_id = u.Impuesto_id,
+                    Provincia_id= u.Provincia_id,
+                    Canton_id = u.Canton_id,
+                    Distrito_id = u.Distrito_id,
+                    OtrasSenas_Emisor = u.OtrasSenas,
+                            Codigo_Telefono = u.Codigo_telefono,
+                            Telefono = u.Telefono,
+                            Correo_smtp = u.Correo_smtp,
+                          //  Contrasena_smtp = u.Contrasena_smtp,
+                            Proveedor_SMTP = u.Proveedor_SMTP,
+                            Puerto_SMTP = u.Puerto_SMTP,
+                            Asunto_SMTP = u.Asunto_SMTP,
+                            Usuario_hacienda = u.Usuario_hacienda,
+                           // Contrasena_hacienda = u.Contrasena_hacienda
+
+
                         })
                         .FirstOrDefault();
 
@@ -62,7 +76,8 @@ namespace marsh_contable.Controllers
                         throw new Exception("empresa_not_found");
                     }
 
-                    empresa.pin_llave = (empresa.pin_llave == String.Empty ? "" : tool.Desencriptar(empresa.pin_llave));
+                 //   empresa.pin_llave = (empresa.pin_llave == String.Empty ? "" : tool.Desencriptar(empresa.pin_llave));
+                    empresa.Ruta_llave_factura = string.IsNullOrEmpty(empresa.Ruta_llave_factura) ? "" : System.IO.Path.GetFileName(empresa.Ruta_llave_factura);
 
                     oR.CodeStatus = HttpStatusCode.OK;
                     oR.Data = empresa;
@@ -147,6 +162,25 @@ namespace marsh_contable.Controllers
                 {
                     throw new Exception("invalid_value_form_Impuesto_id");
                 }
+
+                if (!tool.validaNumeros(model.Telefono))
+                {
+                    throw new Exception("invalid_value_form_Telefono");
+                }
+                if (!tool.ValidaTexto(model.Codigo_Telefono))
+                {
+                    throw new Exception("invalid_value_form_codigo_telefono");
+                }
+
+                if (!tool.validaNumeros(model.Provincia_id.ToString()) || !tool.validaNumeros(model.Canton_id.ToString()) || !tool.validaNumeros(model.Distrito_id.ToString()))
+                {
+                    throw new Exception("invalid_value_form_provincia_canton_distrito");
+                }
+
+                if (!tool.validaNumeros(model.Provincia_id.ToString()) || !tool.validaNumeros(model.Canton_id.ToString()) || !tool.validaNumeros(model.Distrito_id.ToString()))
+                {
+                    throw new Exception("invalid_value_form_provincia_canton_distrito");
+                }
                 // fin de validaciones
 
                 using (var ctx = new Models.EntitiesModel())
@@ -164,7 +198,7 @@ namespace marsh_contable.Controllers
                     empresaExistente.Ruta_nas = model.Ruta_nas;
                     empresaExistente.Numero_sucursal = model.Numero_sucursal;
                     empresaExistente.Formato_fecha = model.Formato_fecha;
-                    empresaExistente.Ruta_llave_factura = model.Ruta_llave_factura;
+                    //empresaExistente.Ruta_llave_factura = model.Ruta_llave_factura;
                     empresaExistente.ruta_logo = model.ruta_logo;
                     empresaExistente.terminal = model.terminal;
                     empresaExistente.codigo_seguridad = model.codigo_seguridad;
@@ -172,12 +206,39 @@ namespace marsh_contable.Controllers
                     empresaExistente.codigo_actividad_id = model.codigo_actividad_id;
                     empresaExistente.tipo_identificacion_id = model.tipo_identificacion_id;
                     empresaExistente.Impuesto_id = model.Impuesto_id;
+                    empresaExistente.Provincia_id = model.Provincia_id;
+                    empresaExistente.Canton_id = model.Provincia_id;
+
+                    empresaExistente.Distrito_id = model.Canton_id;
+
+                    empresaExistente.OtrasSenas = model.OtrasSenas_Emisor;
+
+                    empresaExistente.Codigo_telefono = model.Codigo_Telefono;
+                    empresaExistente.Telefono = model.Telefono;
+                    empresaExistente.Correo_smtp = model.Correo_smtp;
+                    empresaExistente.Proveedor_SMTP = model.Proveedor_SMTP;
+                    empresaExistente.Puerto_SMTP = model.Puerto_SMTP;
+                    empresaExistente.Asunto_SMTP = model.Asunto_SMTP;
+                    empresaExistente.Usuario_hacienda = model.Usuario_hacienda;
 
                     // Pin de llave solo se actualiza si se envia un valor nuevo
                     if (!string.IsNullOrEmpty(model.pin_llave))
                     {
                         empresaExistente.pin_llave = tool.Encriptar(model.pin_llave);
                     }
+
+                    if (!string.IsNullOrEmpty(model.Contrasena_hacienda))
+                    {
+                        empresaExistente.Contrasena_hacienda = tool.Encriptar(model.Contrasena_hacienda);
+                    }
+
+                    if (!string.IsNullOrEmpty(model.Contrasena_smtp))
+                    {
+                        empresaExistente.Contrasena_smtp = tool.Encriptar(model.Contrasena_smtp);
+                    }
+
+
+
 
                     ctx.SaveChanges();
 
@@ -205,6 +266,118 @@ namespace marsh_contable.Controllers
                 oR.Message = ex.Message;
             }
             return oR;
+        }
+
+
+        [HttpPost]
+        [AllowAnonymous] 
+        [Route("api/v1/empresa/upload-llave")]
+ 
+        public Reply UploadLlaveFactura()
+        {
+            Reply oR = new Reply();
+            oR.CodeStatus = 0;
+            try
+            {
+
+                // ── Validar sesión manualmente
+                string sessionId = null;
+                if (Request.Headers.Contains("X-Session-Id"))
+                    sessionId = Request.Headers.GetValues("X-Session-Id").FirstOrDefault();
+
+                if (string.IsNullOrEmpty(sessionId))
+                    throw new Exception("session_id_missing");
+
+                string jwt = HttpRuntime.Cache[$"session_{sessionId}"] as string;
+                if (string.IsNullOrEmpty(jwt))
+                    throw new Exception("session_expired_or_invalid");
+
+                var httpRequest = HttpContext.Current.Request;
+
+                if (httpRequest.Files.Count == 0)
+                    throw new Exception("invalid_file_not_found");
+
+                var archivo = httpRequest.Files[0];
+
+                if (archivo == null || archivo.ContentLength == 0)
+                    throw new Exception("invalid_file_empty");
+
+                // ── Validar extensión .p12
+                string extension = System.IO.Path.GetExtension(archivo.FileName).ToLower();
+                if (extension != ".p12")
+                    throw new Exception("invalid_file_extension_must_be_p12");
+
+                // ── Obtener la ruta NAS desde la BD
+                string rutaNas;
+                using (var ctx = new Models.EntitiesModel())
+                {
+                    ctx.Configuration.LazyLoadingEnabled = false;
+                    ctx.Configuration.ProxyCreationEnabled = false;
+
+                    var empresa = ctx.Empresa
+                        .Where(e => e.Emp_id == 1)
+                        .Select(e => new { e.Ruta_nas })
+                        .FirstOrDefault();
+
+                    if (empresa == null)
+                        throw new Exception("empresa_not_found");
+
+                    rutaNas = empresa.Ruta_nas;
+                }
+
+                if (string.IsNullOrEmpty(rutaNas))
+                    throw new Exception("ruta_nas_not_configured");
+
+                // ── Crear carpeta si no existe
+                if (!System.IO.Directory.Exists(rutaNas))
+                    System.IO.Directory.CreateDirectory(rutaNas);
+
+                // ── Construir ruta completa
+                string nombreArchivo = System.IO.Path.GetFileName(archivo.FileName);
+                string rutaCompleta = System.IO.Path.Combine(rutaNas, nombreArchivo);
+
+                // ── Guardar el archivo
+                archivo.SaveAs(rutaCompleta);
+
+                // ── Actualizar Ruta_llave_factura en BD
+                using (var ctx = new Models.EntitiesModel())
+                {
+                    ctx.Configuration.LazyLoadingEnabled = false;
+                    ctx.Configuration.ProxyCreationEnabled = false;
+
+                    var empresaExistente = ctx.Empresa.FirstOrDefault(e => e.Emp_id == 1);
+                    if (empresaExistente != null)
+                    {
+                        empresaExistente.Ruta_llave_factura = rutaCompleta;
+                        ctx.SaveChanges();
+                    }
+                }
+
+                oR.CodeStatus = HttpStatusCode.OK;
+                oR.Data = new
+                {
+                    ruta_llave_factura = rutaCompleta,
+                    nombre_archivo = nombreArchivo
+                };
+                return oR;
+            }
+            catch (System.Data.Entity.Validation.DbEntityValidationException ex2)
+            {
+                string errorDB = "";
+                foreach (var eve in ex2.EntityValidationErrors)
+                    foreach (var ve in eve.ValidationErrors)
+                        errorDB += ve.ErrorMessage;
+
+                oR.CodeStatus = HttpStatusCode.InternalServerError;
+                oR.Message = errorDB;
+                return oR;
+            }
+            catch (Exception ex)
+            {
+                oR.CodeStatus = HttpStatusCode.InternalServerError;
+                oR.Message = ex.Message;
+                return oR;
+            }
         }
 
     }

@@ -25,7 +25,8 @@ namespace marsh_contable.Modulos
             "api/v1/auth/salt",
             "api/v1/login/recover",
             "api/v1/login/validate-code",
-            "api/v1/login/confirm-change-password"
+            "api/v1/login/confirm-change-password",
+            "api/v1/empresa/upload-llave"
         };
 
             string requestUri = request.RequestUri.AbsolutePath.ToLower().TrimStart('/');
@@ -122,8 +123,11 @@ namespace marsh_contable.Modulos
 
         private HttpResponseMessage Unauthorized(string mensaje)
         {
+
+
             return new HttpResponseMessage(HttpStatusCode.Unauthorized)
             {
+
                 Content = new StringContent(
                     Newtonsoft.Json.JsonConvert.SerializeObject(new
                     {
@@ -134,6 +138,7 @@ namespace marsh_contable.Modulos
                     "application/json"
                 )
             };
+
         }
     }
 }

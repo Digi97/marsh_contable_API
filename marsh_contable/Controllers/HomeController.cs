@@ -7,10 +7,12 @@ using System.Net;
 using marsh_contable.Models;
 using marsh_contable.Modulos;
 
+
 namespace marsh_contable.Controllers
 {
     public class HomeController : ApiController
     {
+
         // ─────────────────────────────────────────────
         // Total de usuarios del sistema
         // ─────────────────────────────────────────────
@@ -183,21 +185,23 @@ namespace marsh_contable.Controllers
             }
         }
 
-        // ─────────────────────────────────────────────
-        // Resumen completo del dashboard en una sola llamada
-        // ─────────────────────────────────────────────
+
         [HttpGet]
         [Authorize]
         [Route("api/v1/home/dashboard")]
         public Reply GetDashboard()
         {
             Reply oR = new Reply();
+              General tool = new General();
+            var hoy = DateTime.Today; // fecha de hoy a las 00:00:00
+            var manana = hoy.AddDays(1); // mañana a las 00:00:00
             oR.CodeStatus = 0;
             try
             {
                 using (var ctx = new Models.EntitiesModel())
                 {
                     int mes = DateTime.Now.Month;
+
                     int anio = DateTime.Now.Year;
 
                     int totalUsuarios = ctx.Usuarios.Count(u => u.activo == 1); //buscar solo los activos
@@ -232,6 +236,30 @@ namespace marsh_contable.Controllers
                                                   
                                                  }).ToList();
 
+
+                    var tipoCambioDia = ctx.Tipo_cambio
+                                 .Where(c => c.fecha >= hoy && c.fecha < manana)
+                                 .Select(c => new TipoCambioViewModel
+                                 {
+                                     id = c.id,
+                                     fecha = c.fecha,
+                                     compra = c.compra,
+                                     venta = c.venta,
+                                     Tipo_moneda_id = c.Tipo_moneda_id
+                                 })
+                                 .FirstOrDefault();
+
+
+                    if (tipoCambioDia == null)
+                    {
+                        var TC = tool.ActualizarTipoCambio();
+                        if (TC != null)
+                        {
+                            tipoCambioDia = TC;
+                        }
+                    }
+
+
                     oR.CodeStatus = HttpStatusCode.OK;
                     oR.Data = new
                     {
@@ -243,7 +271,8 @@ namespace marsh_contable.Controllers
                         mes = mes,
                         anio = anio,
                         facturas_por_tipo_documento = totalPorTipoDocumento,
-                        totalClientesMesActual = totalClientesMesActual
+                        totalClientesMesActual = totalClientesMesActual,
+                        tipo_cambio = tipoCambioDia
                     };
                     return oR;
                 }
@@ -255,5 +284,7 @@ namespace marsh_contable.Controllers
                 return oR;
             }
         }
+
+
     }
 }

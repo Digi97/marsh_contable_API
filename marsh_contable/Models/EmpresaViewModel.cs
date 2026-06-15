@@ -29,8 +29,29 @@ namespace marsh_contable.Models
         public string Distrito_emisor { get; set; }
         public string OtrasSenas_Emisor { get; set; }
 
-        public string Telefono_Emisor { get; set; }
-        public string Codigo_Telefono_Emisor { get; set; }
+
+
+        public int? Provincia_id{ get; set; }
+        public int? Canton_id { get; set; }
+        public int? Distrito_id { get; set; }
+      
+
+        public string Telefono { get; set; }
+        public string Codigo_Telefono { get; set; }
+
+        public string Correo_smtp { get; set; }
+        public string Contrasena_smtp { get; set; }
+        public string Proveedor_SMTP { get; set; }
+        public string Puerto_SMTP { get; set; }
+        public string Asunto_SMTP { get; set; }
+        public string Usuario_hacienda { get; set; }
+        public string Contrasena_hacienda { get; set; }
+
+
+
+
+
+
 
 
     }

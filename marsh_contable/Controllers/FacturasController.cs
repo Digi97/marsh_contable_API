@@ -24,6 +24,7 @@ namespace marsh_contable.Controllers
         [RequierePermiso(PermisosAplica.UsuarioFacturacion)]
         public Reply CreateFactura([FromBody] Models.Facturas model)
         {
+            int id = 0;
             Reply oR = new Reply();
             oR.CodeStatus = 0;
             General tool = new General();
@@ -90,24 +91,25 @@ namespace marsh_contable.Controllers
                     };
                     ctx.Facturas.Add(f);
                     ctx.SaveChanges();
+                    id = f.id;
 
                     FacturaDetallesController factDetalles = new FacturaDetallesController();
                     foreach (var detalles in model.Factura_Detalles)
                     {
                         detalles.Facturas_id = f.id;
-                        var result = factDetalles.CreateFacturaDetalle(detalles, ctx);
+                        var result = factDetalles.CreateFacturaDetalle(detalles);
                         if (result.CodeStatus != HttpStatusCode.OK)
                         {
-
                             throw new Exception(result.Message);
                         }
 
                     }
-
-                    oR.CodeStatus = HttpStatusCode.OK;
-                    oR.Data = f.id;
-                    return oR;
                 }
+
+                CreateDocument(id);
+                oR.CodeStatus = HttpStatusCode.OK;
+                oR.Data = id;
+                return oR;
             }
             catch (System.Data.Entity.Validation.DbEntityValidationException ex2)
             {
@@ -320,6 +322,40 @@ namespace marsh_contable.Controllers
                     {
                         throw new Exception("factura_not_found");
                     }
+
+                   
+
+
+                    f.Factura_Detalles = (from d in ctx.Factura_Detalles
+                                         join um in ctx.Unidad_medida on d.Unidad_medida_id equals um.id
+                                         join cc in  ctx.Codigo_comercial on d.Codigo_comercial_id equals cc.id 
+                                         where d.Facturas_id == id
+                                         select new Models.FacturaDetallesViewModel
+                                         {
+                                             id = d.id,
+                                             Facturas_id = d.Facturas_id,
+                                             Subtotal = d.Subtotal,
+                                             Impuesto = d.Impuesto,
+                                             Total = d.Total,
+                                             Cantidad = d.Cantidad,
+                                             Detalle = d.Detalle,
+                                             Codigos_cabys_id = d.Codigos_cabys_id,
+                                             Codigos_cabys_codigo = d.Codigos_cabys_codigo,
+                                             Codigos_cabys_Impuesto_id = d.Codigos_cabys_Impuesto_id,
+                                             Descuento = d.Descuento,
+                                             Unidad_medida_id = d.Unidad_medida_id,
+                                             Codigo_comercial_id = d.Codigo_comercial_id,
+                                             Fecha = d.Fecha,
+                                             Ultima_fec_actualizacion = d.Ultima_fec_actualizacion,
+                                             Unidad_medida = um.Nombre,
+                                             Codigo_comercial = cc.Nombre
+
+                                         }).ToList();
+
+
+
+
+
                     oR.CodeStatus = HttpStatusCode.OK;
                     oR.Data = f;
                     return oR;
@@ -409,7 +445,7 @@ namespace marsh_contable.Controllers
                 "506",
                 empresa.identificacion,
                 consecutivo,
-                "1",
+                situacionDocumento,
                 empresa.codigo_seguridad
             );
 
@@ -463,14 +499,17 @@ namespace marsh_contable.Controllers
         }
   
     
-        private Boolean CreateDocument(int id, Models.EntitiesModel ctx)
+        private Boolean CreateDocument(int id)
         {
             try
             {
 
-                using (ctx)
+                EmpresaViewModel empresaEmi;
+                List<FacturaDetallesViewModel> detalle;
+                FacturasViewModel f;
+                using (var ctx = new Models.EntitiesModel())
                 {
-                    var f = (from x in ctx.Facturas
+                     f = (from x in ctx.Facturas
                              join c in ctx.Clientes on x.Clientes_id equals c.id
                              join ti in ctx.tipo_identificacion on c.tipo_identificacion_id equals ti.id
                              join tm in ctx.Tipo_moneda on x.Tipo_moneda_id equals tm.id
@@ -521,7 +560,7 @@ namespace marsh_contable.Controllers
                              }).FirstOrDefault();
 
 
-                    var detalle = (from d in ctx.Factura_Detalles
+                     detalle = (from d in ctx.Factura_Detalles
                                    join um in ctx.Unidad_medida on d.Unidad_medida_id equals um.id
                                    join i in ctx.Impuesto on d.Impuesto_id equals i.id
                                    where d.Facturas_id == id
@@ -547,7 +586,7 @@ namespace marsh_contable.Controllers
                                    }).ToList();
 
 
-                    var empresaEmi = (from u in ctx.Empresa
+                     empresaEmi = (from u in ctx.Empresa
                                    join ti in ctx.tipo_identificacion on u.tipo_identificacion_id equals ti.id
                                     join canton in ctx.Canton on u.Canton_id equals canton.id
                                       join dist in ctx.Distrito on u.Distrito_id equals dist.id
@@ -571,108 +610,108 @@ namespace marsh_contable.Controllers
                                        Impuesto_id = u.Impuesto_id,
                                        Tipo_Identificacion = ti.codigo_tipo_identificacion,
                                        Provincia_emisor = u.Provincia_id.ToString(),
-                                       Canton_emisor = canton.codigo,
+                                       Canton_emisor = canton.codigo.ToString().Substring(0, 1),
                                        Distrito_emisor = dist.codigo_distrito,
                                        OtrasSenas_Emisor = u.OtrasSenas,
-                                       Telefono_Emisor = u.Telefono,
-                                       Codigo_Telefono_Emisor = u.Codigo_telefono
+                                       Telefono = u.Telefono,
+                                       Codigo_Telefono = u.Codigo_telefono,
+                                       Usuario_hacienda = u.Usuario_hacienda,
+                                       Contrasena_hacienda = u.Contrasena_hacienda
+
                                    }).FirstOrDefault();
-
-
-
-
-                    var user = "**************";
-                    var userPass = "**********";
-
-                    var pin = "****";
-                    var p12 = "C:\\Users\\$$$$$\\Desktop\\060339051236.p12";
-
-                    var config = new Configuracion(user, userPass, p12, pin);
-                    var FH = new FacturacionHacienda(config);
-
-                    
-                    
-                    ////Emisor                   
-                    var cedulaEmi = new DocumentoIdentificacion(empresaEmi.Tipo_Identificacion, empresaEmi.identificacion);
-                   var telefonoEmi = new TelefonoBase( empresaEmi.Codigo_Telefono_Emisor, empresaEmi.Telefono_Emisor);
-                    var ubicacionEmi = new Ubicacion(empresaEmi.Provincia_emisor, empresaEmi.Canton_emisor, empresaEmi.Distrito_emisor, empresaEmi.OtrasSenas_Emisor);
-                    //var email = "*****@***.com";
-                    var emisor = new Emisor("NOMBRE EMISOR", cedulaEmi, ubicacionEmi,empresaEmi.Correo_empresa);
-
-                    //Informacion de cliente/receptor
-                    var cedula = new DocumentoIdentificacion( f.Tipo_identificacion,f.Cliente_cedula);
-                    var telefono = new TelefonoBase( f.Telefono_codigo_pais, f.Telefono_numero);
-                    var ubicacion = new Ubicacion(f.Cliente_Provincia, f.Cliente_Canton, f.Cliente_distrito, f.Cliente_OtrasSenas);
-                    var receptor = new Receptor("NOMBRE RECEPTOR", cedula,"", f.Cliente,ubicacion,telefono,null, f.Cliente_Correo);
-
-                    var items = new List<Item>();
-
-                    int index = 1;
-
-                    foreach (var row in detalle)
-                    {
-
-                        decimal precio_unitario = (decimal)(row.Subtotal / row.Cantidad);
-                        decimal montoTotal = (decimal)(row.Subtotal / row.Cantidad);
-
-                        //    Item(int numeroLinea, decimal cantidad, string unidadMedida, string detalle, decimal precioUnitario, decimal montoTotal, decimal subTotal, decimal montoTotalLinea,
-                        //string[] codigos = null, decimal descuento = 0,
-                        //string naturalezaDescuento = "", Impuesto[] impuestos = null,
-                        //Exoneracion[] exoneraciones = null)
-                        var taxLine = row.Impuesto_detalle;
-                        
-
-                        var tax = new Facturacion_C_Sharp.Lib.DocumentoItems.Impuesto(taxLine.TarifaIVACodigo, (decimal)taxLine.Porcentaje, 
-                            (decimal)row.Impuesto);
-
-                        items.Add(new Item(index, row.Cantidad, row.Unidad_medida, row.Detalle, precio_unitario, (decimal)row.Subtotal, (decimal)row.Subtotal, (decimal)row.Total,
-                            impuestos: new Facturacion_C_Sharp.Lib.DocumentoItems.Impuesto[] { tax }, descuento: (decimal)row.Descuento, naturalezaDescuento: "Descuento aplicado")); //agregf
-                        index++;
-                    }
-
-
-
-                    var resumenFac = new ResumenFactura(codigoMoneda: f.Tipo_moneda, tipoCambio: (f.Tipo_moneda == "CRC" ? 1 : (decimal)f.cambio_compra), 
-                        totalServExentos: 0, 
-                        totalMercanciasGravadas: (decimal)f.Total, 
-                        totalExento: 0, 
-                        totalGravado: (decimal)f.Total, 
-                        totalVenta: (decimal)f.Total, 
-                        totalVentaNeta: (decimal)f.Total, 
-                        totalImpuesto: (decimal)f.Impuesto, 
-                        totalComprobante: (decimal)f.Total,
-                        totalDescuentos: (decimal) f.Descuento
-                        );
-
-         
-
-                    //DateTime fechaEmision,
-                    //     Emisor emisor,
-                    //     CondicionVenta condicionVenta,
-                    //     String medioPago,                        
-                    //     TipoDocumento tipoDocumento,
-                    //     Item[] items,
-                    //     ResumenFactura resumenFactura,
-                    //     SituacionDocumento situacionDocumento,
-                    //     string clave,
-                    //     string consecutivo,
-                    //     Receptor receptor = null,
-                    //     Normativa normativa = null,
-                    //     Referencia[] referencias = null,
-                    //     string plazoCredito = ""
-                    var factura = new Documento(DateTime.Now, emisor, Documento.CondicionVenta.Contado,
-                                                f.Medio_pago, Documento.TipoDocumento.Factura_Electronica,
-                                                items.ToArray(), 
-                                                resumenFac, 
-                                                Documento.SituacionDocumento.Normal,
-                                                f.Clave,
-                                                f.Consecutivo_electronico,
-                                                receptor );
-
-
-
-
                 }
+
+
+
+                General tool = new General();
+
+
+                var usuarioH = empresaEmi.Usuario_hacienda;
+                var contraH = tool.Desencriptar(empresaEmi.Contrasena_hacienda);
+                var config = new Configuracion(usuarioH, contraH, empresaEmi.Ruta_llave_factura, tool.Desencriptar(empresaEmi.pin_llave));
+                var FH = new FacturacionHacienda(config);
+
+
+                ////Emisor                   
+                var cedulaEmi = new DocumentoIdentificacion(empresaEmi.Tipo_Identificacion, empresaEmi.identificacion);
+                var telefonoEmi = new TelefonoBase(empresaEmi.Codigo_Telefono, empresaEmi.Telefono);
+                var ubicacionEmi = new Ubicacion(empresaEmi.Provincia_emisor, empresaEmi.Canton_emisor, empresaEmi.Distrito_emisor, empresaEmi.OtrasSenas_Emisor);
+              
+                var emisor = new Emisor(empresaEmi.Nombre_empresa, cedulaEmi, ubicacionEmi, empresaEmi.Correo_empresa);
+
+                //Informacion de cliente/receptor
+                var cedula = new DocumentoIdentificacion(f.Tipo_identificacion, f.Cliente_cedula);
+                var telefono = new TelefonoBase(f.Telefono_codigo_pais, f.Telefono_numero);
+                var ubicacion = new Ubicacion(f.Cliente_Provincia, f.Cliente_Canton.ToString().Substring(0, 1), f.Cliente_distrito, f.Cliente_OtrasSenas);
+                var receptor = new Receptor(f.Cliente, cedula, "", f.Cliente, ubicacion, telefono, null, f.Cliente_Correo);
+
+                var items = new List<Item>();
+
+                int index = 1;
+
+                foreach (var row in detalle)
+                {
+
+                    decimal precio_unitario = (decimal)(row.Subtotal / row.Cantidad);
+                    decimal montoTotal = (decimal)(row.Subtotal / row.Cantidad);
+
+                    //    Item(int numeroLinea, decimal cantidad, string unidadMedida, string detalle, decimal precioUnitario, decimal montoTotal, decimal subTotal, decimal montoTotalLinea,
+                    //string[] codigos = null, decimal descuento = 0,
+                    //string naturalezaDescuento = "", Impuesto[] impuestos = null,
+                    //Exoneracion[] exoneraciones = null)
+                    var taxLine = row.Impuesto_detalle;
+
+
+                    var tax = new Facturacion_C_Sharp.Lib.DocumentoItems.Impuesto(taxLine.TarifaIVACodigo, (decimal)taxLine.Porcentaje,
+                        (decimal)row.Impuesto);
+
+                    items.Add(new Item(index, row.Cantidad, row.Unidad_medida, row.Detalle, precio_unitario, (decimal)row.Subtotal, (decimal)row.Subtotal, (decimal)row.Total,
+                        impuestos: new Facturacion_C_Sharp.Lib.DocumentoItems.Impuesto[] { tax }, descuento: (decimal)row.Descuento, naturalezaDescuento: "Descuento aplicado")); //agregf
+                    index++;
+                }
+
+
+
+                var resumenFac = new ResumenFactura(codigoMoneda: f.Tipo_moneda, tipoCambio: (f.Tipo_moneda == "CRC" ? 1 : (decimal)f.cambio_compra),
+                    totalServExentos: 0,
+                    totalMercanciasGravadas: (decimal)f.Total,
+                    totalExento: 0,
+                    totalGravado: (decimal)f.Total,
+                    totalVenta: (decimal)f.Total,
+                    totalVentaNeta: (decimal)f.Total,
+                    totalImpuesto: (decimal)f.Impuesto,
+                    totalComprobante: (decimal)f.Total,
+                    totalDescuentos: (decimal)f.Descuento
+                    );
+
+
+                var factura = new Documento(DateTime.Now, emisor, Documento.CondicionVenta.Contado,
+                                            f.Medio_pago, Documento.TipoDocumento.Factura_Electronica,
+                                            items.ToArray(),
+                                            resumenFac,
+                                            Documento.SituacionDocumento.Normal,
+                                            f.Clave,
+                                            f.Consecutivo_electronico,
+                                            receptor);
+
+
+                factura.FirmarDocumento(config);//firmamos documento para guardarlo
+
+                //var xmlFirmado = FirmadorXML.Firmar(factura, empresaEmi.Ruta_llave_factura, tool.Desencriptar(empresaEmi.pin_llave));
+                FH.GuardarXMLEnviado(factura, empresaEmi.Ruta_nas + "/Documentos_Electronicos/");
+                saveXMLFIle(empresaEmi.Ruta_nas + "/Documentos_Electronicos/" + f.Clave + ".xml");
+
+                //Enviar a Hacienda
+                var esEnviado = FH.EnviarDocumento(factura);
+
+                //Espera a Hacienda
+                System.Threading.Thread.Sleep(2500);
+
+                //Optener el estado de la factura
+                var estado = FH.EstadoDocumento(factura.ClaveNumerica());
+                Console.WriteLine(estado);
+
+
 
 
                 return true;
@@ -681,6 +720,61 @@ namespace marsh_contable.Controllers
             {
                 throw ex;
             }
+        }
+
+
+
+        private bool saveXMLFIle(string rutaArchivo)
+        {
+            try
+            {
+
+
+                bool existe = System.IO.File.Exists(rutaArchivo);
+
+                // Obtener información completa
+                System.IO.FileInfo fileInfo = new System.IO.FileInfo(rutaArchivo);
+
+                string nombreCompleto = fileInfo.Name;               // "llave_factura.p12"
+                string nombreSinExt = fileInfo.Name.Replace(fileInfo.Extension, ""); // "llave_factura"
+                string extension = fileInfo.Extension;           // ".p12"
+                string directorio = fileInfo.DirectoryName;       // "C:\NAS\marsh\llaves"
+                long tamanoBytes = fileInfo.Length;              // 1234
+                double tamanoKB = fileInfo.Length / 1024.0;    // 1.2
+                DateTime fechaCreacion = fileInfo.CreationTime;
+                DateTime fechaModificacion = fileInfo.LastWriteTime;
+                DateTime fechaAcceso = fileInfo.LastAccessTime;
+                bool esReadOnly = fileInfo.IsReadOnly;
+
+                using (var ctx = new Models.EntitiesModel())
+                {
+                    Models.Adjuntos a = new Models.Adjuntos()
+                    {
+                        Nombre_Archivo = nombreCompleto,
+                        Ruta_Archivo = rutaArchivo,
+                        estado = 1, //recien creado significa activo
+                        Tipo_archivo_id = (int)TipoArchivo.XML,
+                        Tamano = tamanoKB,
+                        Descripcion = nombreCompleto,
+                        Usuarios_Usuario_id = 1,//administrador por defecto
+                        extension = extension,
+                        referencia = 0,
+                        Tablas_referencia_id = 1, //Facturas
+                        fecha_ingreso = DateTime.Now,
+                        fecha_actualizacion = DateTime.Now
+                    };
+                    ctx.Adjuntos.Add(a);
+                    ctx.SaveChanges();
+
+                    return true;
+
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+
         }
     
     }

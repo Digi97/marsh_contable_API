@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Linq;
 using System.Web;
 using System.Web.Http;
@@ -18,6 +19,37 @@ namespace marsh_contable
             FilterConfig.RegisterGlobalFilters(GlobalFilters.Filters);
             RouteConfig.RegisterRoutes(RouteTable.Routes);
             BundleConfig.RegisterBundles(BundleTable.Bundles);
+        }
+
+        protected void Application_BeginRequest(object sender, EventArgs e)
+        {
+            HttpContext context = HttpContext.Current;
+            string origin = context.Request.Headers["Origin"];
+
+            // Leer orígenes permitidos del Web.config
+            string[] origenesPermitidos = (ConfigurationManager.AppSettings["CorsOrigins"] ?? "*")
+                .Split(',');
+
+            // Verificar si el origen está en la lista
+            bool origenPermitido = origenesPermitidos.Contains("*") ||
+                                   origenesPermitidos.Any(o => o.Trim() == origin);
+
+            if (origenPermitido && !string.IsNullOrEmpty(origin))
+                context.Response.AddHeader("Access-Control-Allow-Origin", origin);
+            else
+                context.Response.AddHeader("Access-Control-Allow-Origin", "*");
+
+            context.Response.AddHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+            context.Response.AddHeader("Access-Control-Allow-Headers", "Content-Type, Accept, X-Session-Id, Authorization, X-Requested-With");
+            context.Response.AddHeader("Access-Control-Max-Age", "86400");
+
+            // Responder inmediatamente al preflight OPTIONS
+            if (context.Request.HttpMethod == "OPTIONS")
+            {
+                context.Response.StatusCode = 200;
+                context.Response.Flush();
+                context.Response.End();
+            }
         }
     }
 }

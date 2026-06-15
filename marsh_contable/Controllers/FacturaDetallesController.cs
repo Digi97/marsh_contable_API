@@ -19,7 +19,7 @@ namespace marsh_contable.Controllers
         [Authorize]
         [Route("api/v1/factura_detalles")]
         [RequierePermiso(PermisosAplica.UsuarioFacturacion)]
-        public Reply CreateFacturaDetalle([FromBody] Models.Factura_Detalles model, Models.EntitiesModel ctx)
+        public Reply CreateFacturaDetalle([FromBody] Models.Factura_Detalles model)
         {
             Reply oR = new Reply();
             oR.CodeStatus = 0;
@@ -43,7 +43,7 @@ namespace marsh_contable.Controllers
                     throw new Exception("invalid_value_form_Cantidad");
                 }
 
-                using (ctx)
+                using (var ctx = new Models.EntitiesModel())
                 {
                     Models.Factura_Detalles d = new Models.Factura_Detalles()
                     {
@@ -60,7 +60,8 @@ namespace marsh_contable.Controllers
                         Unidad_medida_id = model.Unidad_medida_id,
                         Codigo_comercial_id = model.Codigo_comercial_id,
                         Fecha = DateTime.Now,
-                        Ultima_fec_actualizacion = DateTime.Now
+                        Ultima_fec_actualizacion = DateTime.Now,
+                        Impuesto_id = model.Impuesto_id,
                     };
                     ctx.Factura_Detalles.Add(d);
                     ctx.SaveChanges();

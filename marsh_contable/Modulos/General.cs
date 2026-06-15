@@ -435,7 +435,7 @@ namespace marsh_contable.Modulos
         public String ClaveNumerica(string pais, string cedEmison, string numeroConsecutivo, string situacionDocumento, string codigoSeguridad)
         {
             var fecha = String.Format("{0:ddMMyy}", DateTime.Now);
-            return pais + fecha + cedEmison + numeroConsecutivo + situacionDocumento + codigoSeguridad.PadLeft(8, '0');
+            return pais + fecha + cedEmison.PadLeft(12, '0') + numeroConsecutivo + situacionDocumento + codigoSeguridad.PadLeft(8, '0');
         }
 
 
@@ -465,11 +465,120 @@ namespace marsh_contable.Modulos
             return valor.ToString().PadLeft(2, '0');
         }
 
-        public string RandomHexColor()
+        public Models.TipoCambioViewModel ActualizarTipoCambio()
         {
-            var random = new Random();
-            return string.Format("#{0:X6}", random.Next(0x1000000));
+            try
+            {
+                // ── Fechas del día actual
+                string fechaHoy = DateTime.Now.ToString("yyyy/MM/dd");
+                string apiUrl = $"https://apim.bccr.fi.cr/SDDE/api/Bccr.Ge.SDDE.Publico.Indicadores.API/cuadro/1/series/?idioma=ES&fechaInicio={fechaHoy}&fechaFin={fechaHoy}";
+
+                // ── Leer Bearer token desde Web.config
+                string bccrToken = ConfigurationManager.AppSettings["BCCR_API_TOKEN"];
+
+                if (string.IsNullOrEmpty(bccrToken))
+                    throw new Exception("bccr_api_token_not_configured");
+
+                // ── Consultar API del BCCR con Bearer token
+                string jsonRespuesta;
+                using (var httpClient = new System.Net.Http.HttpClient())
+                {
+                    httpClient.Timeout = TimeSpan.FromSeconds(30);
+
+                    // Agregar el Bearer token en el header
+                    httpClient.DefaultRequestHeaders.Authorization =
+                        new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", bccrToken);
+
+                    var respuesta = httpClient.GetAsync(apiUrl).Result;
+
+                    if (!respuesta.IsSuccessStatusCode)
+                        throw new Exception($"bccr_api_error_{(int)respuesta.StatusCode}");
+
+                    jsonRespuesta = respuesta.Content.ReadAsStringAsync().Result;
+                }
+
+                // ── Deserializar respuesta
+                var resultado = Newtonsoft.Json.JsonConvert.DeserializeObject<BccrResponse>(jsonRespuesta);
+
+                if (resultado == null || !resultado.estado)
+                    throw new Exception("bccr_api_respuesta_invalida");
+
+                // ── Extraer compra y venta
+                double compra = 0;
+                double venta = 0;
+
+                var indicadores = resultado.datos?.FirstOrDefault()?.indicadores;
+
+                if (indicadores == null || !indicadores.Any())
+                    throw new Exception("bccr_api_sin_indicadores");
+
+                foreach (var indicador in indicadores)
+                {
+                    double valor = indicador.series?.FirstOrDefault()?.valorDatoPorPeriodo ?? 0;
+
+                    if (indicador.codigoIndicador == "317") compra = valor;
+                    if (indicador.codigoIndicador == "318") venta = valor;
+                }
+
+                if (compra == 0 || venta == 0)
+                    throw new Exception("bccr_api_valores_no_encontrados");
+
+                // ── Guardar en base de datos
+                using (var ctx = new Models.EntitiesModel())
+                {
+                    DateTime hoy = DateTime.Today;
+                    DateTime manana = hoy.AddDays(1);
+
+                    bool yaExiste = ctx.Tipo_cambio
+                        .Any(t => t.fecha >= hoy &&
+                                  t.fecha < manana &&
+                                  t.Tipo_moneda_id == 1);
+
+                    if (yaExiste)
+                        throw new Exception("tipo_cambio_ya_registrado_hoy");
+
+                    Models.Tipo_cambio tipoCambio = new Models.Tipo_cambio()
+                    {
+                        fecha = DateTime.Now,
+                        compra = compra,
+                        venta = venta,
+                        Tipo_moneda_id = 1,
+                        Usuarios_Usuario_id = 1
+                    };
+
+                    ctx.Tipo_cambio.Add(tipoCambio);
+                    ctx.SaveChanges();
+
+
+                    return new Models.TipoCambioViewModel
+                    {
+                        id = tipoCambio.id,
+                        fecha = tipoCambio.fecha,
+                        compra = tipoCambio.compra,
+                        venta = tipoCambio.venta,
+                        Tipo_moneda_id = tipoCambio.Tipo_moneda_id
+                    };
+
+
+                    //oR.CodeStatus = HttpStatusCode.OK;
+                    //oR.Data = new
+                    //{
+                    //    id = tipoCambio.id,
+                    //    fecha = tipoCambio.fecha,
+                    //    compra = tipoCambio.compra,
+                    //    venta = tipoCambio.venta
+                    //};
+                    //return oR;
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+    
+            }
         }
+
+
 
 
 

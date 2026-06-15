@@ -190,7 +190,7 @@ namespace Facturacion_C_Sharp.Lib
         public XNamespace GetNameSpace ( )
         {
             XNamespace xmlns;
-            xmlns = "https://tribunet.hacienda.go.cr/docs/esquemas/2017/v4.2/mensajeReceptor";
+            xmlns = "https://cdn.comprobanteselectronicos.go.cr/xml-schemas/v4.4/mensajeReceptor";
             return xmlns;
         }
 

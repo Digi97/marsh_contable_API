@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 
 namespace marsh_contable.Models
 {
@@ -41,6 +42,7 @@ namespace marsh_contable.Models
         public String Cliente_distrito { get; set; }
         public String Cliente_OtrasSenas { get; set; }
         public String Cliente_Correo { get; set; }
+        public List<FacturaDetallesViewModel> Factura_Detalles { get; set; }
         
     }
 }

@@ -10,8 +10,15 @@ namespace Facturacion_C_Sharp.Lib
         private String pinLlaveCriptografica;
 
         private String api_client_id = "api-stag";
-        private String documents_endpoint = "https://api.comprobanteselectronicos.go.cr/recepcion-sandbox/v1";
+        private String documents_endpoint = "https://api-sandbox.comprobanteselectronicos.go.cr/recepcion/v1/recepcion/";
         private String authentication_endpoint = "https://idp.comprobanteselectronicos.go.cr/auth/realms/rut-stag/protocol/openid-connect/token";
+
+//        // ── Producción
+//// Autenticación
+//"https://idp.comprobanteselectronicos.go.cr/auth/realms/rut/protocol/openid-connect/token"
+
+//// Recepción
+//"https://api.comprobanteselectronicos.go.cr/recepcion/v1/recepcion"
 
         public Configuracion ( string api_username, string api_password, string rutaLlaveCriptografica, string pinLlaveCriptografica )
         {
