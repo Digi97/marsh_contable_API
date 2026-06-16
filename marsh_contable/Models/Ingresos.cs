@@ -35,7 +35,7 @@ namespace marsh_contable.Models
         public int Clientes_id { get; set; }
         public int Usuarios_Usuario_id { get; set; }
         public int Medio_pago_id { get; set; }
-        public int Facturas_id { get; set; }
+        public Nullable<int> Facturas_id { get; set; }
     
         public virtual Clientes Clientes { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]

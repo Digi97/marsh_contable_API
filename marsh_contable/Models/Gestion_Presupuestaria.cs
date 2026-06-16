@@ -37,6 +37,7 @@ namespace marsh_contable.Models
         public System.DateTime fecha_actualizacion { get; set; }
         public int Usuarios_Usuario_id { get; set; }
         public int Centro_Costos_id { get; set; }
+        public Nullable<int> Tipo_moneda_id { get; set; }
     
         public virtual Categoria_presupuestaria Categoria_presupuestaria { get; set; }
         public virtual Centro_Costos Centro_Costos { get; set; }

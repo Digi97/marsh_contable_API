@@ -11,7 +11,6 @@ using marsh_contable.Modulos;
 
 namespace marsh_contable.Controllers
 {
-  
     public class IngresosController : ApiController
     {
 
@@ -50,6 +49,16 @@ namespace marsh_contable.Controllers
                     throw new Exception("invalid_value_form_Medio_pago_id");
                 }
 
+                if (model.Ingresos_Detalle == null || model.Ingresos_Detalle.Count == 0)
+                {
+                    throw new Exception("detail_is_required");
+                }
+
+                if (model.Tipo_moneda_id == 0)
+                {
+                    throw new Exception("currency_is_required");
+                }
+
                 using (var ctx = new Models.EntitiesModel())
                 {
                     Models.Ingresos i = new Models.Ingresos()
@@ -67,10 +76,22 @@ namespace marsh_contable.Controllers
                         Clientes_id = model.Clientes_id,
                         Usuarios_Usuario_id = model.Usuarios_Usuario_id,
                         Medio_pago_id = model.Medio_pago_id,
-                        Facturas_id = model.Facturas_id
+                        //Facturas_id = null//model.Facturas_id
                     };
                     ctx.Ingresos.Add(i);
                     ctx.SaveChanges();
+
+                    // Guardar detalles usando el mismo contexto
+                    IngresosDetalleController ingresosDetalle = new IngresosDetalleController();
+                    foreach (var detalle in model.Ingresos_Detalle)
+                    {
+                        detalle.Ingresos_id = i.id;
+                        var result = ingresosDetalle.CreateIngresoDetalle(detalle, ctx);
+                        if (result.CodeStatus != HttpStatusCode.OK)
+                        {
+                            throw new Exception(result.Message);
+                        }
+                    }
 
                     oR.CodeStatus = HttpStatusCode.OK;
                     oR.Data = i.id;
@@ -117,6 +138,10 @@ namespace marsh_contable.Controllers
                 if (!tool.ValidaTexto(model.Codigo))
                 {
                     throw new Exception("invalid_string_form_Codigo");
+                }
+                if (model.Tipo_moneda_id == 0)
+                {
+                    throw new Exception("currency_is_required");
                 }
 
                 using (var ctx = new Models.EntitiesModel())
@@ -203,7 +228,7 @@ namespace marsh_contable.Controllers
                                      Medio_pago_id = i.Medio_pago_id,
                                      Facturas_id = i.Facturas_id,
                                      Cliente = c.Nombre + " " + c.Apellido1,
-                                     Tipo_moneda = tm.Nombre,
+                                     Tipo_moneda = tm.Simbolo,
                                      Estado_factura = ef.Nombre,
                                      Medio_pago = mp.descripcion,
                                      Usuario = u.Nombre + " " + u.Apellido1
@@ -273,6 +298,27 @@ namespace marsh_contable.Controllers
                     {
                         throw new Exception("ingreso_not_found");
                     }
+
+                    // Cargar detalles del ingreso
+                    if (i != null)
+                    {
+                        i.IngresosDetalle = ctx.Ingresos_Detalle
+                            .Where(t => t.Ingresos_id == id)
+                            .Select(t => new Models.IngresosDetalleViewModel
+                            {
+                                id = t.id,
+                                Subtotal = t.Subtotal,
+                                Impuesto = t.Impuesto,
+                                Total = t.Total,
+                                Cantidad = t.Cantidad,
+                                Detalle = t.Detalle,
+                                Descuento = t.Descuento,
+                                codigo_comercial = t.codigo_comercial,
+                                //codigo_comercial_id = t.codigo_comercial_id,
+                                Ingresos_id = t.Ingresos_id
+                            }).ToList();
+                    }
+
                     oR.CodeStatus = HttpStatusCode.OK;
                     oR.Data = i;
                     return oR;
@@ -303,7 +349,8 @@ namespace marsh_contable.Controllers
                 using (var ctx = new Models.EntitiesModel())
                 {
                     var lista = ctx.Ingresos.Where(i => i.Clientes_id == clienteId)
-                        .Select(i => new {
+                        .Select(i => new
+                        {
                             i.id,
                             i.Codigo,
                             i.fecha,

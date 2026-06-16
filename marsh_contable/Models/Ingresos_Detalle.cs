@@ -27,7 +27,7 @@ namespace marsh_contable.Models
         public System.DateTime Ultima_fec_actualizacion { get; set; }
         public int Ingresos_id { get; set; }
     
-        public virtual Ingresos Ingresos { get; set; }
         public virtual Unidad_medida Unidad_medida { get; set; }
+        public virtual Ingresos Ingresos { get; set; }
     }
 }

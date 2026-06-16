@@ -26,5 +26,8 @@ namespace marsh_contable.Models
         public string Centro_costo { get; set; }
         public string Usuario { get; set; }
         public string Formato { get; set; }
+
+        public int tipo_moneda_id { get; set; }
+        public string tipo_moneda { get; set; }
     }
 }

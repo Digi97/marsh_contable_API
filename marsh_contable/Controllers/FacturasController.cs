@@ -445,7 +445,7 @@ namespace marsh_contable.Controllers
                 "506",
                 empresa.identificacion,
                 consecutivo,
-                situacionDocumento,
+                "1",//en linea
                 empresa.codigo_seguridad
             );
 
@@ -699,7 +699,7 @@ namespace marsh_contable.Controllers
 
                 //var xmlFirmado = FirmadorXML.Firmar(factura, empresaEmi.Ruta_llave_factura, tool.Desencriptar(empresaEmi.pin_llave));
                 FH.GuardarXMLEnviado(factura, empresaEmi.Ruta_nas + "/Documentos_Electronicos/");
-                saveXMLFIle(empresaEmi.Ruta_nas + "/Documentos_Electronicos/" + f.Clave + ".xml");
+                saveXMLFIle(empresaEmi.Ruta_nas + "/Documentos_Electronicos/" + f.Clave + ".xml", id);
 
                 //Enviar a Hacienda
                 var esEnviado = FH.EnviarDocumento(factura);
@@ -724,7 +724,7 @@ namespace marsh_contable.Controllers
 
 
 
-        private bool saveXMLFIle(string rutaArchivo)
+        private bool saveXMLFIle(string rutaArchivo, int  id = 0)
         {
             try
             {
@@ -758,7 +758,7 @@ namespace marsh_contable.Controllers
                         Descripcion = nombreCompleto,
                         Usuarios_Usuario_id = 1,//administrador por defecto
                         extension = extension,
-                        referencia = 0,
+                        referencia = id, //id de referencia
                         Tablas_referencia_id = 1, //Facturas
                         fecha_ingreso = DateTime.Now,
                         fecha_actualizacion = DateTime.Now

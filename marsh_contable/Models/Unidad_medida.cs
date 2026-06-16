@@ -17,8 +17,8 @@ namespace marsh_contable.Models
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors")]
         public Unidad_medida()
         {
-            this.Factura_Detalles = new HashSet<Factura_Detalles>();
             this.Ingresos_Detalle = new HashSet<Ingresos_Detalle>();
+            this.Factura_Detalles = new HashSet<Factura_Detalles>();
         }
     
         public int id { get; set; }
@@ -26,8 +26,8 @@ namespace marsh_contable.Models
         public string Nombre { get; set; }
     
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<Factura_Detalles> Factura_Detalles { get; set; }
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Ingresos_Detalle> Ingresos_Detalle { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<Factura_Detalles> Factura_Detalles { get; set; }
     }
 }

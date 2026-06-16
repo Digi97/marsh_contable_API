@@ -74,7 +74,8 @@ namespace marsh_contable.Controllers
                         fecha_creacion = DateTime.Now,
                         fecha_actualizacion = DateTime.Now,
                         Usuarios_Usuario_id = model.Usuarios_Usuario_id,
-                        Centro_Costos_id = model.Centro_Costos_id
+                        Centro_Costos_id = model.Centro_Costos_id,
+                        Tipo_moneda_id = model.Tipo_moneda_id
                     };
                     ctx.Gestion_Presupuestaria.Add(gp);
                     ctx.SaveChanges();
@@ -152,6 +153,7 @@ namespace marsh_contable.Controllers
                     gp.estado = (Int16)model.estado;
                     gp.Centro_Costos_id = model.Centro_Costos_id;
                     gp.fecha_actualizacion = DateTime.Now;
+                    gp.Tipo_moneda_id = model.Tipo_moneda_id;
                     ctx.SaveChanges();
 
                     oR.CodeStatus = HttpStatusCode.OK;
@@ -202,6 +204,7 @@ namespace marsh_contable.Controllers
                                  join cp in ctx.Categoria_presupuestaria on gp.Categoria_presupuestaria_id equals cp.id
                                  join cc in ctx.Centro_Costos on gp.Centro_Costos_id equals cc.id
                                  join u in ctx.Usuarios on gp.Usuarios_Usuario_id equals u.Usuario_id
+                                 join tm in ctx.Tipo_moneda on gp.Tipo_moneda_id equals tm.id
                                  select new Models.GestionPresupuestariaViewModel
                                  {
                                      id = gp.id,
@@ -224,7 +227,9 @@ namespace marsh_contable.Controllers
                                      Categoria_presupuestaria = cp.nombre,
                                      Centro_costo = cc.Nombre,
                                      Usuario = u.Nombre + " " + u.Apellido1,
-                                     Formato = formato.ToUpper()
+                                     Formato = formato.ToUpper(),
+                                     tipo_moneda_id = tm.id,
+                                     tipo_moneda = tm.Simbolo
                                  }).ToList();
 
                     oR.CodeStatus = HttpStatusCode.OK;
@@ -260,6 +265,7 @@ namespace marsh_contable.Controllers
                               join cp in ctx.Categoria_presupuestaria on x.Categoria_presupuestaria_id equals cp.id
                               join cc in ctx.Centro_Costos on x.Centro_Costos_id equals cc.id
                               join u in ctx.Usuarios on x.Usuarios_Usuario_id equals u.Usuario_id
+                              join tm in ctx.Tipo_moneda on x.Tipo_moneda_id equals tm.id
                               where x.id == id
                               select new Models.GestionPresupuestariaViewModel
                               {
@@ -282,7 +288,9 @@ namespace marsh_contable.Controllers
                                   Centro_Costos_id = x.Centro_Costos_id,
                                   Categoria_presupuestaria = cp.nombre,
                                   Centro_costo = cc.Nombre,
-                                  Usuario = u.Nombre + " " + u.Apellido1
+                                  Usuario = u.Nombre + " " + u.Apellido1,
+                                  tipo_moneda_id = tm.id,
+                                  tipo_moneda = tm.Simbolo
                               }).FirstOrDefault();
 
                     if (gp == null)

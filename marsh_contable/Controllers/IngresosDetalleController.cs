@@ -19,7 +19,7 @@ namespace marsh_contable.Controllers
         [Authorize]
         [Route("api/v1/ingresos_detalle")]
   
-        public Reply CreateIngresoDetalle([FromBody] Models.Ingresos_Detalle model)
+        public Reply CreateIngresoDetalle([FromBody] Models.Ingresos_Detalle model, Models.EntitiesModel ctx  )
         {
             Reply oR = new Reply();
             oR.CodeStatus = 0;
@@ -47,7 +47,7 @@ namespace marsh_contable.Controllers
                     throw new Exception("invalid_value_form_Unidad_medida_id");
                 }
 
-                using (var ctx = new Models.EntitiesModel())
+                using (ctx)
                 {
                     Models.Ingresos_Detalle d = new Models.Ingresos_Detalle()
                     {
@@ -58,7 +58,7 @@ namespace marsh_contable.Controllers
                         Detalle = model.Detalle,
                         Descuento = model.Descuento,
                         codigo_comercial = model.codigo_comercial,
-                        Unidad_medida_id = model.Unidad_medida_id,
+                        Unidad_medida_id = 1,//por defecto 1
                         Fecha = DateTime.Now,
                         Ultima_fec_actualizacion = DateTime.Now,
                         Ingresos_id = model.Ingresos_id
