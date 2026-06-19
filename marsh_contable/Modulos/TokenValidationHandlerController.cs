@@ -25,8 +25,7 @@ namespace marsh_contable.Modulos
             "api/v1/auth/salt",
             "api/v1/login/recover",
             "api/v1/login/validate-code",
-            "api/v1/login/confirm-change-password",
-            "api/v1/empresa/upload-llave"
+            "api/v1/login/confirm-change-password"
         };
 
             string requestUri = request.RequestUri.AbsolutePath.ToLower().TrimStart('/');

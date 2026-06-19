@@ -23,7 +23,8 @@ namespace marsh_contable
             //    methods: "*"
             //);
             //config.EnableCors(cors);
-         
+
+    
 
             config.MapHttpAttributeRoutes();
             config.MessageHandlers.Add(new Modulos.TokenValidationHandlerController());

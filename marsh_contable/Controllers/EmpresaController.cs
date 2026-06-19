@@ -270,42 +270,47 @@ namespace marsh_contable.Controllers
 
 
         [HttpPost]
-        [AllowAnonymous] 
+        [Authorize]
         [Route("api/v1/empresa/upload-llave")]
- 
-        public Reply UploadLlaveFactura()
+        public Reply UploadLlaveFactura([FromBody] UploadLlaveViewModel model)
         {
             Reply oR = new Reply();
             oR.CodeStatus = 0;
             try
             {
+                // ── Validar modelo
+                if (model == null)
+                    throw new Exception("invalid_model_request_missing");
 
-                // ── Validar sesión manualmente
-                string sessionId = null;
-                if (Request.Headers.Contains("X-Session-Id"))
-                    sessionId = Request.Headers.GetValues("X-Session-Id").FirstOrDefault();
-
-                if (string.IsNullOrEmpty(sessionId))
-                    throw new Exception("session_id_missing");
-
-                string jwt = HttpRuntime.Cache[$"session_{sessionId}"] as string;
-                if (string.IsNullOrEmpty(jwt))
-                    throw new Exception("session_expired_or_invalid");
-
-                var httpRequest = HttpContext.Current.Request;
-
-                if (httpRequest.Files.Count == 0)
+                if (string.IsNullOrEmpty(model.file))
                     throw new Exception("invalid_file_not_found");
 
-                var archivo = httpRequest.Files[0];
-
-                if (archivo == null || archivo.ContentLength == 0)
-                    throw new Exception("invalid_file_empty");
+                if (string.IsNullOrEmpty(model.fileName))
+                    throw new Exception("invalid_file_name_missing");
 
                 // ── Validar extensión .p12
-                string extension = System.IO.Path.GetExtension(archivo.FileName).ToLower();
+                string extension = System.IO.Path.GetExtension(model.fileName).ToLower();
                 if (extension != ".p12")
                     throw new Exception("invalid_file_extension_must_be_p12");
+
+                // ── Limpiar Base64 (quitar prefijo data:...;base64, si viene)
+                string base64 = model.file;
+                if (base64.Contains(","))
+                    base64 = base64.Split(',')[1];
+
+                // ── Convertir Base64 a bytes
+                byte[] fileBytes;
+                try
+                {
+                    fileBytes = Convert.FromBase64String(base64);
+                }
+                catch
+                {
+                    throw new Exception("invalid_file_base64_format");
+                }
+
+                if (fileBytes.Length == 0)
+                    throw new Exception("invalid_file_empty");
 
                 // ── Obtener la ruta NAS desde la BD
                 string rutaNas;
@@ -332,18 +337,17 @@ namespace marsh_contable.Controllers
                 if (!System.IO.Directory.Exists(rutaNas))
                     System.IO.Directory.CreateDirectory(rutaNas);
 
-                // ── Construir ruta completa
-                string nombreArchivo = System.IO.Path.GetFileName(archivo.FileName);
+                // ── Construir ruta completa y guardar
+                string nombreArchivo = System.IO.Path.GetFileName(model.fileName);
                 string rutaCompleta = System.IO.Path.Combine(rutaNas, nombreArchivo);
 
-                // ── Guardar el archivo
-                archivo.SaveAs(rutaCompleta);
+                System.IO.File.WriteAllBytes(rutaCompleta, fileBytes);
 
                 // ── Actualizar Ruta_llave_factura en BD
                 using (var ctx = new Models.EntitiesModel())
                 {
-                    ctx.Configuration.LazyLoadingEnabled = false;
-                    ctx.Configuration.ProxyCreationEnabled = false;
+                  //  ctx.Configuration.LazyLoadingEnabled = false;
+                    //ctx.Configuration.ProxyCreationEnabled = false;
 
                     var empresaExistente = ctx.Empresa.FirstOrDefault(e => e.Emp_id == 1);
                     if (empresaExistente != null)
