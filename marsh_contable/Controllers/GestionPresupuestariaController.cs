@@ -55,8 +55,32 @@ namespace marsh_contable.Controllers
                     throw new Exception("invalid_value_form_Centro_Costos_id");
                 }
 
+                if (model.periodo_inicio >= model.periodo_fin)
+                {
+                    throw new Exception("periodo_should_be_minor_than_periodo_fin");
+                }
+               
+                if (model.anio_presupuesto.Length != 4 || !int.TryParse(model.anio_presupuesto, out int anio))
+                {
+                    throw new Exception("invalid_format_anio_presupuesto");
+                }
+
+                if (anio < model.periodo_inicio.Year || anio > model.periodo_fin.Year)
+                {
+                    throw new Exception("anio_presupuesto_fuera_de_periodo");
+                }
+
+
                 using (var ctx = new Models.EntitiesModel())
                 {
+
+                    Models.Gestion_Presupuestaria gpExist = ctx.Gestion_Presupuestaria.FirstOrDefault(u => u.periodo_inicio >=  model.periodo_inicio || u.periodo_fin <= model.periodo_fin);
+                    if (gpExist != null)
+                    {
+                        throw new Exception("gestion_presupuestaria_for_period_exist");
+                    }
+
+
                     Models.Gestion_Presupuestaria gp = new Models.Gestion_Presupuestaria()
                     {
                         codigo = model.codigo,

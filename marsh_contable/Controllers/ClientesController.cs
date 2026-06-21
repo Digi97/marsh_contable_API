@@ -329,7 +329,7 @@ namespace marsh_contable.Controllers
                             x.identificacion,
                             x.correo,
                             x.estado
-                        })
+                        }).OrderByDescending(x => x.id)
                         .ToList();
 
                     oR.CodeStatus = HttpStatusCode.OK;

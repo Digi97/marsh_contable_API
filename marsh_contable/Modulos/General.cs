@@ -263,7 +263,7 @@ namespace marsh_contable.Modulos
 
         public bool ValidaTexto(string text)
         {
-            const String regexfotNames = @"^[a-zA-ZáéíóúÁÉÍÓÚñÑ0-9\s.,;:¡!¿?\-_()%]+$";
+            const String regexfotNames = @"^[a-zA-ZáéíóúÁÉÍÓÚñÑ0-9\s.,;:¡!¿?\-_()%#]+$";
             if (!string.IsNullOrWhiteSpace(text) && Regex.IsMatch(text, regexfotNames))
             {
                 return true;

@@ -47,8 +47,18 @@ namespace marsh_contable.Controllers
                         Monto_modificado = model.Monto_modificado,
                         Monto_compometido = model.Monto_compometido,
                         detalle_presupuesto = model.detalle_presupuesto,
-                        Gestion_Presupuestaria_id = model.Gestion_Presupuestaria_id
+                        Gestion_Presupuestaria_id = model.Gestion_Presupuestaria_id,
+                        Categoria_presupuestaria_id = model.Categoria_presupuestaria_id,
+                        Gastos_id = model.Gastos_id,
+                        Ingresos_id = model.Ingresos_id,
+                        Facturas_id = model.Facturas_id,
+                        Monto_ejecutado = model.Monto_ejecutado,
+                        Usuarios_Usuario_id = model.Usuarios_Usuario_id,
+                        Fecha_registro = DateTime.Now,
+                        Observaciones = "",
+                        activo = 1
                     };
+
                     ctx.Gestion_P_detalle.Add(d);
                     ctx.SaveChanges();
 
@@ -83,11 +93,12 @@ namespace marsh_contable.Controllers
         [HttpPut]
         [Authorize]
         [Route("api/v1/gestion_p_detalle/{id}")]
-        public Reply UpdateGestionPDetalle(int id, [FromBody] Models.Gestion_P_detalle model)
+        public Reply UpdateGestionPDetalle(int id, [FromBody] Models.Gestion_P_detalle model, int typeDoc = 0)
         {
             Reply oR = new Reply();
             oR.CodeStatus = 0;
             General tool = new General();
+            Models.Gestion_P_detalle d;
             try
             {
                 if (model == null)
@@ -101,7 +112,26 @@ namespace marsh_contable.Controllers
 
                 using (var ctx = new Models.EntitiesModel())
                 {
-                    Models.Gestion_P_detalle d = ctx.Gestion_P_detalle.FirstOrDefault(u => u.id == id);
+                    
+                    switch(typeDoc)
+                    {
+                        case 0:// Gastos_id
+                            d = ctx.Gestion_P_detalle.FirstOrDefault(u => u.Gastos_id == id);
+                           break;
+                        case 1: //Ingresos
+                            d = ctx.Gestion_P_detalle.FirstOrDefault(u => u.Ingresos_id == id);
+
+                            break;
+
+                        case 2: //Facturas
+                            d = ctx.Gestion_P_detalle.FirstOrDefault(u => u.Facturas_id == id);
+                        break;
+                        default:
+                            d = null;
+                                break;
+                    }
+
+                   
                     if (d == null)
                     {
                         throw new Exception("gestion_p_detalle_not_found");
@@ -112,6 +142,15 @@ namespace marsh_contable.Controllers
                     d.Monto_compometido = model.Monto_compometido;
                     d.detalle_presupuesto = model.detalle_presupuesto;
                     d.Gestion_Presupuestaria_id = model.Gestion_Presupuestaria_id;
+                    d.Categoria_presupuestaria_id = model.Categoria_presupuestaria_id;
+                    d.Gastos_id = model.Gastos_id;
+                    d.Ingresos_id = model.Ingresos_id;
+                    d.Facturas_id = model.Facturas_id;
+                    d.Monto_ejecutado = model.Monto_ejecutado;
+                    d.Usuarios_Usuario_id = model.Usuarios_Usuario_id;
+                    d.Fecha_registro = model.Fecha_registro;
+                    d.Observaciones = model.Observaciones;
+                    d.activo = model.activo;
                     ctx.SaveChanges();
 
                     oR.CodeStatus = HttpStatusCode.OK;
@@ -159,6 +198,20 @@ namespace marsh_contable.Controllers
                 {
                     var lista = (from d in ctx.Gestion_P_detalle
                                  join gp in ctx.Gestion_Presupuestaria on d.Gestion_Presupuestaria_id equals gp.id
+                                 join cp in ctx.Categoria_presupuestaria on d.Categoria_presupuestaria_id equals cp.id
+
+                                 // LEFT JOIN Facturas
+                                 join f in ctx.Facturas on d.Facturas_id equals f.id into facturaGroup
+                                 from f in facturaGroup.DefaultIfEmpty()
+
+                                     // LEFT JOIN Gastos
+                                 join g in ctx.Gastos on d.Gastos_id equals g.id into gastoGroup
+                                 from g in gastoGroup.DefaultIfEmpty()
+
+                                     // LEFT JOIN Ingresos
+                                 join i in ctx.Ingresos on d.Ingresos_id equals i.id into ingresoGroup
+                                 from i in ingresoGroup.DefaultIfEmpty()
+
                                  where d.Gestion_Presupuestaria_id == gestionId
                                  select new Models.GestionPDetalleViewModel
                                  {
@@ -169,8 +222,16 @@ namespace marsh_contable.Controllers
                                      Monto_compometido = d.Monto_compometido,
                                      detalle_presupuesto = d.detalle_presupuesto,
                                      Gestion_Presupuestaria_id = d.Gestion_Presupuestaria_id,
-                                     Gestion_presupuestaria_nombre = gp.nombre
-                                 }).ToList();
+                                     Gestion_presupuestaria_nombre = gp.nombre,
+                                     Gastos_id = d.Gastos_id,
+                                     Facturas_id = d.Facturas_id,
+                                     Ingresos_id = d.Ingresos_id,
+                                     Monto_ejecutado = d.Monto_ejecutado,
+                                     Fecha_registro = d.Fecha_registro,
+                                     categoria_presupuestaria = cp.nombre,
+                                     Observaciones = d.Observaciones
+
+                                 }).OrderByDescending(x => x.id).ToList();
 
                     oR.CodeStatus = HttpStatusCode.OK;
                     oR.Data = lista;

@@ -23,6 +23,7 @@ namespace marsh_contable.Models
         public int Clientes_id { get; set; }
         public int Condicion_venta_id { get; set; }
         public int Medio_pago_id { get; set; }
+        public int Usuarios_Usuario_id { get; set; }
 
         // Descripciones
         public string Tipo_moneda { get; set; }
@@ -43,7 +44,11 @@ namespace marsh_contable.Models
         public String Cliente_OtrasSenas { get; set; }
         public String Cliente_Correo { get; set; }
         public List<FacturaDetallesViewModel> Factura_Detalles { get; set; }
-        
+        public List<FacturaDetallesViewModel> Factura_DetalleEliminados { get; set; }
+
+        public List<FacturaDetallesViewModel> Factura_DetalleAgregados { get; set; }
+
+
     }
 }
 // FECHA DE ENTEGA NOTAS: SIGUIENTE SEMANA SEMANA 5

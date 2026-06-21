@@ -270,7 +270,7 @@ namespace marsh_contable.Controllers
      
              Rol = r.Descripcion
  }
-            ).ToList();
+            ).OrderByDescending(x => x.Usuario_id).ToList();
 
                     oR.CodeStatus = HttpStatusCode.OK;
                     oR.Data = usuarios;

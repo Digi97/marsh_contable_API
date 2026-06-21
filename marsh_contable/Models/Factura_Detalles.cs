@@ -34,7 +34,7 @@ namespace marsh_contable.Models
     
         public virtual Codigo_comercial Codigo_comercial { get; set; }
         public virtual Codigos_cabys Codigos_cabys { get; set; }
-        public virtual Facturas Facturas { get; set; }
         public virtual Unidad_medida Unidad_medida { get; set; }
+        public virtual Facturas Facturas { get; set; }
     }
 }

@@ -19,6 +19,10 @@ namespace marsh_contable.Controllers
         [Route("api/v1/ingresos")]
         public Reply CreateIngreso([FromBody] Models.Ingresos model)
         {
+
+            int id = 0;
+            Models.Gestion_Presupuestaria gpExist;
+            Models.Ingresos i;
             Reply oR = new Reply();
             oR.CodeStatus = 0;
             General tool = new General();
@@ -61,7 +65,17 @@ namespace marsh_contable.Controllers
 
                 using (var ctx = new Models.EntitiesModel())
                 {
-                    Models.Ingresos i = new Models.Ingresos()
+
+                    DateTime currentDate = DateTime.Now;
+
+                    gpExist = ctx.Gestion_Presupuestaria
+       .FirstOrDefault(u => currentDate >= u.periodo_inicio && currentDate <= u.periodo_fin);
+                    
+                    if (gpExist == null)
+                    {
+                        throw new Exception("gestion_presupuestaria_for_current_period_dont_exist");
+                    }
+                     i = new Models.Ingresos()
                     {
                         Codigo = model.Codigo,
                         fecha = DateTime.Now,
@@ -85,6 +99,7 @@ namespace marsh_contable.Controllers
                     IngresosDetalleController ingresosDetalle = new IngresosDetalleController();
                     foreach (var detalle in model.Ingresos_Detalle)
                     {
+                        id = i.id;
                         detalle.Ingresos_id = i.id;
                         var result = ingresosDetalle.CreateIngresoDetalle(detalle, ctx);
                         if (result.CodeStatus != HttpStatusCode.OK)
@@ -93,10 +108,41 @@ namespace marsh_contable.Controllers
                         }
                     }
 
-                    oR.CodeStatus = HttpStatusCode.OK;
-                    oR.Data = i.id;
-                    return oR;
+          
                 }
+
+
+                Models.Gestion_P_detalle detalleP = new Models.Gestion_P_detalle()
+                {
+                    Monto = i.Total,
+                    Monto_aprobado = gpExist.monto_aprobado,
+                    Monto_modificado = gpExist.monto_modificado,
+                    Monto_compometido = gpExist.monto_comprometido,
+                    Monto_ejecutado = (decimal)i.Total,
+                    detalle_presupuesto = $"Ingresos #{id}",
+                    Gestion_Presupuestaria_id = gpExist.id, // ID del presupuesto activo
+                    Categoria_presupuestaria_id = (int)Modulos.Categoria_presupuestaria.Ingresos,
+                    Gastos_id = null,
+                    Ingresos_id = id,
+                    Facturas_id = null,
+                    Usuarios_Usuario_id = (int)model.Usuarios_Usuario_id,
+                    Fecha_registro = DateTime.Now,
+                    Observaciones = $"Id: {i.id} | Subtotal: {i.Subtotal} | Impuesto: {i.Impuesto} | Descuento: {i.Descuento}",
+                    activo = 1
+                };
+
+
+                GestionPDetalleController detalleGestion = new GestionPDetalleController();
+                var response = detalleGestion.CreateGestionPDetalle(detalleP);
+
+                if (response.CodeStatus != HttpStatusCode.OK)
+                {
+                    throw new Exception(response.Message);
+                }
+
+                oR.CodeStatus = HttpStatusCode.OK;
+                oR.Data = i.id;
+                return oR;
             }
             catch (System.Data.Entity.Validation.DbEntityValidationException ex2)
             {
@@ -129,6 +175,8 @@ namespace marsh_contable.Controllers
             Reply oR = new Reply();
             oR.CodeStatus = 0;
             General tool = new General();
+            Models.Gestion_Presupuestaria gpExist;
+            Models.Ingresos i;
             try
             {
                 if (model == null)
@@ -146,7 +194,17 @@ namespace marsh_contable.Controllers
 
                 using (var ctx = new Models.EntitiesModel())
                 {
-                    Models.Ingresos i = ctx.Ingresos.FirstOrDefault(u => u.id == id);
+
+                    DateTime currentDate = DateTime.Now;
+                    gpExist = ctx.Gestion_Presupuestaria
+      .FirstOrDefault(u => currentDate >= u.periodo_inicio && currentDate <= u.periodo_fin);
+                    
+                    if (gpExist == null)
+                    {
+                        throw new Exception("gestion_presupuestaria_for_current_period_dont_exist");
+                    }
+                    
+                    i = ctx.Ingresos.FirstOrDefault(u => u.id == id);
                     if (i == null)
                     {
                         throw new Exception("ingreso_not_found");
@@ -165,10 +223,42 @@ namespace marsh_contable.Controllers
                     i.Facturas_id = model.Facturas_id;
                     ctx.SaveChanges();
 
-                    oR.CodeStatus = HttpStatusCode.OK;
-                    oR.Data = i.id;
-                    return oR;
                 }
+
+
+
+                Models.Gestion_P_detalle detalle = new Models.Gestion_P_detalle()
+                {
+                    Monto = i.Total,
+                    Monto_aprobado = gpExist.monto_aprobado,
+                    Monto_modificado = gpExist.monto_modificado,
+                    Monto_compometido = gpExist.monto_comprometido,
+                    Monto_ejecutado = (decimal)i.Total,
+                    detalle_presupuesto = $"Gastos #{id}",
+                    Gestion_Presupuestaria_id = gpExist.id, // ID del presupuesto activo
+                    Categoria_presupuestaria_id = (int)Modulos.Categoria_presupuestaria.Ingresos,
+                    Gastos_id = null,
+                    Ingresos_id = id,
+                    Facturas_id = null,
+                    Usuarios_Usuario_id = (int)model.Usuarios_Usuario_id,
+                    Fecha_registro = DateTime.Now,
+                    Observaciones = $"Id: {i.id} | Subtotal: {i.Subtotal} | Impuesto: {i.Impuesto} | Descuento: {i.Descuento}",
+                    activo = 1
+                };
+
+
+                GestionPDetalleController detalleGestion = new GestionPDetalleController();
+                var response = detalleGestion.UpdateGestionPDetalle(id, detalle, 1);
+
+                if (response.CodeStatus != HttpStatusCode.OK)
+                {
+                    throw new Exception(response.Message);
+                }
+
+
+                oR.CodeStatus = HttpStatusCode.OK;
+                oR.Data = i.id;
+                return oR;
             }
             catch (System.Data.Entity.Validation.DbEntityValidationException ex2)
             {
@@ -232,7 +322,7 @@ namespace marsh_contable.Controllers
                                      Estado_factura = ef.Nombre,
                                      Medio_pago = mp.descripcion,
                                      Usuario = u.Nombre + " " + u.Apellido1
-                                 }).ToList();
+                                 }).OrderByDescending(x => x.id).ToList();
 
                     oR.CodeStatus = HttpStatusCode.OK;
                     oR.Data = lista;

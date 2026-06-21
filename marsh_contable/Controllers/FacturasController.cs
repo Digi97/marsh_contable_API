@@ -25,6 +25,8 @@ namespace marsh_contable.Controllers
         public Reply CreateFactura([FromBody] Models.Facturas model)
         {
             int id = 0;
+            Models.Gestion_Presupuestaria gpExist;
+            Models.Facturas f;
             Reply oR = new Reply();
             oR.CodeStatus = 0;
             General tool = new General();
@@ -59,8 +61,21 @@ namespace marsh_contable.Controllers
                     throw new Exception("invalid_value_form_Tipo_documento_id");
                 }
 
+              
+
+
+
                 using (var ctx = new Models.EntitiesModel())
                 {
+
+                      DateTime currentDate = DateTime.Now;
+
+                    gpExist = ctx.Gestion_Presupuestaria
+       .FirstOrDefault(u => currentDate >= u.periodo_inicio && currentDate <= u.periodo_fin);
+                    if (gpExist == null)
+                {
+                    throw new Exception("gestion_presupuestaria_for_current_period_dont_exist");
+                }
 
                     int siguienteConsecutivo = ctx.Facturas
                     .Where(x => x.Tipo_documento_id == (int)TipoDocumentoId.FacturaElectronica)
@@ -70,7 +85,7 @@ namespace marsh_contable.Controllers
 
                     var llaves = ObtenerClaveYConsecutivo(ctx, TipoDocumentoId.FacturaElectronica); //generamos las llaves, de nuevo, esto como doble factor para que no se repita la clave
 
-                    Models.Facturas f = new Models.Facturas()
+                     f = new Models.Facturas()
                     {
                         Clave = llaves.Clave,
                         Consecutivo_electronico = llaves.Consecutivo,
@@ -87,7 +102,8 @@ namespace marsh_contable.Controllers
                         cambio_compra = model.cambio_compra,
                         Clientes_id = model.Clientes_id,
                         Condicion_venta_id = model.Condicion_venta_id,
-                        Medio_pago_id = model.Medio_pago_id
+                        Medio_pago_id = model.Medio_pago_id,
+                        Usuarios_Usuario_id = model.Usuarios_Usuario_id
                     };
                     ctx.Facturas.Add(f);
                     ctx.SaveChanges();
@@ -106,7 +122,38 @@ namespace marsh_contable.Controllers
                     }
                 }
 
+
+
+                Models.Gestion_P_detalle detalle = new Models.Gestion_P_detalle()
+                {
+                    Monto = f.Total,
+                    Monto_aprobado = gpExist.monto_aprobado,
+                    Monto_modificado = gpExist.monto_modificado,
+                    Monto_compometido = gpExist.monto_comprometido,
+                    Monto_ejecutado = (decimal)f.Total,
+                    detalle_presupuesto = $"Factura #{id} - Clave: {f.Clave}",
+                    Gestion_Presupuestaria_id = gpExist.id, // ID del presupuesto activo
+                    Categoria_presupuestaria_id = (int)Modulos.Categoria_presupuestaria.Ingresos,
+                    Gastos_id = null,
+                    Ingresos_id = null,
+                    Facturas_id = id,
+                    Usuarios_Usuario_id = (int)model.Usuarios_Usuario_id,
+                    Fecha_registro = DateTime.Now,
+                    Observaciones = $"Consecutivo: {f.Consecutivo_electronico} | Subtotal: {f.Subtotal} | Impuesto: {f.Impuesto} | Descuento: {f.Descuento}",
+                    activo = 1
+                };
+
+
+                GestionPDetalleController detalleGestion = new GestionPDetalleController();
+                var response = detalleGestion.CreateGestionPDetalle(detalle);
+
+                if(response.CodeStatus != HttpStatusCode.OK)
+                {
+                    throw new Exception(response.Message);
+                }
+                /// si todo se hace correctamente creamos el doc electronico
                 CreateDocument(id);
+
                 oR.CodeStatus = HttpStatusCode.OK;
                 oR.Data = id;
                 return oR;
@@ -138,11 +185,13 @@ namespace marsh_contable.Controllers
         [Authorize]
         [Route("api/v1/facturas/{id}")]
         [RequierePermiso(PermisosAplica.UsuarioFacturacion)]
-        public Reply UpdateFactura(int id, [FromBody] Models.Facturas model)
+        public Reply UpdateFactura(int id, [FromBody] Models.FacturasViewModel model)
         {
             Reply oR = new Reply();
             oR.CodeStatus = 0;
             General tool = new General();
+            Models.Gestion_Presupuestaria gpExist;
+            Models.Facturas f;
             try
             {
                 if (model == null)
@@ -154,9 +203,28 @@ namespace marsh_contable.Controllers
                     throw new Exception("invalid_string_form_Clave");
                 }
 
+                if (!tool.ValidaTexto(model.Clave))
+                {
+                    throw new Exception("invalid_string_form_Clave");
+                }
+
+
+                if (model.Factura_DetalleAgregados.Count  == 0 || model.Factura_DetalleEliminados.Count == 0 )
+                {
+                    throw new Exception("nothing_changed_on_this_invoice");
+                }
+
                 using (var ctx = new Models.EntitiesModel())
                 {
-                    Models.Facturas f = ctx.Facturas.FirstOrDefault(u => u.id == id);
+
+                    DateTime currentDate = DateTime.Now;
+                    gpExist = ctx.Gestion_Presupuestaria
+     .FirstOrDefault(u => currentDate >= u.periodo_inicio && currentDate <= u.periodo_fin);
+                    if (gpExist == null)
+                    {
+                        throw new Exception("gestion_presupuestaria_for_current_period_dont_exist");
+                    }
+                    f = ctx.Facturas.FirstOrDefault(u => u.id == id);
                     if (f == null)
                     {
                         throw new Exception("factura_not_found");
@@ -178,11 +246,42 @@ namespace marsh_contable.Controllers
                     f.Condicion_venta_id = model.Condicion_venta_id;
                     f.Medio_pago_id = model.Medio_pago_id;
                     ctx.SaveChanges();
-
-                    oR.CodeStatus = HttpStatusCode.OK;
-                    oR.Data = f.id;
-                    return oR;
                 }
+
+
+
+                Models.Gestion_P_detalle detalle = new Models.Gestion_P_detalle()
+                {
+                    Monto =f.Total,
+                    Monto_aprobado = gpExist.monto_aprobado,
+                    Monto_modificado = gpExist.monto_modificado,
+                    Monto_compometido = gpExist.monto_comprometido,
+                    Monto_ejecutado = (decimal)f.Total,
+                    detalle_presupuesto = $"Gastos #{id}",
+                    Gestion_Presupuestaria_id = gpExist.id, // ID del presupuesto activo
+                    Categoria_presupuestaria_id = (int)Modulos.Categoria_presupuestaria.Ingresos,
+                    Gastos_id = null,
+                    Ingresos_id = null,
+                    Facturas_id = id,
+                    Usuarios_Usuario_id = (int)model.Usuarios_Usuario_id,
+                    Fecha_registro = DateTime.Now,
+                    Observaciones = $"Id: {f.id} | Subtotal: {f.Subtotal} | Impuesto: {f.Impuesto} | Descuento: {f.Descuento}",
+                    activo = 1
+                };
+
+
+                GestionPDetalleController detalleGestion = new GestionPDetalleController();
+                var response = detalleGestion.UpdateGestionPDetalle(id, detalle, 2);
+
+                if (response.CodeStatus != HttpStatusCode.OK)
+                {
+                    throw new Exception(response.Message);
+                }
+
+
+                oR.CodeStatus = HttpStatusCode.OK;
+                oR.Data = id;
+                return oR;
             }
             catch (System.Data.Entity.Validation.DbEntityValidationException ex2)
             {
@@ -225,6 +324,7 @@ namespace marsh_contable.Controllers
                                  join td in ctx.Tipo_documento on f.Tipo_documento_id equals td.id
                                  join cv in ctx.Condicion_venta on f.Condicion_venta_id equals cv.id
                                  join mp in ctx.Medio_pago on f.Medio_pago_id equals mp.id
+                                 where f.Tipo_documento_id == (int)TipoDocumentoId.FacturaElectronica //filtramos solo las facturas
                                  select new Models.FacturasViewModel
                                  {
                                      id = f.id,
@@ -708,12 +808,40 @@ namespace marsh_contable.Controllers
                 System.Threading.Thread.Sleep(2500);
 
                 //Optener el estado de la factura
-                var estado = FH.EstadoDocumento(factura.ClaveNumerica());
-                Console.WriteLine(estado);
+                var estado = FH.EstadoDocumento(f.Clave);
 
+                using (var ctx = new Models.EntitiesModel())
+                {
 
+                    Models.Facturas fupdate = ctx.Facturas.FirstOrDefault(u => u.id == id);
+                    if (f == null)
+                    {
+                        throw new Exception("factura_not_found");
+                    }
+                    int newStatus = 0;
+                    switch(estado.EstadoEnHacienda)
+                    {
+                        case "aceptado":
+                            newStatus = (int)EstadoFactura.AceptadoPorHacienda;
+                        break;
+                        case "procesando":
+                            newStatus = (int)EstadoFactura.PendienteProcesarHacienda;
+                            break;
+                        case "rechazado":
+                            newStatus = (int)EstadoFactura.RechazadoPorHacienda;
+                            break;
+                        case "recibido":
+                            newStatus = (int)EstadoFactura.RecibidoHacienda;
+                            break;
+                        default:
+                            newStatus = (int)EstadoFactura.Error;
+                         break;
+                    
+                    }
+                    fupdate.Estado_Factura_id = newStatus;
 
-
+                    ctx.SaveChanges();
+                }
                 return true;
 
             }catch(Exception ex)
@@ -776,6 +904,266 @@ namespace marsh_contable.Controllers
             }
 
         }
-    
+
+
+        [HttpPost]
+        [Authorize]
+        [Route("api/v1/aceptafactura")]
+        [RequierePermiso(PermisosAplica.UsuarioAceptacionFacturas)]
+        public Reply AceptaFactura([FromBody] AceptaFacturaViewModel model)
+        {
+            Reply oR = new Reply();
+            oR.CodeStatus = 0;
+            General tool = new General();
+            try
+            {
+                if (model == null)
+                    throw new Exception("invalid_model_request_missing");
+
+                if (string.IsNullOrEmpty(model.base64Factura))
+                    throw new Exception("invalid_base64_factura_missing");
+
+                // ── PASO 1: Decodificar Base64 a texto XML
+                string xmlTexto;
+                try
+                {
+                    // Limpiar prefijo data:...;base64, si viene
+                    string base64 = model.base64Factura;
+                    if (base64.Contains(","))
+                        base64 = base64.Split(',')[1];
+
+                    byte[] xmlBytes = Convert.FromBase64String(base64);
+                    xmlTexto = System.Text.Encoding.UTF8.GetString(xmlBytes);
+                }
+                catch
+                {
+                    throw new Exception("invalid_base64_format");
+                }
+
+                // ── PASO 2: Parsear XML
+                System.Xml.Linq.XDocument xmlDoc;
+                try
+                {
+                    xmlDoc = System.Xml.Linq.XDocument.Parse(xmlTexto);
+                }
+                catch
+                {
+                    throw new Exception("invalid_xml_format");
+                }
+
+                // ── PASO 3: Namespace de FacturaElectronica v4.4
+                System.Xml.Linq.XNamespace ns =
+                    "https://cdn.comprobanteselectronicos.go.cr/xml-schemas/v4.4/facturaElectronica";
+
+                var root = xmlDoc.Root;
+                if (root == null || root.Name.LocalName != "FacturaElectronica")
+                    throw new Exception("invalid_xml_not_factura_electronica");
+
+                // ── PASO 4: Extraer datos del XML
+                string clave = root.Element(ns + "Clave")?.Value ?? "";
+                string consecutivo = root.Element(ns + "NumeroConsecutivo")?.Value ?? "";
+                string fechaEmision = root.Element(ns + "FechaEmision")?.Value ?? "";
+
+                // Emisor (proveedor)
+                var emisor = root.Element(ns + "Emisor");
+                string emisorNombre = emisor?.Element(ns + "Nombre")?.Value ?? "";
+                string emisorTipo = emisor?.Element(ns + "Identificacion")
+                                            ?.Element(ns + "Tipo")?.Value ?? "";
+                string emisorNumero = emisor?.Element(ns + "Identificacion")
+                                            ?.Element(ns + "Numero")?.Value ?? "";
+
+                // Receptor (la empresa)
+                var receptor = root.Element(ns + "Receptor");
+                string receptorNombre = receptor?.Element(ns + "Nombre")?.Value ?? "";
+
+                // Resumen
+                var resumen = root.Element(ns + "ResumenFactura");
+                double totalVenta = double.Parse(resumen?.Element(ns + "TotalVenta")?.Value ?? "0",
+                    System.Globalization.CultureInfo.InvariantCulture);
+                double totalDescuentos = double.Parse(resumen?.Element(ns + "TotalDescuentos")?.Value ?? "0",
+                    System.Globalization.CultureInfo.InvariantCulture);
+                double totalImpuesto = double.Parse(resumen?.Element(ns + "TotalImpuesto")?.Value ?? "0",
+                    System.Globalization.CultureInfo.InvariantCulture);
+                double totalComprobante = double.Parse(resumen?.Element(ns + "TotalComprobante")?.Value ?? "0",
+                    System.Globalization.CultureInfo.InvariantCulture);
+
+                // Validaciones básicas
+                if (string.IsNullOrEmpty(clave))
+                    throw new Exception("xml_missing_clave");
+                if (string.IsNullOrEmpty(emisorNombre))
+                    throw new Exception("xml_missing_emisor");
+
+                // ── PASO 5: Buscar o crear proveedor por identificación
+                int proveedorId = 0;
+                using (var ctx = new Models.EntitiesModel())
+                {
+                    ctx.Configuration.LazyLoadingEnabled = false;
+                    ctx.Configuration.ProxyCreationEnabled = false;
+
+                    var proveedor = ctx.Proveedor
+                        .FirstOrDefault(p => p.identificacion == emisorNumero);
+
+                    if (proveedor != null)
+                    {
+                        proveedorId = proveedor.id;
+                    }
+                    else
+                    {
+                        // Crear proveedor automáticamente desde datos del XML
+                        var nuevoProveedor = new Models.Proveedor()
+                        {
+                            identificacion = emisorNumero,
+                            tipo_identificacion_id = int.Parse(emisorTipo),
+                            Nombre = emisorNombre,
+                            Apellido1 = "",
+                            Apellido2 = "",
+                            correo = emisor?.Element(ns + "CorreoElectronico")?.Value ?? "",
+                            Distrito_id = 1,
+                            Canton_id = 1,
+                            Provincia_id = 1,
+                            codigo_actividad_id = 1,
+                            estado = 1,
+                            fecha_creacion = DateTime.Now,
+                            fecha_actualizacion = DateTime.Now,
+                            exonerado = 0
+                        };
+                        ctx.Proveedor.Add(nuevoProveedor);
+                        ctx.SaveChanges();
+                        proveedorId = nuevoProveedor.id;
+                    }
+                }
+
+                // ── PASO 6: Guardar como Gasto con detalles
+                using (var ctx = new Models.EntitiesModel())
+                {
+                    ctx.Configuration.LazyLoadingEnabled = false;
+                    ctx.Configuration.ProxyCreationEnabled = false;
+
+                    Models.Gastos g = new Models.Gastos()
+                    {
+                        Descripcion = $"Factura {emisorNombre} - Clave: {clave}",
+                        Categoria_gasto_id = model.Categoria_gasto_id,
+                        Subtotal = totalVenta,
+                        Impuesto = totalImpuesto,
+                        Total = totalComprobante,
+                        Doc_Referencia = clave,
+                        Fecha = DateTime.Now,
+                        Ultima_Fec_Actualizacion = DateTime.Now,
+                        Usuarios_Usuario_id = model.Usuarios_Usuario_id,
+                        Tipo_documento_id = (int)TipoDocumentoId.FacturaElectronicaCompra,
+                        Medio_pago_id = model.Medio_pago_id,
+                        Proveedor_id = proveedorId,
+                        Descuento = totalDescuentos,
+                        Tipo_moneda_id = model.Tipo_moneda_id
+                    };
+                    ctx.Gastos.Add(g);
+                    ctx.SaveChanges();
+
+                    // ── Extraer líneas de detalle del XML
+                    var detalleServicio = root.Element(ns + "DetalleServicio");
+                    if (detalleServicio != null)
+                    {
+                        var lineas = detalleServicio.Elements(ns + "LineaDetalle");
+                        GastosDetallesController gastosDetalles = new GastosDetallesController();
+
+                        foreach (var linea in lineas)
+                        {
+                            double precioUnit = double.Parse(
+                                linea.Element(ns + "PrecioUnitario")?.Value ?? "0",
+                                System.Globalization.CultureInfo.InvariantCulture);
+                            double montoTotal = double.Parse(
+                                linea.Element(ns + "MontoTotal")?.Value ?? "0",
+                                System.Globalization.CultureInfo.InvariantCulture);
+                            double subTotal = double.Parse(
+                                linea.Element(ns + "SubTotal")?.Value ?? "0",
+                                System.Globalization.CultureInfo.InvariantCulture);
+                            double montoTotalLinea = double.Parse(
+                                linea.Element(ns + "MontoTotalLinea")?.Value ?? "0",
+                                System.Globalization.CultureInfo.InvariantCulture);
+                            int cantidad = int.Parse(
+                                linea.Element(ns + "Cantidad")?.Value ?? "1");
+                            string detalle = linea.Element(ns + "Detalle")?.Value ?? "";
+
+                            // Extraer impuesto de la línea
+                            var impuestoNode = linea.Element(ns + "Impuesto");
+                            double montoImpuesto = 0;
+                            if (impuestoNode != null)
+                            {
+                                montoImpuesto = double.Parse(
+                                    impuestoNode.Element(ns + "Monto")?.Value ?? "0",
+                                    System.Globalization.CultureInfo.InvariantCulture);
+                            }
+
+                            // Extraer descuento de la línea
+                            var descuentoNode = linea.Element(ns + "Descuento");
+                            double montoDescuento = 0;
+                            if (descuentoNode != null)
+                            {
+                                montoDescuento = double.Parse(
+                                    descuentoNode.Element(ns + "MontoDescuento")?.Value ?? "0",
+                                    System.Globalization.CultureInfo.InvariantCulture);
+                            }
+
+                            // Código comercial
+                            string codigoComercial = "";
+                            var codigoComNode = linea.Element(ns + "CodigoComercial");
+                            if (codigoComNode != null)
+                            {
+                                codigoComercial = codigoComNode.Element(ns + "Codigo")?.Value ?? "";
+                            }
+
+                            Models.Gastos_Detalles gd = new Models.Gastos_Detalles()
+                            {
+                                Subtotal = subTotal,
+                                Impuesto = montoImpuesto,
+                                Total = montoTotalLinea,
+                                Cantidad = cantidad,
+                                Detalle = detalle,
+                                Descuento = montoDescuento,
+                                codigo_comercial = codigoComercial,
+                                Fecha = DateTime.Now,
+                                Ultima_fec_actualizacion = DateTime.Now,
+                                Gastos_id = g.id
+                            };
+
+                            var result = gastosDetalles.CreateGastoDetalle(gd, ctx);
+                            if (result.CodeStatus != HttpStatusCode.OK)
+                                throw new Exception(result.Message);
+                        }
+                    }
+
+                    oR.CodeStatus = HttpStatusCode.OK;
+                    oR.Data = new
+                    {
+                        gasto_id = g.id,
+                        clave = clave,
+                        consecutivo = consecutivo,
+                        emisor_nombre = emisorNombre,
+                        emisor_identificacion = emisorNumero,
+                        total = totalComprobante,
+                        impuesto = totalImpuesto,
+                        descuento = totalDescuentos
+                    };
+                    return oR;
+                }
+            }
+            catch (System.Data.Entity.Validation.DbEntityValidationException ex2)
+            {
+                string errorDB = "";
+                foreach (var eve in ex2.EntityValidationErrors)
+                    foreach (var ve in eve.ValidationErrors)
+                        errorDB += ve.ErrorMessage;
+                oR.CodeStatus = HttpStatusCode.InternalServerError;
+                oR.Message = errorDB;
+                return oR;
+            }
+            catch (Exception ex)
+            {
+                oR.CodeStatus = HttpStatusCode.InternalServerError;
+                oR.Message = ex.Message;
+                return oR;
+            }
+        }
+
     }
 }

@@ -199,7 +199,7 @@ namespace marsh_contable.Controllers
                                      Fecha = d.Fecha,
                                      Ultima_fec_actualizacion = d.Ultima_fec_actualizacion,
                                      Unidad_medida = um.Nombre
-                                 }).ToList();
+                                 }).OrderByDescending(x => x.id).ToList();
 
                     oR.CodeStatus = HttpStatusCode.OK;
                     oR.Data = lista;

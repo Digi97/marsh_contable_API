@@ -19,6 +19,7 @@ namespace marsh_contable.Models
         {
             this.Cuenta_Encabezado = new HashSet<Cuenta_Encabezado>();
             this.Factura_Detalles = new HashSet<Factura_Detalles>();
+            this.Gestion_P_detalle = new HashSet<Gestion_P_detalle>();
             this.Ingresos = new HashSet<Ingresos>();
         }
     
@@ -39,6 +40,7 @@ namespace marsh_contable.Models
         public int Clientes_id { get; set; }
         public int Condicion_venta_id { get; set; }
         public int Medio_pago_id { get; set; }
+        public Nullable<int> Usuarios_Usuario_id { get; set; }
     
         public virtual Clientes Clientes { get; set; }
         public virtual Condicion_venta Condicion_venta { get; set; }
@@ -51,6 +53,9 @@ namespace marsh_contable.Models
         public virtual Tipo_moneda Tipo_moneda { get; set; }
         public virtual Medio_pago Medio_pago { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<Gestion_P_detalle> Gestion_P_detalle { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Ingresos> Ingresos { get; set; }
+        public virtual Usuarios Usuarios { get; set; }
     }
 }

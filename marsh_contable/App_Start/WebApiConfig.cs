@@ -14,18 +14,6 @@ namespace marsh_contable
         {
 
 
-            //string origenes = ConfigurationManager.AppSettings["CorsOrigins"] ?? "*";
-            //string headers = ConfigurationManager.AppSettings["CorsHeaders"] ?? "*";
-
-            //var cors = new EnableCorsAttribute(
-            //    origins: origenes,
-            //    headers: headers,
-            //    methods: "*"
-            //);
-            //config.EnableCors(cors);
-
-    
-
             config.MapHttpAttributeRoutes();
             config.MessageHandlers.Add(new Modulos.TokenValidationHandlerController());
 
