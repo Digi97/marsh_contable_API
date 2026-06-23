@@ -19,7 +19,7 @@ namespace marsh_contable.Controllers
         [Authorize]
         [Route("api/v1/gestion_presupuestaria")]
         [RequierePermiso(PermisosAplica.UsuarioPresupuestos)]
-        public Reply CreateGestionPresupuestaria([FromBody] Models.Gestion_Presupuestaria model)
+        public Reply CreateGestionPresupuestaria([FromBody] Models.GestionPresupuestariaViewModel model)
         {
             Reply oR = new Reply();
             oR.CodeStatus = 0;
@@ -30,10 +30,7 @@ namespace marsh_contable.Controllers
                 {
                     throw new Exception("invalid_model_request_missing");
                 }
-                if (!tool.ValidaTexto(model.codigo))
-                {
-                    throw new Exception("invalid_string_form_codigo");
-                }
+
                 if (!tool.ValidaTexto(model.nombre))
                 {
                     throw new Exception("invalid_string_form_nombre");
@@ -46,15 +43,8 @@ namespace marsh_contable.Controllers
                 {
                     throw new Exception("invalid_string_form_anio_presupuesto");
                 }
-                if (!tool.validaNumeros(model.Categoria_presupuestaria_id.ToString()))
-                {
-                    throw new Exception("invalid_value_form_Categoria_presupuestaria_id");
-                }
-                if (!tool.validaNumeros(model.Centro_Costos_id.ToString()))
-                {
-                    throw new Exception("invalid_value_form_Centro_Costos_id");
-                }
-
+                
+                
                 if (model.periodo_inicio >= model.periodo_fin)
                 {
                     throw new Exception("periodo_should_be_minor_than_periodo_fin");
@@ -71,41 +61,74 @@ namespace marsh_contable.Controllers
                 }
 
 
+
+                if (model.detalles.Count == 0)
+                {
+                    throw new Exception("detalles_are_required");
+                }
+
+
                 using (var ctx = new Models.EntitiesModel())
                 {
 
-                    Models.Gestion_Presupuestaria gpExist = ctx.Gestion_Presupuestaria.FirstOrDefault(u => u.periodo_inicio >=  model.periodo_inicio || u.periodo_fin <= model.periodo_fin);
-                    if (gpExist != null)
+                    //Models.Gestion_Presupuestaria gpExist = ctx.Gestion_Presupuestaria.FirstOrDefault(u => u.periodo_inicio >=  model.periodo_inicio || u.periodo_fin <= model.periodo_fin);
+                    //if (gpExist != null)
+                    //{
+                    //    throw new Exception("gestion_presupuestaria_for_period_exist");
+                    //}
+
+
+
+                    foreach(var detalle in model.detalles)
                     {
-                        throw new Exception("gestion_presupuestaria_for_period_exist");
+
+
+                        var codigo = (from cp in ctx.Categoria_presupuestaria
+                                         from cc in ctx.Centro_Costos
+                                         where cc.id == detalle.centro_Costos_id && cp.id == detalle.categoria_presupuestaria_id
+                                         select cc.codigo + "-" + cp.tipo_categoria
+                                 ).FirstOrDefault();
+
+
+                        var tipo_moneda_id = (from cp in ctx.Categoria_presupuestaria
+                                  
+                                      select cp.tipo_moneda_id
+                           ).FirstOrDefault();
+
+
+
+                        Models.Gestion_Presupuestaria gp = new Models.Gestion_Presupuestaria()
+                        {
+                            codigo = codigo,
+                            nombre = model.nombre,
+                            Descripcion = model.Descripcion,
+                            anio_presupuesto = model.anio_presupuesto,
+                            periodo_inicio = model.periodo_inicio,
+                            periodo_fin = model.periodo_fin,
+                            Categoria_presupuestaria_id = detalle.categoria_presupuestaria_id,
+                            monto_aprobado = detalle.monto,
+                            monto_modificado = 0, //en creacion es cero
+                            monto_comprometido = detalle.monto,
+                            monto_ejecutado = 0, //en creacion es cero
+                            estado = 1, //default activo en creacion
+                            fecha_creacion = DateTime.Now,
+                            fecha_actualizacion = DateTime.Now,
+                            Usuarios_Usuario_id = model.Usuarios_Usuario_id,
+                            Centro_Costos_id = detalle.centro_Costos_id,
+                            Tipo_moneda_id = model.Tipo_moneda_id
+                        };
+                        ctx.Gestion_Presupuestaria.Add(gp);
+                        ctx.SaveChanges();
+
+
+
                     }
 
 
-                    Models.Gestion_Presupuestaria gp = new Models.Gestion_Presupuestaria()
-                    {
-                        codigo = model.codigo,
-                        nombre = model.nombre,
-                        Descripcion = model.Descripcion,
-                        anio_presupuesto = model.anio_presupuesto,
-                        periodo_inicio = model.periodo_inicio,
-                        periodo_fin = model.periodo_fin,
-                        Categoria_presupuestaria_id = model.Categoria_presupuestaria_id,
-                        monto_aprobado = model.monto_aprobado,
-                        monto_modificado = model.monto_modificado,
-                        monto_comprometido = model.monto_comprometido,
-                        monto_ejecutado = model.monto_ejecutado,
-                        estado = (Int16)model.estado,
-                        fecha_creacion = DateTime.Now,
-                        fecha_actualizacion = DateTime.Now,
-                        Usuarios_Usuario_id = model.Usuarios_Usuario_id,
-                        Centro_Costos_id = model.Centro_Costos_id,
-                        Tipo_moneda_id = model.Tipo_moneda_id
-                    };
-                    ctx.Gestion_Presupuestaria.Add(gp);
-                    ctx.SaveChanges();
+
 
                     oR.CodeStatus = HttpStatusCode.OK;
-                    oR.Data = gp.id;
+                    oR.Data = 1;
                     return oR;
                 }
             }
@@ -252,7 +275,7 @@ namespace marsh_contable.Controllers
                                      Centro_costo = cc.Nombre,
                                      Usuario = u.Nombre + " " + u.Apellido1,
                                      Formato = formato.ToUpper(),
-                                     tipo_moneda_id = tm.id,
+                                     Tipo_moneda_id = tm.id,
                                      tipo_moneda = tm.Simbolo
                                  }).ToList();
 
@@ -313,7 +336,7 @@ namespace marsh_contable.Controllers
                                   Categoria_presupuestaria = cp.nombre,
                                   Centro_costo = cc.Nombre,
                                   Usuario = u.Nombre + " " + u.Apellido1,
-                                  tipo_moneda_id = tm.id,
+                                  Tipo_moneda_id = tm.id,
                                   tipo_moneda = tm.Simbolo
                               }).FirstOrDefault();
 

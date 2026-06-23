@@ -24,10 +24,13 @@ namespace marsh_contable.Models
         public int id { get; set; }
         public string nombre { get; set; }
         public string tipo_categoria { get; set; }
+        public Nullable<decimal> Monto_presupuestado { get; set; }
+        public Nullable<int> Tipo_moneda_id { get; set; }
     
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Gestion_Presupuestaria> Gestion_Presupuestaria { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Gestion_P_detalle> Gestion_P_detalle { get; set; }
+        public virtual Tipo_moneda Tipo_moneda { get; set; }
     }
 }

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 
 namespace marsh_contable.Models
 {
@@ -27,7 +28,9 @@ namespace marsh_contable.Models
         public string Usuario { get; set; }
         public string Formato { get; set; }
 
-        public int tipo_moneda_id { get; set; }
+        public int Tipo_moneda_id { get; set; }
         public string tipo_moneda { get; set; }
+
+        public List<DetalleGestionPViewModel> detalles { get; set; }
     }
 }

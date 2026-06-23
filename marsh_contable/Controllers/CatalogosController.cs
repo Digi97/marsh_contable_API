@@ -885,7 +885,9 @@ namespace marsh_contable.Controllers
                 if (model == null) throw new Exception("invalid_model_request_missing");
                 if (!tool.ValidaTexto(model.codigo)) throw new Exception("invalid_string_form_codigo");
                 if (!tool.ValidaTexto(model.Nombre)) throw new Exception("invalid_string_form_Nombre");
-                if (!tool.ValidaTexto(model.Seudonimo)) throw new Exception("invalid_string_form_Seudonimo");
+               // if (!tool.ValidaTexto(model.Seudonimo)) throw new Exception("invalid_string_form_Seudonimo");
+                if (!tool.validaNumeros(model.Monto_presupuesto_anual.ToString())) throw new Exception("invalid_format_monto_presupuesto_anual");
+
 
                 using (var ctx = new Models.EntitiesModel())
                 {
@@ -893,7 +895,9 @@ namespace marsh_contable.Controllers
                     {
                         codigo = model.codigo,
                         Nombre = model.Nombre,
-                        Seudonimo = model.Seudonimo
+                        Seudonimo = model.codigo,//seudonimo igual a codigo
+                        Monto_presupuesto_anual = model.Monto_presupuesto_anual,
+                        Tipo_moneda_id = model.Tipo_moneda_id
                     };
                     ctx.Centro_Costos.Add(cc);
                     ctx.SaveChanges();
@@ -928,7 +932,8 @@ namespace marsh_contable.Controllers
                 if (model == null) throw new Exception("invalid_model_request_missing");
                 if (!tool.ValidaTexto(model.codigo)) throw new Exception("invalid_string_form_codigo");
                 if (!tool.ValidaTexto(model.Nombre)) throw new Exception("invalid_string_form_Nombre");
-                if (!tool.ValidaTexto(model.Seudonimo)) throw new Exception("invalid_string_form_Seudonimo");
+              //  if (!tool.ValidaTexto(model.Seudonimo)) throw new Exception("invalid_string_form_Seudonimo");
+                if (!tool.validaNumeros(model.Monto_presupuesto_anual.ToString())) throw new Exception("invalid_format_monto_presupuesto_anual");
 
                 using (var ctx = new Models.EntitiesModel())
                 {
@@ -936,7 +941,9 @@ namespace marsh_contable.Controllers
                     if (cc == null) throw new Exception("centro_costos_not_found");
                     cc.codigo = model.codigo;
                     cc.Nombre = model.Nombre;
-                    cc.Seudonimo = model.Seudonimo;
+                    cc.Seudonimo = model.codigo;
+                    cc.Monto_presupuesto_anual = model.Monto_presupuesto_anual;
+                    cc.Tipo_moneda_id = model.Tipo_moneda_id;
                     ctx.SaveChanges();
                     oR.CodeStatus = HttpStatusCode.OK;
                     oR.Data = cc.id;
@@ -967,7 +974,7 @@ namespace marsh_contable.Controllers
             {
                 using (var ctx = new Models.EntitiesModel())
                 {
-                    var data = ctx.Centro_Costos.Select(x => new { x.id, x.codigo, x.Nombre, x.Seudonimo }).ToList();
+                    var data = ctx.Centro_Costos.Select(x => new { x.id, x.codigo, x.Nombre, x.Seudonimo, x.Monto_presupuesto_anual, x.Tipo_moneda_id }).ToList();
                     oR.CodeStatus = HttpStatusCode.OK;
                     oR.Data = data;
                     return oR;
@@ -999,7 +1006,7 @@ namespace marsh_contable.Controllers
                 using (var ctx = new Models.EntitiesModel())
                 {
                     var data = ctx.Centro_Costos.Where(x => x.id == id)
-                        .Select(x => new { x.id, x.codigo, x.Nombre, x.Seudonimo }).FirstOrDefault();
+                        .Select(x => new { x.id, x.codigo, x.Nombre, x.Seudonimo, x.Monto_presupuesto_anual, x.Tipo_moneda_id }).FirstOrDefault();
                     if (data == null) throw new Exception("centro_costos_not_found");
                     oR.CodeStatus = HttpStatusCode.OK;
                     oR.Data = data;
@@ -1018,6 +1025,54 @@ namespace marsh_contable.Controllers
             }
             catch (Exception ex) { oR.CodeStatus = HttpStatusCode.InternalServerError; oR.Message = ex.Message; return oR; }
         }
+
+
+        [HttpDelete]
+        [Authorize]
+        [Route("api/v1/catalogos/centro_costos/{id}")]
+        public Reply DeleteCentroCostos(int id)
+        {
+            Reply oR = new Reply();
+            oR.CodeStatus = 0;
+            try
+            {
+                if (id <= 0)
+                    throw new Exception("invalid_value_for_id");
+
+                using (var ctx = new Models.EntitiesModel())
+                {
+                    var item = ctx.Centro_Costos.FirstOrDefault(x => x.id == id);
+
+                    if (item == null)
+                        throw new Exception("centro_costos_presupuestaria_not_found");
+
+                    // Verificar si tiene registros asociados
+                    //bool tieneDetalle = ctx.Gestion_P_detalle
+                    //    .Any(d => d.Ce == id);
+
+                    bool tieneGestion = ctx.Gestion_Presupuestaria
+                        .Any(d => d.Centro_Costos_id == id);
+
+                    if ( tieneGestion)
+                        throw new Exception("centro_costos_tiene_registros_asociados_no_se_puede_eliminar");
+
+                    ctx.Centro_Costos.Remove(item);
+                    ctx.SaveChanges();
+
+                    oR.CodeStatus = HttpStatusCode.OK;
+                    oR.Data = id;
+                    return oR;
+                }
+            }
+            catch (Exception ex)
+            {
+                oR.CodeStatus = HttpStatusCode.InternalServerError;
+                oR.Message = ex.Message;
+                return oR;
+            }
+        }
+
+
         #endregion
 
         #region "Tipo_moneda"
@@ -1500,23 +1555,83 @@ namespace marsh_contable.Controllers
         [Authorize]
         [Route("api/v1/catalogos/categoria_presupuestaria")]
         [RequierePermiso(PermisosAplica.UsuarioMantenimiento)]
-        public Reply CreateCategoriaPresupuestaria([FromBody] Models.Categoria_presupuestaria model) { Reply oR = new Reply(); oR.CodeStatus = 0; General tool = new General(); try { if (model == null) throw new Exception("invalid_model_request_missing"); if (!tool.ValidaTexto(model.nombre)) throw new Exception("invalid_string_form_nombre"); if (!tool.ValidaTexto(model.tipo_categoria)) throw new Exception("invalid_string_form_tipo_categoria"); using (var ctx = new Models.EntitiesModel()) { Models.Categoria_presupuestaria e = new Models.Categoria_presupuestaria() { nombre = model.nombre, tipo_categoria = model.tipo_categoria }; ctx.Categoria_presupuestaria.Add(e); ctx.SaveChanges(); oR.CodeStatus = HttpStatusCode.OK; oR.Data = e.id; return oR; } } catch (Exception ex) { oR.CodeStatus = HttpStatusCode.InternalServerError; oR.Message = ex.Message; return oR; } }
+        public Reply CreateCategoriaPresupuestaria([FromBody] Models.Categoria_presupuestaria model) { Reply oR = new Reply(); oR.CodeStatus = 0; General tool = new General(); try { if (model == null) throw new Exception("invalid_model_request_missing"); if (!tool.ValidaTexto(model.nombre)) throw new Exception("invalid_string_form_nombre"); if (!tool.ValidaTexto(model.tipo_categoria)) throw new Exception("invalid_string_form_tipo_categoria");
+
+                if (!tool.validaNumeros(model.Monto_presupuestado.ToString())) 
+                    throw new Exception("invalid_monto_presupuestado");
+
+
+                using (var ctx = new Models.EntitiesModel()) { Models.Categoria_presupuestaria e = new Models.Categoria_presupuestaria() { nombre = model.nombre, tipo_categoria = model.tipo_categoria, Monto_presupuestado = model.Monto_presupuestado, Tipo_moneda_id = model.Tipo_moneda_id }; ctx.Categoria_presupuestaria.Add(e); ctx.SaveChanges(); oR.CodeStatus = HttpStatusCode.OK; oR.Data = e.id; return oR; } } catch (Exception ex) { oR.CodeStatus = HttpStatusCode.InternalServerError; oR.Message = ex.Message; return oR; } }
 
         [HttpPut]
         [Authorize]
         [Route("api/v1/catalogos/categoria_presupuestaria/{id}")]
         [RequierePermiso(PermisosAplica.UsuarioMantenimiento)]
-        public Reply UpdateCategoriaPresupuestaria(int id, [FromBody] Models.Categoria_presupuestaria model) { Reply oR = new Reply(); oR.CodeStatus = 0; General tool = new General(); try { if (model == null) throw new Exception("invalid_model_request_missing"); if (!tool.ValidaTexto(model.nombre)) throw new Exception("invalid_string_form_nombre"); if (!tool.ValidaTexto(model.tipo_categoria)) throw new Exception("invalid_string_form_tipo_categoria"); using (var ctx = new Models.EntitiesModel()) { Models.Categoria_presupuestaria e = ctx.Categoria_presupuestaria.FirstOrDefault(x => x.id == id); if (e == null) throw new Exception("categoria_presupuestaria_not_found"); e.nombre = model.nombre; e.tipo_categoria = model.tipo_categoria; ctx.SaveChanges(); oR.CodeStatus = HttpStatusCode.OK; oR.Data = e.id; return oR; } } catch (Exception ex) { oR.CodeStatus = HttpStatusCode.InternalServerError; oR.Message = ex.Message; return oR; } }
+        public Reply UpdateCategoriaPresupuestaria(int id, [FromBody] Models.Categoria_presupuestaria model) { Reply oR = new Reply(); oR.CodeStatus = 0; General tool = new General(); try { if (model == null) throw new Exception("invalid_model_request_missing"); if (!tool.ValidaTexto(model.nombre)) throw new Exception("invalid_string_form_nombre");
+
+
+                if (!tool.validaNumeros(model.Monto_presupuestado.ToString()))
+                    throw new Exception("invalid_monto_presupuestado");
+
+                if (!tool.ValidaTexto(model.tipo_categoria)) throw new Exception("invalid_string_form_tipo_categoria"); using (var ctx = new Models.EntitiesModel()) { Models.Categoria_presupuestaria e = ctx.Categoria_presupuestaria.FirstOrDefault(x => x.id == id); if (e == null) throw new Exception("categoria_presupuestaria_not_found"); e.nombre = model.nombre; e.tipo_categoria = model.tipo_categoria; e.Monto_presupuestado = model.Monto_presupuestado; e.Tipo_moneda_id = model.Tipo_moneda_id; ctx.SaveChanges(); oR.CodeStatus = HttpStatusCode.OK; oR.Data = e.id; return oR; } } catch (Exception ex) { oR.CodeStatus = HttpStatusCode.InternalServerError; oR.Message = ex.Message; return oR; } }
 
         [HttpGet]
         [Authorize]
         [Route("api/v1/catalogos/categoria_presupuestaria")]
-        public Reply GetAllCategoriaPresupuestaria() { Reply oR = new Reply(); oR.CodeStatus = 0; try { using (var ctx = new Models.EntitiesModel()) { oR.CodeStatus = HttpStatusCode.OK; oR.Data = ctx.Categoria_presupuestaria.Select(x => new { x.id, x.nombre, x.tipo_categoria }).ToList(); return oR; } } catch (Exception ex) { oR.CodeStatus = HttpStatusCode.InternalServerError; oR.Message = ex.Message; return oR; } }
+        public Reply GetAllCategoriaPresupuestaria() { Reply oR = new Reply(); oR.CodeStatus = 0; try { using (var ctx = new Models.EntitiesModel()) { oR.CodeStatus = HttpStatusCode.OK; oR.Data = ctx.Categoria_presupuestaria.Select(x => new { x.id, x.nombre, x.tipo_categoria, x.Monto_presupuestado, x.Tipo_moneda_id }).ToList(); return oR; } } catch (Exception ex) { oR.CodeStatus = HttpStatusCode.InternalServerError; oR.Message = ex.Message; return oR; } }
 
         [HttpGet]
         [Authorize]
         [Route("api/v1/catalogos/categoria_presupuestaria/{id}")]
-        public Reply GetCategoriaPresupuestariaById(int id) { Reply oR = new Reply(); oR.CodeStatus = 0; try { if (id <= 0) throw new Exception("invalid_value_for_id"); using (var ctx = new Models.EntitiesModel()) { var data = ctx.Categoria_presupuestaria.Where(x => x.id == id).Select(x => new { x.id, x.nombre, x.tipo_categoria }).FirstOrDefault(); if (data == null) throw new Exception("categoria_presupuestaria_not_found"); oR.CodeStatus = HttpStatusCode.OK; oR.Data = data; return oR; } } catch (Exception ex) { oR.CodeStatus = HttpStatusCode.InternalServerError; oR.Message = ex.Message; return oR; } }
+        public Reply GetCategoriaPresupuestariaById(int id) { Reply oR = new Reply(); oR.CodeStatus = 0; try { if (id <= 0) throw new Exception("invalid_value_for_id"); using (var ctx = new Models.EntitiesModel()) { var data = ctx.Categoria_presupuestaria.Where(x => x.id == id).Select(x => new { x.id, x.nombre, x.tipo_categoria, x.Tipo_moneda_id }).FirstOrDefault(); if (data == null) throw new Exception("categoria_presupuestaria_not_found"); oR.CodeStatus = HttpStatusCode.OK; oR.Data = data; return oR; } } catch (Exception ex) { oR.CodeStatus = HttpStatusCode.InternalServerError; oR.Message = ex.Message; return oR; } }
+
+
+        [HttpDelete]
+        [Authorize]
+        [Route("api/v1/catalogos/categoria_presupuestaria/{id}")]
+        public Reply DeleteCategoriaPresupuestaria(int id)
+        {
+            Reply oR = new Reply();
+            oR.CodeStatus = 0;
+            try
+            {
+                if (id <= 0)
+                    throw new Exception("invalid_value_for_id");
+
+                using (var ctx = new Models.EntitiesModel())
+                {
+                    var item = ctx.Categoria_presupuestaria.FirstOrDefault(x => x.id == id);
+
+                    if (item == null)
+                        throw new Exception("categoria_presupuestaria_not_found");
+
+                    // Verificar si tiene registros asociados
+                    bool tieneDetalle = ctx.Gestion_P_detalle
+                        .Any(d => d.Categoria_presupuestaria_id == id);
+
+                    bool tieneGestion = ctx.Gestion_Presupuestaria
+                        .Any(d => d.Categoria_presupuestaria_id == id);
+
+                    if (tieneDetalle || tieneGestion)
+                        throw new Exception("categoria_tiene_registros_asociados_no_se_puede_eliminar");
+
+                    ctx.Categoria_presupuestaria.Remove(item);
+                    ctx.SaveChanges();
+
+                    oR.CodeStatus = HttpStatusCode.OK;
+                    oR.Data = id;
+                    return oR;
+                }
+            }
+            catch (Exception ex)
+            {
+                oR.CodeStatus = HttpStatusCode.InternalServerError;
+                oR.Message = ex.Message;
+                return oR;
+            }
+        }
+
+
         #endregion
 
         #region "Roles"

@@ -123,6 +123,8 @@
         <AssociationConnector Association="marsh_contableModel.FK_GP_Detalle_Facturas" />
         <AssociationConnector Association="marsh_contableModel.fk_Ingresos_Facturas1" />
         <AssociationConnector Association="marsh_contableModel.FK_Usuarios_Factura" />
+        <AssociationConnector Association="marsh_contableModel.fk_tipo_moneda_cp" />
+        <AssociationConnector Association="marsh_contableModel.fk_tipo_moneda_cc" />
         </Diagram>
     </edmx:Diagrams>
   </edmx:Designer>

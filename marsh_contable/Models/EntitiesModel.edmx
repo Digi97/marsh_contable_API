@@ -47,6 +47,8 @@
           <Property Name="id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
           <Property Name="nombre" Type="varchar" MaxLength="100" Nullable="false" />
           <Property Name="tipo_categoria" Type="varchar" MaxLength="100" Nullable="false" />
+          <Property Name="Monto_presupuestado" Type="decimal" Precision="12" Scale="2" />
+          <Property Name="Tipo_moneda_id" Type="int" />
         </EntityType>
         <EntityType Name="Centro_Costos">
           <Key>
@@ -56,6 +58,8 @@
           <Property Name="codigo" Type="varchar" MaxLength="45" Nullable="false" />
           <Property Name="Nombre" Type="varchar" MaxLength="150" Nullable="false" />
           <Property Name="Seudonimo" Type="varchar" MaxLength="45" Nullable="false" />
+          <Property Name="Monto_presupuesto_anual" Type="decimal" Precision="12" Scale="2" />
+          <Property Name="Tipo_moneda_id" Type="int" />
         </EntityType>
         <EntityType Name="Clientes">
           <Key>
@@ -1445,6 +1449,30 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
+        <Association Name="fk_tipo_moneda_cc">
+          <End Role="Tipo_moneda" Type="Self.Tipo_moneda" Multiplicity="0..1" />
+          <End Role="Centro_Costos" Type="Self.Centro_Costos" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Tipo_moneda">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="Centro_Costos">
+              <PropertyRef Name="Tipo_moneda_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="fk_tipo_moneda_cp">
+          <End Role="Tipo_moneda" Type="Self.Tipo_moneda" Multiplicity="0..1" />
+          <End Role="Categoria_presupuestaria" Type="Self.Categoria_presupuestaria" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Tipo_moneda">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="Categoria_presupuestaria">
+              <PropertyRef Name="Tipo_moneda_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
         <Association Name="fk_Usuario_Empresa1">
           <End Role="Empresa" Type="Self.Empresa" Multiplicity="1" />
           <End Role="Usuarios" Type="Self.Usuarios" Multiplicity="*" />
@@ -1810,6 +1838,14 @@
             <End Role="Usuarios" EntitySet="Usuarios" />
             <End Role="Tipo_cambio" EntitySet="Tipo_cambio" />
           </AssociationSet>
+          <AssociationSet Name="fk_tipo_moneda_cc" Association="Self.fk_tipo_moneda_cc">
+            <End Role="Tipo_moneda" EntitySet="Tipo_moneda" />
+            <End Role="Centro_Costos" EntitySet="Centro_Costos" />
+          </AssociationSet>
+          <AssociationSet Name="fk_tipo_moneda_cp" Association="Self.fk_tipo_moneda_cp">
+            <End Role="Tipo_moneda" EntitySet="Tipo_moneda" />
+            <End Role="Categoria_presupuestaria" EntitySet="Categoria_presupuestaria" />
+          </AssociationSet>
           <AssociationSet Name="fk_Usuario_Empresa1" Association="Self.fk_Usuario_Empresa1">
             <End Role="Empresa" EntitySet="Empresa" />
             <End Role="Usuarios" EntitySet="Usuarios" />
@@ -1877,6 +1913,9 @@
           <Property Name="tipo_categoria" Type="String" MaxLength="100" FixedLength="false" Unicode="false" Nullable="false" />
           <NavigationProperty Name="Gestion_Presupuestaria" Relationship="Self.fk_Gestion_Presupuestaria_Categoria_presupuestaria1" FromRole="Categoria_presupuestaria" ToRole="Gestion_Presupuestaria" />
           <NavigationProperty Name="Gestion_P_detalle" Relationship="marsh_contableModel.FK_GP_Categoria_Presupuesto" FromRole="Categoria_presupuestaria" ToRole="Gestion_P_detalle" />
+          <Property Name="Monto_presupuestado" Type="Decimal" Precision="12" Scale="2" />
+          <Property Name="Tipo_moneda_id" Type="Int32" />
+          <NavigationProperty Name="Tipo_moneda" Relationship="marsh_contableModel.fk_tipo_moneda_cp" FromRole="Categoria_presupuestaria" ToRole="Tipo_moneda" />
         </EntityType>
         <EntityType Name="Centro_Costos">
           <Key>
@@ -1888,6 +1927,9 @@
           <Property Name="Seudonimo" Type="String" MaxLength="45" FixedLength="false" Unicode="false" Nullable="false" />
           <NavigationProperty Name="Cuenta_Encabezado" Relationship="Self.fk_Cuenta_Encabezado_Centro_Costos1" FromRole="Centro_Costos" ToRole="Cuenta_Encabezado" />
           <NavigationProperty Name="Gestion_Presupuestaria" Relationship="Self.fk_Gestion_Presupuestaria_Centro_Costos1" FromRole="Centro_Costos" ToRole="Gestion_Presupuestaria" />
+          <Property Name="Monto_presupuesto_anual" Type="Decimal" Precision="12" Scale="2" />
+          <Property Name="Tipo_moneda_id" Type="Int32" />
+          <NavigationProperty Name="Tipo_moneda" Relationship="marsh_contableModel.fk_tipo_moneda_cc" FromRole="Centro_Costos" ToRole="Tipo_moneda" />
         </EntityType>
         <EntityType Name="Clientes">
           <Key>
@@ -2388,6 +2430,8 @@
           <Property Name="Simbolo" Type="String" MaxLength="2" FixedLength="false" Unicode="false" />
           <NavigationProperty Name="Ingresos" Relationship="marsh_contableModel.fk_Factura_Tipo_moneda10" FromRole="Tipo_moneda" ToRole="Ingresos" />
           <NavigationProperty Name="Facturas" Relationship="marsh_contableModel.fk_Factura_Tipo_moneda1" FromRole="Tipo_moneda" ToRole="Facturas" />
+          <NavigationProperty Name="Categoria_presupuestaria" Relationship="marsh_contableModel.fk_tipo_moneda_cp" FromRole="Tipo_moneda" ToRole="Categoria_presupuestaria" />
+          <NavigationProperty Name="Centro_Costos" Relationship="marsh_contableModel.fk_tipo_moneda_cc" FromRole="Tipo_moneda" ToRole="Centro_Costos" />
         </EntityType>
         <EntityType Name="Unidad_medida">
           <Key>
@@ -3310,6 +3354,14 @@
             <End Role="Usuarios" EntitySet="Usuarios" />
             <End Role="Facturas" EntitySet="Facturas" />
           </AssociationSet>
+          <AssociationSet Name="fk_tipo_moneda_cp" Association="marsh_contableModel.fk_tipo_moneda_cp">
+            <End Role="Tipo_moneda" EntitySet="Tipo_moneda" />
+            <End Role="Categoria_presupuestaria" EntitySet="Categoria_presupuestaria" />
+          </AssociationSet>
+          <AssociationSet Name="fk_tipo_moneda_cc" Association="marsh_contableModel.fk_tipo_moneda_cc">
+            <End Role="Tipo_moneda" EntitySet="Tipo_moneda" />
+            <End Role="Centro_Costos" EntitySet="Centro_Costos" />
+          </AssociationSet>
         </EntityContainer>
         <Association Name="FK_Cuentas_Contables_Tipo_moneda">
           <End Type="marsh_contableModel.Tipo_moneda" Role="Tipo_moneda" Multiplicity="1" />
@@ -3793,6 +3845,30 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
+        <Association Name="fk_tipo_moneda_cp">
+          <End Type="marsh_contableModel.Tipo_moneda" Role="Tipo_moneda" Multiplicity="0..1" />
+          <End Type="marsh_contableModel.Categoria_presupuestaria" Role="Categoria_presupuestaria" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Tipo_moneda">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="Categoria_presupuestaria">
+              <PropertyRef Name="Tipo_moneda_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="fk_tipo_moneda_cc">
+          <End Type="marsh_contableModel.Tipo_moneda" Role="Tipo_moneda" Multiplicity="0..1" />
+          <End Type="marsh_contableModel.Centro_Costos" Role="Centro_Costos" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Tipo_moneda">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="Centro_Costos">
+              <PropertyRef Name="Tipo_moneda_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
       </Schema>
     </edmx:ConceptualModels>
     <!-- C-S mapping content -->
@@ -3839,6 +3915,8 @@
           <EntitySetMapping Name="Categoria_presupuestaria">
             <EntityTypeMapping TypeName="marsh_contableModel.Categoria_presupuestaria">
               <MappingFragment StoreEntitySet="Categoria_presupuestaria">
+                <ScalarProperty Name="Tipo_moneda_id" ColumnName="Tipo_moneda_id" />
+                <ScalarProperty Name="Monto_presupuestado" ColumnName="Monto_presupuestado" />
                 <ScalarProperty Name="id" ColumnName="id" />
                 <ScalarProperty Name="nombre" ColumnName="nombre" />
                 <ScalarProperty Name="tipo_categoria" ColumnName="tipo_categoria" />
@@ -3848,6 +3926,8 @@
           <EntitySetMapping Name="Centro_Costos">
             <EntityTypeMapping TypeName="marsh_contableModel.Centro_Costos">
               <MappingFragment StoreEntitySet="Centro_Costos">
+                <ScalarProperty Name="Tipo_moneda_id" ColumnName="Tipo_moneda_id" />
+                <ScalarProperty Name="Monto_presupuesto_anual" ColumnName="Monto_presupuesto_anual" />
                 <ScalarProperty Name="id" ColumnName="id" />
                 <ScalarProperty Name="codigo" ColumnName="codigo" />
                 <ScalarProperty Name="Nombre" ColumnName="Nombre" />
