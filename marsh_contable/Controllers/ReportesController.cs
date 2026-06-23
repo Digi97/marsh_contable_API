@@ -254,11 +254,10 @@ namespace marsh_contable.Controllers
         [Authorize]
         [Route("api/v1/reportes/facturas/filtro")]
         public Reply GetReporteFacturasFiltrado(
-            [FromUri] int? estadoFacturaId = null,
             [FromUri] int? tipoDocumentoId = null,
             [FromUri] int? clienteId = null,
-            [FromUri] DateTime? fechaDesde = null,
-            [FromUri] DateTime? fechaHasta = null)
+            [FromUri] DateTime? fechaCreacionDesde = null,
+            [FromUri] DateTime? fechaCreacionHasta = null)
         {
             Reply oR = new Reply();
             oR.CodeStatus = 0;
@@ -300,9 +299,7 @@ namespace marsh_contable.Controllers
                                     Medio_pago = mp.descripcion
                                 };
 
-                    // Filtros dinámicos
-                    if (estadoFacturaId.HasValue && estadoFacturaId.Value > 0)
-                        query = query.Where(f => f.Estado_Factura_id == estadoFacturaId.Value);
+              ;
 
                     if (tipoDocumentoId.HasValue && tipoDocumentoId.Value > 0)
                         query = query.Where(f => f.Tipo_documento_id == tipoDocumentoId.Value);
@@ -310,8 +307,8 @@ namespace marsh_contable.Controllers
                     if (clienteId.HasValue && clienteId.Value > 0)
                         query = query.Where(f => f.Clientes_id == clienteId.Value);
 
-                    if (fechaDesde.HasValue && fechaHasta.HasValue)
-                        query = query.Where(f => f.fecha >= fechaDesde.Value && f.fecha <= fechaHasta.Value);
+                    if (fechaCreacionDesde.HasValue && fechaCreacionHasta.HasValue)
+                        query = query.Where(f => f.fecha >= fechaCreacionDesde.Value && f.fecha <= fechaCreacionHasta.Value);
 
                     var facturas = query.OrderByDescending(f => f.id).ToList();
 
@@ -320,7 +317,7 @@ namespace marsh_contable.Controllers
                     {
                         titulo = "Reporte de Facturas",
                         fecha_generacion = DateTime.Now,
-                        filtros = new { estadoFacturaId, tipoDocumentoId, clienteId, fechaDesde, fechaHasta },
+                        filtros = new {tipoDocumentoId, clienteId, fechaCreacionDesde, fechaCreacionHasta },
                         total_registros = facturas.Count,
                         total_subtotal = facturas.Sum(f => f.Subtotal),
                         total_impuesto = facturas.Sum(f => f.Impuesto),
@@ -350,10 +347,9 @@ namespace marsh_contable.Controllers
         public Reply GetReporteGastosFiltrado(
             [FromUri] int? categoriaGastoId = null,
             [FromUri] int? proveedorId = null,
-            [FromUri] int? tipoDocumentoId = null,
             [FromUri] int? medioPagoId = null,
-            [FromUri] DateTime? fechaDesde = null,
-            [FromUri] DateTime? fechaHasta = null)
+            [FromUri] DateTime? fechaCreacionDesde = null,
+            [FromUri] DateTime? fechaCreacionHasta = null)
         {
             Reply oR = new Reply();
             oR.CodeStatus = 0;
@@ -400,14 +396,13 @@ namespace marsh_contable.Controllers
                     if (proveedorId.HasValue && proveedorId.Value > 0)
                         query = query.Where(g => g.Proveedor_id == proveedorId.Value);
 
-                    if (tipoDocumentoId.HasValue && tipoDocumentoId.Value > 0)
-                        query = query.Where(g => g.Tipo_documento_id == tipoDocumentoId.Value);
+                ;
 
                     if (medioPagoId.HasValue && medioPagoId.Value > 0)
                         query = query.Where(g => g.Medio_pago_id == medioPagoId.Value);
 
-                    if (fechaDesde.HasValue && fechaHasta.HasValue)
-                        query = query.Where(g => g.Fecha >= fechaDesde.Value && g.Fecha <= fechaHasta.Value);
+                    if (fechaCreacionDesde.HasValue && fechaCreacionHasta.HasValue)
+                        query = query.Where(g => g.Fecha >= fechaCreacionDesde.Value && g.Fecha <= fechaCreacionHasta.Value);
 
                     var gastos = query.OrderByDescending(g => g.id).ToList();
 
@@ -436,7 +431,7 @@ namespace marsh_contable.Controllers
                     {
                         titulo = "Reporte de Gastos",
                         fecha_generacion = DateTime.Now,
-                        filtros = new { categoriaGastoId, proveedorId, tipoDocumentoId, medioPagoId, fechaDesde, fechaHasta },
+                        filtros = new { categoriaGastoId, proveedorId, medioPagoId, fechaCreacionDesde, fechaCreacionHasta },
                         total_registros = gastos.Count,
                         total_subtotal = gastos.Sum(g => g.Subtotal),
                         total_impuesto = gastos.Sum(g => g.Impuesto),
@@ -466,11 +461,8 @@ namespace marsh_contable.Controllers
         [Authorize]
         [Route("api/v1/reportes/gestion_presupuestaria/filtro")]
         public Reply GetReporteGestionPresupuestariaFiltrado(
-            [FromUri] int? gestionId = null,
-            [FromUri] int? categoriaId = null,
-            [FromUri] int? usuarioId = null,
-            [FromUri] DateTime? fechaDesde = null,
-            [FromUri] DateTime? fechaHasta = null)
+            [FromUri] DateTime? fechaCreacionDesde = null,
+            [FromUri] DateTime? fechaCreacionHasta = null)
         {
             Reply oR = new Reply();
             oR.CodeStatus = 0;
@@ -532,18 +524,8 @@ namespace marsh_contable.Controllers
                                                         : "Manual"
                                 };
 
-                    // Filtros dinámicos
-                    if (gestionId.HasValue && gestionId.Value > 0)
-                        query = query.Where(d => d.Gestion_Presupuestaria_id == gestionId.Value);
-
-                    if (categoriaId.HasValue && categoriaId.Value > 0)
-                        query = query.Where(d => d.Categoria_presupuestaria_id == categoriaId.Value);
-
-                    if (usuarioId.HasValue && usuarioId.Value > 0)
-                        query = query.Where(d => d.Usuarios_Usuario_id == usuarioId.Value);
-
-                    if (fechaDesde.HasValue && fechaHasta.HasValue)
-                        query = query.Where(d => d.Fecha_registro >= fechaDesde.Value && d.Fecha_registro <= fechaHasta.Value);
+                    if (fechaCreacionDesde.HasValue && fechaCreacionHasta.HasValue)
+                        query = query.Where(d => d.Fecha_registro >= fechaCreacionDesde.Value && d.Fecha_registro <= fechaCreacionHasta.Value);
 
                     var detalles = query.OrderByDescending(d => d.id).ToList();
 
@@ -572,7 +554,7 @@ namespace marsh_contable.Controllers
                     {
                         titulo = "Reporte de Gestión Presupuestaria - Detalle de Movimientos",
                         fecha_generacion = DateTime.Now,
-                        filtros = new { gestionId, categoriaId, usuarioId, fechaDesde, fechaHasta },
+                        filtros = new { fechaCreacionDesde, fechaCreacionHasta},
                         total_registros = detalles.Count,
                         total_monto_ejecutado = detalles.Sum(d => (double)d.Monto_ejecutado),
                         total_monto = detalles.Sum(d => d.Monto),

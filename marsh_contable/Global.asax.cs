@@ -21,10 +21,34 @@ namespace marsh_contable
             BundleConfig.RegisterBundles(BundleTable.Bundles);
         }
 
+        protected void Application_Error(object sender, EventArgs e)
+        {
+
+            Exception ex = Server.GetLastError();
+
+            // Ignorar error de ruta raíz
+            if (ex?.Message?.Contains("la ruta de acceso '/'") == true ||
+                ex?.Message?.Contains("does not implement IController") == true)
+            {
+                Server.ClearError();
+                return;
+            }
+
+            System.Diagnostics.Debug.WriteLine($"=== CRASH: {ex?.GetType().Name}");
+            System.Diagnostics.Debug.WriteLine($"=== MESSAGE: {ex?.Message}");
+            System.Diagnostics.Debug.WriteLine($"=== STACK: {ex?.StackTrace}");
+        }
+
         protected void Application_BeginRequest(object sender, EventArgs e)
         {
             HttpContext context = HttpContext.Current;
             string origin = context.Request.Headers["Origin"];
+
+            string path = context.Request.Path.ToLower();
+
+            // No aplicar CORS a Swagger
+            if (path.Contains("/swagger"))
+                return;
 
             // Leer orígenes permitidos del Web.config
             string[] origenesPermitidos = (ConfigurationManager.AppSettings["CorsOrigins"] ?? "*")
@@ -48,7 +72,8 @@ namespace marsh_contable
             {
                 context.Response.StatusCode = 200;
                 context.Response.Flush();
-                context.Response.End();
+                // context.Response.End();
+                HttpContext.Current.ApplicationInstance.CompleteRequest();
             }
         }
     }
