@@ -10,5 +10,6 @@ namespace marsh_contable.Models
         public int categoria_presupuestaria_id { get; set; }
         public int centro_Costos_id { get; set; }
         public double monto { get; set; }
+        public int id { get; set; }
     }
 }

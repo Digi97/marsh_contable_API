@@ -18,6 +18,7 @@ namespace marsh_contable.Models
         public Gestion_Presupuestaria()
         {
             this.Gestion_P_detalle = new HashSet<Gestion_P_detalle>();
+            this.Gestion_P_Anio = new HashSet<Gestion_P_Anio>();
         }
     
         public int id { get; set; }
@@ -44,5 +45,7 @@ namespace marsh_contable.Models
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Gestion_P_detalle> Gestion_P_detalle { get; set; }
         public virtual Usuarios Usuarios { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<Gestion_P_Anio> Gestion_P_Anio { get; set; }
     }
 }

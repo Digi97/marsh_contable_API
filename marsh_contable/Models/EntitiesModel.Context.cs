@@ -69,5 +69,6 @@ namespace marsh_contable.Models
         public virtual DbSet<Ingresos> Ingresos { get; set; }
         public virtual DbSet<Factura_Detalles> Factura_Detalles { get; set; }
         public virtual DbSet<Facturas> Facturas { get; set; }
+        public virtual DbSet<Gestion_P_Anio> Gestion_P_Anio { get; set; }
     }
 }

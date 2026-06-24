@@ -314,6 +314,16 @@
           <Property Name="Ultima_fec_actualizacion" Type="datetime" Nullable="false" />
           <Property Name="Gastos_id" Type="int" Nullable="false" />
         </EntityType>
+        <EntityType Name="Gestion_P_Anio">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="Gestion_Presupuestaria_id" Type="int" Nullable="false" />
+          <Property Name="anio_presupuesto" Type="varchar" MaxLength="10" Nullable="false" />
+          <Property Name="monto" Type="decimal" Precision="12" Scale="2" Nullable="false" />
+          <Property Name="mes" Type="int" Nullable="false" />
+        </EntityType>
         <EntityType Name="Gestion_P_detalle">
           <Key>
             <PropertyRef Name="id" />
@@ -1209,6 +1219,18 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
+        <Association Name="FK_Gestion_P_Anio_GP">
+          <End Role="Gestion_Presupuestaria" Type="Self.Gestion_Presupuestaria" Multiplicity="1" />
+          <End Role="Gestion_P_Anio" Type="Self.Gestion_P_Anio" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Gestion_Presupuestaria">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="Gestion_P_Anio">
+              <PropertyRef Name="Gestion_Presupuestaria_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
         <Association Name="fk_Gestion_P_detalle_Gestion_Presupuestaria1">
           <End Role="Gestion_Presupuestaria" Type="Self.Gestion_Presupuestaria" Multiplicity="1" />
           <End Role="Gestion_P_detalle" Type="Self.Gestion_P_detalle" Multiplicity="*" />
@@ -1531,6 +1553,7 @@
           <EntitySet Name="Facturas" EntityType="Self.Facturas" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Gastos" EntityType="Self.Gastos" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Gastos_Detalles" EntityType="Self.Gastos_Detalles" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Gestion_P_Anio" EntityType="Self.Gestion_P_Anio" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Gestion_P_detalle" EntityType="Self.Gestion_P_detalle" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Gestion_Presupuestaria" EntityType="Self.Gestion_Presupuestaria" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Impuesto" EntityType="Self.Impuesto" Schema="dbo" store:Type="Tables" />
@@ -1757,6 +1780,10 @@
           <AssociationSet Name="fk_Gastos_Usuarios1" Association="Self.fk_Gastos_Usuarios1">
             <End Role="Usuarios" EntitySet="Usuarios" />
             <End Role="Gastos" EntitySet="Gastos" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Gestion_P_Anio_GP" Association="Self.FK_Gestion_P_Anio_GP">
+            <End Role="Gestion_Presupuestaria" EntitySet="Gestion_Presupuestaria" />
+            <End Role="Gestion_P_Anio" EntitySet="Gestion_P_Anio" />
           </AssociationSet>
           <AssociationSet Name="fk_Gestion_P_detalle_Gestion_Presupuestaria1" Association="Self.fk_Gestion_P_detalle_Gestion_Presupuestaria1">
             <End Role="Gestion_Presupuestaria" EntitySet="Gestion_Presupuestaria" />
@@ -2226,6 +2253,7 @@
           <NavigationProperty Name="Gestion_P_detalle" Relationship="Self.fk_Gestion_P_detalle_Gestion_Presupuestaria1" FromRole="Gestion_Presupuestaria" ToRole="Gestion_P_detalle" />
           <NavigationProperty Name="Usuarios" Relationship="Self.fk_Gestion_Presupuestaria_Usuarios1" FromRole="Gestion_Presupuestaria" ToRole="Usuarios" />
           <Property Name="Tipo_moneda_id" Type="Int32" />
+          <NavigationProperty Name="Gestion_P_Anio" Relationship="marsh_contableModel.FK_Gestion_P_Anio_GP" FromRole="Gestion_Presupuestaria" ToRole="Gestion_P_Anio" />
         </EntityType>
         <EntityType Name="Impuesto">
           <Key>
@@ -3362,6 +3390,11 @@
             <End Role="Tipo_moneda" EntitySet="Tipo_moneda" />
             <End Role="Centro_Costos" EntitySet="Centro_Costos" />
           </AssociationSet>
+          <EntitySet Name="Gestion_P_Anio" EntityType="marsh_contableModel.Gestion_P_Anio" />
+          <AssociationSet Name="FK_Gestion_P_Anio_GP" Association="marsh_contableModel.FK_Gestion_P_Anio_GP">
+            <End Role="Gestion_Presupuestaria" EntitySet="Gestion_Presupuestaria" />
+            <End Role="Gestion_P_Anio" EntitySet="Gestion_P_Anio" />
+          </AssociationSet>
         </EntityContainer>
         <Association Name="FK_Cuentas_Contables_Tipo_moneda">
           <End Type="marsh_contableModel.Tipo_moneda" Role="Tipo_moneda" Multiplicity="1" />
@@ -3866,6 +3899,29 @@
             </Principal>
             <Dependent Role="Centro_Costos">
               <PropertyRef Name="Tipo_moneda_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <EntityType Name="Gestion_P_Anio">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="Gestion_Presupuestaria_id" Type="Int32" Nullable="false" />
+          <Property Name="anio_presupuesto" Type="String" Nullable="false" MaxLength="10" FixedLength="false" Unicode="false" />
+          <Property Name="monto" Type="Decimal" Nullable="false" Precision="12" Scale="2" />
+          <Property Name="mes" Type="Int32" Nullable="false" />
+          <NavigationProperty Name="Gestion_Presupuestaria" Relationship="marsh_contableModel.FK_Gestion_P_Anio_GP" FromRole="Gestion_P_Anio" ToRole="Gestion_Presupuestaria" />
+        </EntityType>
+        <Association Name="FK_Gestion_P_Anio_GP">
+          <End Type="marsh_contableModel.Gestion_Presupuestaria" Role="Gestion_Presupuestaria" Multiplicity="1" />
+          <End Type="marsh_contableModel.Gestion_P_Anio" Role="Gestion_P_Anio" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Gestion_Presupuestaria">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="Gestion_P_Anio">
+              <PropertyRef Name="Gestion_Presupuestaria_id" />
             </Dependent>
           </ReferentialConstraint>
         </Association>
@@ -4488,6 +4544,17 @@
                 <ScalarProperty Name="fecha" ColumnName="fecha" />
                 <ScalarProperty Name="Consecutivo_electronico" ColumnName="Consecutivo_electronico" />
                 <ScalarProperty Name="Clave" ColumnName="Clave" />
+                <ScalarProperty Name="id" ColumnName="id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Gestion_P_Anio">
+            <EntityTypeMapping TypeName="marsh_contableModel.Gestion_P_Anio">
+              <MappingFragment StoreEntitySet="Gestion_P_Anio">
+                <ScalarProperty Name="mes" ColumnName="mes" />
+                <ScalarProperty Name="monto" ColumnName="monto" />
+                <ScalarProperty Name="anio_presupuesto" ColumnName="anio_presupuesto" />
+                <ScalarProperty Name="Gestion_Presupuestaria_id" ColumnName="Gestion_Presupuestaria_id" />
                 <ScalarProperty Name="id" ColumnName="id" />
               </MappingFragment>
             </EntityTypeMapping>
