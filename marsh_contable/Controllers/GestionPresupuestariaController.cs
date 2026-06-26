@@ -530,6 +530,58 @@ namespace marsh_contable.Controllers
                 return oR;
             }
         }
+
+
+
+
+        [HttpGet]
+        [Authorize]
+        [Route("api/v1/gestion_presupuestaria_dropdown/{anio_presupuesto}")]
+        public Reply GetGestionPDropDown(string anio_presupuesto)
+        {
+            Reply oR = new Reply();
+            oR.CodeStatus = 0;
+            try
+            {
+                if (String.IsNullOrEmpty(anio_presupuesto))
+                {
+                    throw new Exception("invalid_value_for_anio_presupuesto");
+                }
+                using (var ctx = new Models.EntitiesModel())
+                {
+                    var resultado = (from gp in ctx.Gestion_Presupuestaria
+                                     join cc in ctx.Centro_Costos on gp.Centro_Costos_id equals cc.id
+                                     join cp in ctx.Categoria_presupuestaria on gp.Categoria_presupuestaria_id equals cp.id
+                                     join tm in ctx.Tipo_moneda on gp.Tipo_moneda_id equals tm.id
+                                     where gp.anio_presupuesto == anio_presupuesto
+                                     select new
+                                     {
+                                         id = gp.id+"_"+gp.Categoria_presupuestaria_id+"_"+ gp.Centro_Costos_id,
+                                         gp.nombre,
+                                         descripcion = gp.nombre + " ( " + cp.nombre + "-" + cc.Nombre + " ) ",
+                                         monto = gp.monto_aprobado,
+                                         simbolo = tm.Simbolo
+                                     }).ToList();
+
+                    if (resultado == null)
+                    {
+                        throw new Exception("gestion_presupuestaria_not_found");
+                    }
+                    oR.CodeStatus = HttpStatusCode.OK;
+                    oR.Data = resultado;
+                    return oR;
+                }
+            }
+            catch (Exception ex)
+            {
+                oR.CodeStatus = HttpStatusCode.InternalServerError;
+                oR.Message = ex.Message;
+                return oR;
+            }
+        }
+
+
+
         #endregion
     }
 }

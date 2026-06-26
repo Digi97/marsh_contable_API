@@ -51,8 +51,11 @@
     <Reference Include="EntityFramework.SqlServer, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
       <HintPath>..\packages\EntityFramework.6.2.0\lib\net45\EntityFramework.SqlServer.dll</HintPath>
     </Reference>
-    <Reference Include="Microsoft.Bcl.AsyncInterfaces, Version=8.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
-      <HintPath>..\packages\Microsoft.Bcl.AsyncInterfaces.8.0.0\lib\net462\Microsoft.Bcl.AsyncInterfaces.dll</HintPath>
+    <Reference Include="FirmaXadesNet">
+      <HintPath>..\..\FirmaXadesNet45\FirmaXadesNet\obj\Debug\FirmaXadesNet.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Bcl.AsyncInterfaces, Version=10.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.Bcl.AsyncInterfaces.10.0.0\lib\net462\Microsoft.Bcl.AsyncInterfaces.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.Bcl.TimeProvider, Version=8.0.0.1, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.Bcl.TimeProvider.8.0.1\lib\net462\Microsoft.Bcl.TimeProvider.dll</HintPath>
@@ -88,6 +91,9 @@
     <Reference Include="Microsoft.Owin.Security.OAuth, Version=4.2.3.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.Owin.Security.OAuth.4.2.3\lib\net45\Microsoft.Owin.Security.OAuth.dll</HintPath>
     </Reference>
+    <Reference Include="Microsoft.Xades">
+      <HintPath>..\..\FirmaXadesNet45\Library\bin\Debug\Microsoft.Xades.dll</HintPath>
+    </Reference>
     <Reference Include="Newtonsoft.Json, Version=13.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>..\packages\Newtonsoft.Json.13.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
@@ -97,9 +103,15 @@
     <Reference Include="Owin, Version=1.0.0.0, Culture=neutral, PublicKeyToken=f0ebd12fd5e55cc5, processorArchitecture=MSIL">
       <HintPath>..\packages\Owin.1.0\lib\net40\Owin.dll</HintPath>
     </Reference>
+    <Reference Include="RestSharp, Version=114.0.0.0, Culture=neutral, PublicKeyToken=598062e77f915f75, processorArchitecture=MSIL">
+      <HintPath>..\packages\RestSharp.114.0.0\lib\net471\RestSharp.dll</HintPath>
+    </Reference>
+    <Reference Include="Swashbuckle.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=cd1bb07a5ac7c7bc, processorArchitecture=MSIL">
+      <HintPath>..\packages\Swashbuckle.Core.5.6.0\lib\net40\Swashbuckle.Core.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
-    <Reference Include="System.Buffers, Version=4.0.3.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
-      <HintPath>..\packages\System.Buffers.4.5.1\lib\net461\System.Buffers.dll</HintPath>
+    <Reference Include="System.Buffers, Version=4.0.5.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Buffers.4.6.1\lib\net462\System.Buffers.dll</HintPath>
     </Reference>
     <Reference Include="System.Data" />
     <Reference Include="System.Data.Entity" />
@@ -110,31 +122,31 @@
     <Reference Include="System.IdentityModel.Tokens.Jwt, Version=8.18.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\packages\System.IdentityModel.Tokens.Jwt.8.18.0\lib\net472\System.IdentityModel.Tokens.Jwt.dll</HintPath>
     </Reference>
-    <Reference Include="System.Memory, Version=4.0.1.2, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
-      <HintPath>..\packages\System.Memory.4.5.5\lib\net461\System.Memory.dll</HintPath>
+    <Reference Include="System.IO.Pipelines, Version=10.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.IO.Pipelines.10.0.0\lib\net462\System.IO.Pipelines.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Memory, Version=4.0.5.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Memory.4.6.3\lib\net462\System.Memory.dll</HintPath>
     </Reference>
     <Reference Include="System.Net.Http.Formatting, Version=6.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.AspNet.WebApi.Client.6.0.0\lib\net45\System.Net.Http.Formatting.dll</HintPath>
     </Reference>
     <Reference Include="System.Numerics" />
-    <Reference Include="System.Numerics.Vectors, Version=4.1.4.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
-      <HintPath>..\packages\System.Numerics.Vectors.4.5.0\lib\net46\System.Numerics.Vectors.dll</HintPath>
+    <Reference Include="System.Numerics.Vectors, Version=4.1.6.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Numerics.Vectors.4.6.1\lib\net462\System.Numerics.Vectors.dll</HintPath>
     </Reference>
-    <Reference Include="System.Runtime.CompilerServices.Unsafe, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
-      <HintPath>..\packages\System.Runtime.CompilerServices.Unsafe.6.0.0\lib\net461\System.Runtime.CompilerServices.Unsafe.dll</HintPath>
+    <Reference Include="System.Runtime.CompilerServices.Unsafe, Version=6.0.3.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Runtime.CompilerServices.Unsafe.6.1.2\lib\net462\System.Runtime.CompilerServices.Unsafe.dll</HintPath>
     </Reference>
     <Reference Include="System.Security" />
-    <Reference Include="System.Text.Encodings.Web, Version=8.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
-      <HintPath>..\packages\System.Text.Encodings.Web.8.0.0\lib\net462\System.Text.Encodings.Web.dll</HintPath>
+    <Reference Include="System.Text.Encodings.Web, Version=10.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Text.Encodings.Web.10.0.0\lib\net462\System.Text.Encodings.Web.dll</HintPath>
     </Reference>
-    <Reference Include="System.Text.Json, Version=8.0.0.5, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
-      <HintPath>..\packages\System.Text.Json.8.0.5\lib\net462\System.Text.Json.dll</HintPath>
+    <Reference Include="System.Text.Json, Version=10.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Text.Json.10.0.0\lib\net462\System.Text.Json.dll</HintPath>
     </Reference>
-    <Reference Include="System.Threading.Tasks.Extensions, Version=4.2.0.1, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
-      <HintPath>..\packages\System.Threading.Tasks.Extensions.4.5.4\lib\net461\System.Threading.Tasks.Extensions.dll</HintPath>
-    </Reference>
-    <Reference Include="System.ValueTuple, Version=4.0.3.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
-      <HintPath>..\packages\System.ValueTuple.4.5.0\lib\net47\System.ValueTuple.dll</HintPath>
+    <Reference Include="System.Threading.Tasks.Extensions, Version=4.2.4.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Threading.Tasks.Extensions.4.6.3\lib\net462\System.Threading.Tasks.Extensions.dll</HintPath>
     </Reference>
     <Reference Include="System.Web.Cors, Version=5.3.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.AspNet.Cors.5.3.0\lib\net45\System.Web.Cors.dll</HintPath>
@@ -189,6 +201,9 @@
     <Reference Include="System.Web.Optimization">
       <HintPath>..\packages\Microsoft.AspNet.Web.Optimization.1.1.3\lib\net40\System.Web.Optimization.dll</HintPath>
     </Reference>
+    <Reference Include="WebActivatorEx, Version=2.0.0.0, Culture=neutral, PublicKeyToken=7b26dc2a43f6a0d4, processorArchitecture=MSIL">
+      <HintPath>..\packages\WebActivatorEx.2.0\lib\net40\WebActivatorEx.dll</HintPath>
+    </Reference>
     <Reference Include="WebGrease">
       <Private>True</Private>
       <HintPath>..\packages\WebGrease.1.6.0\lib\WebGrease.dll</HintPath>
@@ -207,6 +222,7 @@
     <Compile Include="App_Start\BundleConfig.cs" />
     <Compile Include="App_Start\FilterConfig.cs" />
     <Compile Include="App_Start\RouteConfig.cs" />
+    <Compile Include="App_Start\SwaggerConfig.cs" />
     <Compile Include="App_Start\WebApiConfig.cs" />
     <Compile Include="Areas\HelpPage\ApiDescriptionExtensions.cs" />
     <Compile Include="Areas\HelpPage\App_Start\HelpPageConfig.cs" />
@@ -253,12 +269,34 @@
     <Compile Include="Controllers\IngresosController.cs" />
     <Compile Include="Controllers\IngresosDetalleController.cs" />
     <Compile Include="Controllers\ProveedorController.cs" />
+    <Compile Include="Controllers\ReportesController.cs" />
     <Compile Include="Controllers\TelefonosController.cs" />
     <Compile Include="Controllers\TipoIdentificacionController.cs" />
-    <Compile Include="Controllers\TokenValidationHandlerController.cs" />
     <Compile Include="Controllers\UbicacionController.cs" />
     <Compile Include="Controllers\UsersController.cs" />
     <Compile Include="Controllers\ValuesController.cs" />
+    <Compile Include="DocElectronic\FacturacionHacienda.cs" />
+    <Compile Include="DocElectronic\Lib\Configuracion.cs" />
+    <Compile Include="DocElectronic\Lib\Documento.cs" />
+    <Compile Include="DocElectronic\Lib\DocumentoItems\DocumentoIdentificacion.cs" />
+    <Compile Include="DocElectronic\Lib\DocumentoItems\Emisor.cs" />
+    <Compile Include="DocElectronic\Lib\DocumentoItems\Exoneracion.cs" />
+    <Compile Include="DocElectronic\Lib\DocumentoItems\Impuesto.cs" />
+    <Compile Include="DocElectronic\Lib\DocumentoItems\Item.cs" />
+    <Compile Include="DocElectronic\Lib\DocumentoItems\Normativa.cs" />
+    <Compile Include="DocElectronic\Lib\DocumentoItems\Receptor.cs" />
+    <Compile Include="DocElectronic\Lib\DocumentoItems\Referencia.cs" />
+    <Compile Include="DocElectronic\Lib\DocumentoItems\ResumenFactura.cs" />
+    <Compile Include="DocElectronic\Lib\DocumentoItems\TelefonoBase.cs" />
+    <Compile Include="DocElectronic\Lib\DocumentoItems\Ubicacion.cs" />
+    <Compile Include="DocElectronic\Lib\EstadoDocumento.cs" />
+    <Compile Include="DocElectronic\Lib\FirmadorXML.cs" />
+    <Compile Include="DocElectronic\Lib\MensajeReceptor.cs" />
+    <Compile Include="DocElectronic\Properties\Resources.Designer.cs" />
+    <Compile Include="DocElectronic\Utils\IXMLGenerador.cs" />
+    <Compile Include="DocElectronic\Utils\UtilDateTime.cs" />
+    <Compile Include="DocElectronic\Utils\UtilEnum.cs" />
+    <Compile Include="DocElectronic\Utils\XSDUtils.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
@@ -280,6 +318,7 @@
       <DependentUpon>EntitiesModel.tt</DependentUpon>
     </Compile>
     <Compile Include="Models\ChangePasswordViewModel.cs" />
+    <Compile Include="Models\ClaveViewModel.cs" />
     <Compile Include="Models\Clientes.cs">
       <DependentUpon>EntitiesModel.tt</DependentUpon>
     </Compile>
@@ -308,6 +347,7 @@
       <DependentUpon>EntitiesModel.tt</DependentUpon>
     </Compile>
     <Compile Include="Models\DataTableRequest.cs" />
+    <Compile Include="Models\DetalleGestionPViewModel.cs" />
     <Compile Include="Models\Devoluciones.cs">
       <DependentUpon>EntitiesModel.tt</DependentUpon>
     </Compile>
@@ -354,9 +394,14 @@
     <Compile Include="Models\Gastos_Detalles.cs">
       <DependentUpon>EntitiesModel.tt</DependentUpon>
     </Compile>
+    <Compile Include="Models\GestionPAnioDetallesViewModel.cs" />
+    <Compile Include="Models\GestionPAnioViewModel.cs" />
     <Compile Include="Models\GestionPDetalleViewModel.cs" />
     <Compile Include="Models\GestionPresupuestariaViewModel.cs" />
     <Compile Include="Models\Gestion_Presupuestaria.cs">
+      <DependentUpon>EntitiesModel.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\Gestion_P_Anio.cs">
       <DependentUpon>EntitiesModel.tt</DependentUpon>
     </Compile>
     <Compile Include="Models\Gestion_P_detalle.cs">
@@ -434,12 +479,32 @@
     <Compile Include="Models\Unidad_medida.cs">
       <DependentUpon>EntitiesModel.tt</DependentUpon>
     </Compile>
+    <Compile Include="Models\UploadLlaveViewModel.cs" />
     <Compile Include="Models\Usuarios.cs">
       <DependentUpon>EntitiesModel.tt</DependentUpon>
     </Compile>
     <Compile Include="Models\UsuariosViewModel.cs" />
+    <Compile Include="Modulos\AceptaFacturaViewModel.cs" />
+    <Compile Include="Modulos\Categoria_presupuestaria.cs" />
+    <Compile Include="Modulos\EstadoFactura.cs" />
     <Compile Include="Modulos\General.cs" />
+    <Compile Include="Modulos\PermisosAplica.cs" />
+    <Compile Include="Modulos\RequierePermisoAttribute.cs" />
+    <Compile Include="Modulos\SerializeBCCR.cs" />
+    <Compile Include="Modulos\TipoDocumentoCode.cs" />
+    <Compile Include="Modulos\TipoDocumentoId.cs" />
+    <Compile Include="Modulos\TokenValidationHandlerController.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <Compile Include="Properties\Settings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+      <DependentUpon>Settings.settings</DependentUpon>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <Content Include="Areas\HelpPage\HelpPage.css" />
@@ -488,6 +553,52 @@
     <Content Include="Models\EntitiesModel.edmx.diagram">
       <DependentUpon>EntitiesModel.edmx</DependentUpon>
     </Content>
+    <None Include="DocElectronic\XSD\4.2\FacturaElectronica_V.4.2.xsd">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="DocElectronic\XSD\4.2\MensajeHacienda_V4.2.xsd">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="DocElectronic\XSD\4.2\MensajeReceptor_4.2.xsd">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="DocElectronic\XSD\4.2\NotaCreditoElectronica_V4.2.xsd">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="DocElectronic\XSD\4.2\NotaDebitoElectronica.xsd">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="DocElectronic\XSD\4.2\TiqueteElectronico_V4.2.xsd">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="DocElectronic\XSD\4.4\FacturaElectronicaCompra_V4.4.xsd">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="DocElectronic\XSD\4.4\FacturaElectronicaExportacion_V4.4.xsd">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="DocElectronic\XSD\4.4\FacturaElectronica_V4.4.xsd">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="DocElectronic\XSD\4.4\MensajeReceptor_V4.4.xsd">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="DocElectronic\XSD\4.4\NotaCreditoElectronica_V4.4.xsd">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="DocElectronic\XSD\4.4\NotaDebitoElectronica_V4.4.xsd">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="DocElectronic\XSD\4.4\ReciboElectronicoPago_V4.4.xsd">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="DocElectronic\XSD\4.4\TiqueteElectronico_V4.4.xsd">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
     <None Include="Scripts\jquery-3.4.1.intellisense.js" />
     <Content Include="Scripts\jquery-3.4.1.js" />
     <Content Include="Scripts\jquery-3.4.1.min.js" />
@@ -513,6 +624,7 @@
     <Folder Include="App_Data\" />
     <Folder Include="Views\Base\" />
     <Folder Include="Views\Catalogos\" />
+    <Folder Include="Views\Reportes\" />
     <Folder Include="Views\TokenValidationHandler\" />
     <Folder Include="Views\Users\" />
   </ItemGroup>
@@ -548,6 +660,13 @@
   <ItemGroup>
     <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
   </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="DocElectronic\Properties\Resources.resx" />
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
     <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>
@@ -581,7 +700,9 @@
       <ErrorText>Este proyecto hace referencia a los paquetes NuGet que faltan en este equipo. Use la restauración de paquetes NuGet para descargarlos. Para obtener más información, consulte http://go.microsoft.com/fwlink/?LinkID=322105. El archivo que falta es {0}.</ErrorText>
     </PropertyGroup>
     <Error Condition="!Exists('..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.2.0.1\build\net46\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.2.0.1\build\net46\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props'))" />
+    <Error Condition="!Exists('..\packages\System.ValueTuple.4.6.1\build\net471\System.ValueTuple.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\System.ValueTuple.4.6.1\build\net471\System.ValueTuple.targets'))" />
   </Target>
+  <Import Project="..\packages\System.ValueTuple.4.6.1\build\net471\System.ValueTuple.targets" Condition="Exists('..\packages\System.ValueTuple.4.6.1\build\net471\System.ValueTuple.targets')" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it.
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

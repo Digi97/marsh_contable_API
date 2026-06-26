@@ -18,6 +18,7 @@ namespace marsh_contable.Controllers
         [HttpPost]
         [Authorize]
         [Route("api/v1/gestion_p_detalle")]
+        [RequierePermiso(PermisosAplica.UsuarioPresupuestos)]
         public Reply CreateGestionPDetalle([FromBody] Models.Gestion_P_detalle model)
         {
             Reply oR = new Reply();
@@ -93,6 +94,7 @@ namespace marsh_contable.Controllers
         [HttpPut]
         [Authorize]
         [Route("api/v1/gestion_p_detalle/{id}")]
+        [RequierePermiso(PermisosAplica.UsuarioPresupuestos)]
         public Reply UpdateGestionPDetalle(int id, [FromBody] Models.Gestion_P_detalle model, int typeDoc = 0)
         {
             Reply oR = new Reply();
@@ -184,6 +186,7 @@ namespace marsh_contable.Controllers
         [HttpGet]
         [Authorize]
         [Route("api/v1/gestion_p_detalle/gestion/{gestionId}")]
+        [RequierePermiso(PermisosAplica.UsuarioPresupuestos)]
         public Reply GetDetallesByGestion(int gestionId)
         {
             Reply oR = new Reply();
@@ -199,16 +202,10 @@ namespace marsh_contable.Controllers
                     var lista = (from d in ctx.Gestion_P_detalle
                                  join gp in ctx.Gestion_Presupuestaria on d.Gestion_Presupuestaria_id equals gp.id
                                  join cp in ctx.Categoria_presupuestaria on d.Categoria_presupuestaria_id equals cp.id
-
-                                 // LEFT JOIN Facturas
                                  join f in ctx.Facturas on d.Facturas_id equals f.id into facturaGroup
                                  from f in facturaGroup.DefaultIfEmpty()
-
-                                     // LEFT JOIN Gastos
                                  join g in ctx.Gastos on d.Gastos_id equals g.id into gastoGroup
                                  from g in gastoGroup.DefaultIfEmpty()
-
-                                     // LEFT JOIN Ingresos
                                  join i in ctx.Ingresos on d.Ingresos_id equals i.id into ingresoGroup
                                  from i in ingresoGroup.DefaultIfEmpty()
 
@@ -250,6 +247,7 @@ namespace marsh_contable.Controllers
         [HttpGet]
         [Authorize]
         [Route("api/v1/gestion_p_detalle/{id}")]
+        [RequierePermiso(PermisosAplica.UsuarioPresupuestos)]
         public Reply GetGestionPDetalleById(int id)
         {
             Reply oR = new Reply();
@@ -294,6 +292,7 @@ namespace marsh_contable.Controllers
         [HttpDelete]
         [Authorize]
         [Route("api/v1/gestion_p_detalle/{id}")]
+        [RequierePermiso(PermisosAplica.UsuarioPresupuestos)]
         public Reply DeleteGestionPDetalle(int id)
         {
             Reply oR = new Reply();

@@ -315,7 +315,7 @@ namespace marsh_contable.Modulos
 
         public bool validaPassword(string text)
         {
-            const string pwdFormat = @"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).+$";
+            const string pwdFormat = @"^(?=.[a-z])(?=.[A-Z])(?=.\d)(?=.[\W_]).{8,}$";//@"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).+$";
             return Regex.IsMatch(text, pwdFormat);
 
         }

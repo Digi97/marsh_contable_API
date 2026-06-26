@@ -73,7 +73,6 @@ namespace marsh_contable.Controllers
 
                 using (var ctx = new Models.EntitiesModel())
                 {
-
                     var userExist = ctx.Usuarios
                          .Where(u =>
                              u.Correo == model.Correo && 
@@ -82,13 +81,11 @@ namespace marsh_contable.Controllers
                          {
                              Usuario_id = u.Usuario_id,
                          }).FirstOrDefault();
-
                     // Usuario no encontrado
                     if (userExist != null)
                     {
                         throw new Exception("user_already_exist");
                     }
-
 
                     Models.Usuarios nuevoUsuario = new Models.Usuarios()
                     {
@@ -106,7 +103,6 @@ namespace marsh_contable.Controllers
                         Empresa_Emp_id = 1
 
                     };
-
                     ctx.Usuarios.Add(nuevoUsuario);
                     ctx.SaveChanges();
 
@@ -383,6 +379,11 @@ namespace marsh_contable.Controllers
                 if (!tool.ValidaCorreo(model.Correo))
                 {
                     throw new Exception("invalid_value_form_Correo");
+                }
+
+                if (!tool.validaPassword(model.Contrasena))
+                {
+                    throw new Exception("invalid_value_form_Contrasena");
                 }
 
                 using (var ctx = new Models.EntitiesModel())
