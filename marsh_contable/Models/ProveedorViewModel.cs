@@ -30,6 +30,9 @@ namespace marsh_contable.Models
         public string Codigo_actividad { get; set; }
         public string Nombre_actividad { get; set; }
 
+        public string CtaIBAN_Colones { get; set; }
+        public string CtaIBAN_Dolares { get; set; }
+
         public List<TelefonosViewModel> Telefonos { get; set; }
     }
 }

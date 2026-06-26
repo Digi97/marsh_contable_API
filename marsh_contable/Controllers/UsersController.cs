@@ -481,6 +481,8 @@ namespace marsh_contable.Controllers
                         slidingExpiration: System.Web.Caching.Cache.NoSlidingExpiration
                     );
 
+                    GeneraOTP(usuarioResponse.Usuario_id); //mandamos el OTP
+                    
                     oR.CodeStatus = HttpStatusCode.OK;
                     oR.Message = sessionId;// tool.GenerateTokenJWT(model.Correo, permisosJWT);
                     oR.Data = usuarioResponse;
@@ -844,6 +846,179 @@ namespace marsh_contable.Controllers
             }
             return oR;
         }
+
+
+        [HttpPost]
+        [AllowAnonymous]
+        [Route("api/v1/otp")]
+        public Reply ValidateOTP([FromBody] Models.MultiFactor model)
+        {
+            Reply oR = new Reply();
+            oR.CodeStatus = 0;
+            General tool = new General();
+
+            try
+            {
+                // Validar body null
+                if (model == null)
+                {
+                    throw new Exception("invalid_model");
+                }
+
+                // Validar que el código no venga vacío
+                if (string.IsNullOrWhiteSpace(model.OTP))
+                {
+                    throw new Exception("invalid_value_otp");
+                }
+
+                using (var ctx = new Models.EntitiesModel())
+                {
+                    // Buscar usuario por código de recuperación
+                    Models.MultiFactor multi = ctx.MultiFactor
+                        .FirstOrDefault(u =>
+                            u.OTP == model.OTP &&
+                            u.Usuarios_Usuario_id == model.Usuarios_Usuario_id);
+
+                    // Código no existe en ningún usuario activo
+                    if (multi == null)
+                    {
+                        throw new Exception("invalid_recovery_code");
+                    }
+
+                    // Validar que Fec_Actualizacion tenga valor
+                    if (multi.Fecha == null)
+                    {
+                        throw new Exception("invalid_date");
+                    }
+
+                    // Calcular minutos transcurridos desde la solicitud
+                    double minutosTranscurridos = (DateTime.Now - multi.Fecha).TotalMinutes;
+
+                    if (minutosTranscurridos > 15)
+                    {
+                    
+                        ctx.MultiFactor.Remove(multi); //eliminamos el registro
+                        ctx.SaveChanges();
+
+                        throw new Exception("otp_expired");
+                    }
+
+                    // limpiar el código para que no pueda usarse de nuevo
+                    ctx.MultiFactor.Remove(multi); //eliminamos el registro
+                    ctx.SaveChanges();
+
+                    oR.CodeStatus = HttpStatusCode.OK;
+                    oR.Message = "code_validated";
+                    oR.Data = multi.Usuarios_Usuario_id;
+
+                }
+            }
+            catch (System.Data.Entity.Validation.DbEntityValidationException ex)
+            {
+                string errorDB = "";
+                foreach (var eve in ex.EntityValidationErrors)
+                    foreach (var ve in eve.ValidationErrors)
+                        errorDB += ve.ErrorMessage;
+
+                oR.CodeStatus = HttpStatusCode.InternalServerError;
+                oR.Message = errorDB;
+            }
+            catch (Exception ex)
+            {
+                oR.CodeStatus = HttpStatusCode.InternalServerError;
+                oR.Message = ex.Message;
+            }
+            return oR;
+        }
+
+
+        private bool GeneraOTP(int uid)
+        {
+            try
+            {
+                string codigoRecuperacion;
+                Models.Usuarios usuario;
+
+                using (var ctx = new Models.EntitiesModel())
+                {
+
+                     usuario = ctx.Usuarios
+                       .FirstOrDefault(u => u.Usuario_id == uid && u.activo == 1);
+
+                    if (usuario == null)
+                    {
+                        throw new Exception("user_not_found");
+                    }
+
+
+                    // Generar código de recuperación seguro de 6 dígitos
+                
+                    using (var rng = System.Security.Cryptography.RandomNumberGenerator.Create())
+                    {
+                        byte[] bytes = new byte[4];
+                        rng.GetBytes(bytes);
+                        int codigo = (Math.Abs(BitConverter.ToInt32(bytes, 0)) % 900000) + 100000;
+                        codigoRecuperacion = codigo.ToString();
+                    }
+
+
+                    Models.MultiFactor multi = new Models.MultiFactor()
+                    {
+                        Usuarios_Usuario_id = uid,
+                        OTP = codigoRecuperacion,
+                        Fecha = DateTime.Now
+
+
+                    };
+                    ctx.MultiFactor.Add(multi);
+                    ctx.SaveChanges();
+                    }
+
+
+
+                string cuerpoHtml = $@"
+        <html>
+        <body style='font-family: Arial, sans-serif; color: #333;'>
+            <div style='max-width: 600px; margin: 0 auto; padding: 20px;'>
+                <h2 style='color: #1F4E79;'>Código OTP</h2>
+                <p>Hola <strong>{usuario.Nombre} {usuario.Apellido1} {usuario.Apellido2}</strong>,</p>
+                <p>Recibimos una solicitud para inicio de sesión
+                   Usá el siguiente código para continuar con el proceso de autenticación:</p>
+                <div style='text-align: center; margin: 30px 0;'>
+                    <span style='
+                        font-size: 36px;
+                        font-weight: bold;
+                        letter-spacing: 8px;
+                        color: #1F4E79;
+                        background-color: #DCE6F1;
+                        padding: 15px 30px;
+                        border-radius: 8px;
+                        display: inline-block;'>
+                        {codigoRecuperacion}
+                    </span>
+                </div>
+                <p>Este código es válido por <strong>15 minutos</strong>. 
+                   Si no solicitaste recuperar tu contraseña, ignorá este mensaje.</p>
+                <hr style='border: none; border-top: 1px solid #ddd; margin: 20px 0;'/>
+                <p style='font-size: 12px; color: #999;'>
+                    Este es un correo automático, por favor no respondas a este mensaje.
+                </p>
+            </div>
+        </body>
+        </html>";
+
+                General tool = new General();
+                tool.Send_Mail(usuario.Correo, "Código de OTP", cuerpoHtml);
+
+
+                return true;
+
+            } catch(Exception ex)
+            {
+                throw ex;
+            }
+        }
+
 
     }
 }

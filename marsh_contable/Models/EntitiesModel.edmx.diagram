@@ -127,6 +127,10 @@
         <AssociationConnector Association="marsh_contableModel.fk_tipo_moneda_cc" />
         <EntityTypeShape EntityType="marsh_contableModel.Gestion_P_Anio" Width="1.5" PointX="6" PointY="32.125" />
         <AssociationConnector Association="marsh_contableModel.FK_Gestion_P_Anio_GP" />
+        <EntityTypeShape EntityType="marsh_contableModel.AuditaTabla" Width="1.5" PointX="3.75" PointY="64.5" />
+        <EntityTypeShape EntityType="marsh_contableModel.MultiFactor" Width="1.5" PointX="3.75" PointY="50.5" />
+        <AssociationConnector Association="marsh_contableModel.FK_AuditaTabla_Empresa" />
+        <AssociationConnector Association="marsh_contableModel.FK_MultiFactor_Usuarios" />
         </Diagram>
     </edmx:Diagrams>
   </edmx:Designer>

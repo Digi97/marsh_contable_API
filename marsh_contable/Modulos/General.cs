@@ -271,10 +271,23 @@ namespace marsh_contable.Modulos
             return false;
 
         }
+    //    ^CR[0 - 9]{2}
+    //[A-Za-z0-9]{18}$
 
         public bool ValidaRuta(string text)
         {
             const String regexfotNames = @"^(https?:\/\/|[a-zA-Z]:\\)([\w\-]+\.)*[\w\-]+([\\/][\w\-._~:/?#\[\]@!$&'()*+,;=%]*)?$";
+            if (!string.IsNullOrWhiteSpace(text) && Regex.IsMatch(text, regexfotNames))
+            {
+                return true;
+            }
+            return false;
+
+        }
+
+        public bool ValidaIBAN(string text)
+        {
+            const String regexfotNames = @"^CR[0-9]{2}[A-Za-z0-9]{18}$";
             if (!string.IsNullOrWhiteSpace(text) && Regex.IsMatch(text, regexfotNames))
             {
                 return true;
@@ -315,7 +328,7 @@ namespace marsh_contable.Modulos
 
         public bool validaPassword(string text)
         {
-            const string pwdFormat = @"^(?=.[a-z])(?=.[A-Z])(?=.\d)(?=.[\W_]).{8,}$";//@"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).+$";
+            const string pwdFormat = @"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).+$";
             return Regex.IsMatch(text, pwdFormat);
 
         }

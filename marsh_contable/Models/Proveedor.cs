@@ -37,6 +37,8 @@ namespace marsh_contable.Models
         public System.DateTime fecha_actualizacion { get; set; }
         public short exonerado { get; set; }
         public string OtrasSenas { get; set; }
+        public string CtaIBAN_Colones { get; set; }
+        public string CtaIBAN_Dolares { get; set; }
     
         public virtual codigo_actividad codigo_actividad { get; set; }
         public virtual Distrito Distrito { get; set; }

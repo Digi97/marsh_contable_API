@@ -23,6 +23,21 @@
           <Property Name="fecha_ingreso" Type="datetime" Nullable="false" />
           <Property Name="fecha_actualizacion" Type="datetime" Nullable="false" />
         </EntityType>
+        <EntityType Name="AuditaTabla">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="CamposKey" Type="varchar" MaxLength="200" Nullable="false" />
+          <Property Name="NombreTabla" Type="varchar" MaxLength="100" Nullable="false" />
+          <Property Name="CamposValores" Type="varchar" MaxLength="200" Nullable="false" />
+          <Property Name="Fecha" Type="datetime" Nullable="false" />
+          <Property Name="Accion" Type="varchar" MaxLength="1" Nullable="false" />
+          <Property Name="NombreColumna" Type="varchar" MaxLength="100" Nullable="false" />
+          <Property Name="ValorAnterior" Type="varchar" MaxLength="200" />
+          <Property Name="ValorNuevo" Type="varchar" MaxLength="200" />
+          <Property Name="Empresa_Emp_id" Type="int" Nullable="false" />
+        </EntityType>
         <EntityType Name="Canton">
           <Key>
             <PropertyRef Name="id" />
@@ -424,6 +439,15 @@
           <Property Name="codigo" Type="varchar" MaxLength="5" Nullable="false" />
           <Property Name="descripcion" Type="varchar" MaxLength="150" Nullable="false" />
         </EntityType>
+        <EntityType Name="MultiFactor">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="OTP" Type="varchar" MaxLength="45" Nullable="false" />
+          <Property Name="Fecha" Type="datetime" Nullable="false" />
+          <Property Name="Usuarios_Usuario_id" Type="int" Nullable="false" />
+        </EntityType>
         <EntityType Name="Padron">
           <Key>
             <PropertyRef Name="id" />
@@ -471,6 +495,8 @@
           <Property Name="fecha_actualizacion" Type="datetime" Nullable="false" />
           <Property Name="exonerado" Type="smallint" Nullable="false" />
           <Property Name="OtrasSenas" Type="varchar" MaxLength="200" />
+          <Property Name="CtaIBAN_Colones" Type="varchar" MaxLength="200" />
+          <Property Name="CtaIBAN_Dolares" Type="varchar" MaxLength="200" />
         </EntityType>
         <EntityType Name="Provincia">
           <Key>
@@ -626,6 +652,18 @@
             </Principal>
             <Dependent Role="Adjuntos">
               <PropertyRef Name="Usuarios_Usuario_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_AuditaTabla_Empresa">
+          <End Role="Empresa" Type="Self.Empresa" Multiplicity="1" />
+          <End Role="AuditaTabla" Type="Self.AuditaTabla" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Empresa">
+              <PropertyRef Name="Emp_id" />
+            </Principal>
+            <Dependent Role="AuditaTabla">
+              <PropertyRef Name="Empresa_Emp_id" />
             </Dependent>
           </ReferentialConstraint>
         </Association>
@@ -1387,6 +1425,18 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
+        <Association Name="FK_MultiFactor_Usuarios">
+          <End Role="Usuarios" Type="Self.Usuarios" Multiplicity="1" />
+          <End Role="MultiFactor" Type="Self.MultiFactor" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Usuarios">
+              <PropertyRef Name="Usuario_id" />
+            </Principal>
+            <Dependent Role="MultiFactor">
+              <PropertyRef Name="Usuarios_Usuario_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
         <Association Name="FK_Padron_Empresa">
           <End Role="Empresa" Type="Self.Empresa" Multiplicity="1" />
           <End Role="Padron" Type="Self.Padron" Multiplicity="*" />
@@ -1533,6 +1583,7 @@
         </Association>
         <EntityContainer Name="marsh_contableModelStoreContainer">
           <EntitySet Name="Adjuntos" EntityType="Self.Adjuntos" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="AuditaTabla" EntityType="Self.AuditaTabla" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Canton" EntityType="Self.Canton" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Categoria_gasto" EntityType="Self.Categoria_gasto" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Categoria_presupuestaria" EntityType="Self.Categoria_presupuestaria" Schema="dbo" store:Type="Tables" />
@@ -1560,6 +1611,7 @@
           <EntitySet Name="Ingresos" EntityType="Self.Ingresos" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Ingresos_Detalle" EntityType="Self.Ingresos_Detalle" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Medio_pago" EntityType="Self.Medio_pago" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="MultiFactor" EntityType="Self.MultiFactor" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Padron" EntityType="Self.Padron" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Permisos" EntityType="Self.Permisos" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Permisos_x_rol" EntityType="Self.Permisos_x_rol" Schema="dbo" store:Type="Tables" />
@@ -1588,6 +1640,10 @@
           <AssociationSet Name="fk_Adjuntos_Usuarios1" Association="Self.fk_Adjuntos_Usuarios1">
             <End Role="Usuarios" EntitySet="Usuarios" />
             <End Role="Adjuntos" EntitySet="Adjuntos" />
+          </AssociationSet>
+          <AssociationSet Name="FK_AuditaTabla_Empresa" Association="Self.FK_AuditaTabla_Empresa">
+            <End Role="Empresa" EntitySet="Empresa" />
+            <End Role="AuditaTabla" EntitySet="AuditaTabla" />
           </AssociationSet>
           <AssociationSet Name="fk_Canton_Provincia1" Association="Self.fk_Canton_Provincia1">
             <End Role="Provincia" EntitySet="Provincia" />
@@ -1836,6 +1892,10 @@
           <AssociationSet Name="fk_Ingresos_Usuarios1" Association="Self.fk_Ingresos_Usuarios1">
             <End Role="Usuarios" EntitySet="Usuarios" />
             <End Role="Ingresos" EntitySet="Ingresos" />
+          </AssociationSet>
+          <AssociationSet Name="FK_MultiFactor_Usuarios" Association="Self.FK_MultiFactor_Usuarios">
+            <End Role="Usuarios" EntitySet="Usuarios" />
+            <End Role="MultiFactor" EntitySet="MultiFactor" />
           </AssociationSet>
           <AssociationSet Name="FK_Padron_Empresa" Association="Self.FK_Padron_Empresa">
             <End Role="Empresa" EntitySet="Empresa" />
@@ -2161,6 +2221,7 @@
           <NavigationProperty Name="Provincia" Relationship="marsh_contableModel.FK_Empresa_Provincia" FromRole="Empresa" ToRole="Provincia" />
           <Property Name="Usuario_hacienda" Type="String" MaxLength="200" FixedLength="false" Unicode="false" />
           <Property Name="Contrasena_hacienda" Type="String" MaxLength="200" FixedLength="false" Unicode="false" />
+          <NavigationProperty Name="AuditaTabla" Relationship="marsh_contableModel.FK_AuditaTabla_Empresa" FromRole="Empresa" ToRole="AuditaTabla" />
         </EntityType>
         <EntityType Name="Estado_Factura">
           <Key>
@@ -2343,6 +2404,8 @@
           <NavigationProperty Name="Gastos" Relationship="Self.fk_Gastos_Proveedor1" FromRole="Proveedor" ToRole="Gastos" />
           <NavigationProperty Name="tipo_identificacion" Relationship="Self.fk_Clientes_tipo_identificacion10" FromRole="Proveedor" ToRole="tipo_identificacion" />
           <NavigationProperty Name="Telefonos" Relationship="Self.fk_Telefonos_Proveedor1" FromRole="Proveedor" ToRole="Telefonos" />
+          <Property Name="CtaIBAN_Colones" Type="String" MaxLength="200" FixedLength="false" Unicode="false" />
+          <Property Name="CtaIBAN_Dolares" Type="String" MaxLength="200" FixedLength="false" Unicode="false" />
         </EntityType>
         <EntityType Name="Provincia">
           <Key>
@@ -2502,6 +2565,7 @@
           <NavigationProperty Name="Ingresos" Relationship="marsh_contableModel.fk_Ingresos_Usuarios1" FromRole="Usuarios" ToRole="Ingresos" />
           <NavigationProperty Name="Gestion_P_detalle" Relationship="marsh_contableModel.FK_GP_Detalle_Usuarios" FromRole="Usuarios" ToRole="Gestion_P_detalle" />
           <NavigationProperty Name="Facturas" Relationship="marsh_contableModel.FK_Usuarios_Factura" FromRole="Usuarios" ToRole="Facturas" />
+          <NavigationProperty Name="MultiFactor" Relationship="marsh_contableModel.FK_MultiFactor_Usuarios" FromRole="Usuarios" ToRole="MultiFactor" />
         </EntityType>
         <Association Name="fk_Adjuntos_Tablas_referencia1">
           <End Role="Tablas_referencia" Type="Self.Tablas_referencia" Multiplicity="1" />
@@ -3395,6 +3459,16 @@
             <End Role="Gestion_Presupuestaria" EntitySet="Gestion_Presupuestaria" />
             <End Role="Gestion_P_Anio" EntitySet="Gestion_P_Anio" />
           </AssociationSet>
+          <EntitySet Name="AuditaTabla" EntityType="marsh_contableModel.AuditaTabla" />
+          <EntitySet Name="MultiFactor" EntityType="marsh_contableModel.MultiFactor" />
+          <AssociationSet Name="FK_AuditaTabla_Empresa" Association="marsh_contableModel.FK_AuditaTabla_Empresa">
+            <End Role="Empresa" EntitySet="Empresa" />
+            <End Role="AuditaTabla" EntitySet="AuditaTabla" />
+          </AssociationSet>
+          <AssociationSet Name="FK_MultiFactor_Usuarios" Association="marsh_contableModel.FK_MultiFactor_Usuarios">
+            <End Role="Usuarios" EntitySet="Usuarios" />
+            <End Role="MultiFactor" EntitySet="MultiFactor" />
+          </AssociationSet>
         </EntityContainer>
         <Association Name="FK_Cuentas_Contables_Tipo_moneda">
           <End Type="marsh_contableModel.Tipo_moneda" Role="Tipo_moneda" Multiplicity="1" />
@@ -3925,6 +3999,56 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
+        <EntityType Name="AuditaTabla">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="CamposKey" Type="String" Nullable="false" MaxLength="200" FixedLength="false" Unicode="false" />
+          <Property Name="NombreTabla" Type="String" Nullable="false" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="CamposValores" Type="String" Nullable="false" MaxLength="200" FixedLength="false" Unicode="false" />
+          <Property Name="Fecha" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="Accion" Type="String" Nullable="false" MaxLength="1" FixedLength="false" Unicode="false" />
+          <Property Name="NombreColumna" Type="String" Nullable="false" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="ValorAnterior" Type="String" MaxLength="200" FixedLength="false" Unicode="false" />
+          <Property Name="ValorNuevo" Type="String" MaxLength="200" FixedLength="false" Unicode="false" />
+          <Property Name="Empresa_Emp_id" Type="Int32" Nullable="false" />
+          <NavigationProperty Name="Empresa" Relationship="marsh_contableModel.FK_AuditaTabla_Empresa" FromRole="AuditaTabla" ToRole="Empresa" />
+        </EntityType>
+        <EntityType Name="MultiFactor">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="OTP" Type="String" Nullable="false" MaxLength="45" FixedLength="false" Unicode="false" />
+          <Property Name="Fecha" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="Usuarios_Usuario_id" Type="Int32" Nullable="false" />
+          <NavigationProperty Name="Usuarios" Relationship="marsh_contableModel.FK_MultiFactor_Usuarios" FromRole="MultiFactor" ToRole="Usuarios" />
+        </EntityType>
+        <Association Name="FK_AuditaTabla_Empresa">
+          <End Type="marsh_contableModel.Empresa" Role="Empresa" Multiplicity="1" />
+          <End Type="marsh_contableModel.AuditaTabla" Role="AuditaTabla" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Empresa">
+              <PropertyRef Name="Emp_id" />
+            </Principal>
+            <Dependent Role="AuditaTabla">
+              <PropertyRef Name="Empresa_Emp_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_MultiFactor_Usuarios">
+          <End Type="marsh_contableModel.Usuarios" Role="Usuarios" Multiplicity="1" />
+          <End Type="marsh_contableModel.MultiFactor" Role="MultiFactor" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Usuarios">
+              <PropertyRef Name="Usuario_id" />
+            </Principal>
+            <Dependent Role="MultiFactor">
+              <PropertyRef Name="Usuarios_Usuario_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
       </Schema>
     </edmx:ConceptualModels>
     <!-- C-S mapping content -->
@@ -4298,6 +4422,8 @@
           <EntitySetMapping Name="Proveedor">
             <EntityTypeMapping TypeName="marsh_contableModel.Proveedor">
               <MappingFragment StoreEntitySet="Proveedor">
+                <ScalarProperty Name="CtaIBAN_Dolares" ColumnName="CtaIBAN_Dolares" />
+                <ScalarProperty Name="CtaIBAN_Colones" ColumnName="CtaIBAN_Colones" />
                 <ScalarProperty Name="id" ColumnName="id" />
                 <ScalarProperty Name="identificacion" ColumnName="identificacion" />
                 <ScalarProperty Name="tipo_identificacion_id" ColumnName="tipo_identificacion_id" />
@@ -4555,6 +4681,32 @@
                 <ScalarProperty Name="monto" ColumnName="monto" />
                 <ScalarProperty Name="anio_presupuesto" ColumnName="anio_presupuesto" />
                 <ScalarProperty Name="Gestion_Presupuestaria_id" ColumnName="Gestion_Presupuestaria_id" />
+                <ScalarProperty Name="id" ColumnName="id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="AuditaTabla">
+            <EntityTypeMapping TypeName="marsh_contableModel.AuditaTabla">
+              <MappingFragment StoreEntitySet="AuditaTabla">
+                <ScalarProperty Name="Empresa_Emp_id" ColumnName="Empresa_Emp_id" />
+                <ScalarProperty Name="ValorNuevo" ColumnName="ValorNuevo" />
+                <ScalarProperty Name="ValorAnterior" ColumnName="ValorAnterior" />
+                <ScalarProperty Name="NombreColumna" ColumnName="NombreColumna" />
+                <ScalarProperty Name="Accion" ColumnName="Accion" />
+                <ScalarProperty Name="Fecha" ColumnName="Fecha" />
+                <ScalarProperty Name="CamposValores" ColumnName="CamposValores" />
+                <ScalarProperty Name="NombreTabla" ColumnName="NombreTabla" />
+                <ScalarProperty Name="CamposKey" ColumnName="CamposKey" />
+                <ScalarProperty Name="id" ColumnName="id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="MultiFactor">
+            <EntityTypeMapping TypeName="marsh_contableModel.MultiFactor">
+              <MappingFragment StoreEntitySet="MultiFactor">
+                <ScalarProperty Name="Usuarios_Usuario_id" ColumnName="Usuarios_Usuario_id" />
+                <ScalarProperty Name="Fecha" ColumnName="Fecha" />
+                <ScalarProperty Name="OTP" ColumnName="OTP" />
                 <ScalarProperty Name="id" ColumnName="id" />
               </MappingFragment>
             </EntityTypeMapping>

@@ -72,6 +72,21 @@ namespace marsh_contable.Controllers
                     throw new Exception("invalid_value_form_codigo_actividad_id");
                 }
 
+                if(String.IsNullOrEmpty(model.CtaIBAN_Colones) == false) //si la cta iban viene con valor se valida
+                {
+                    if (!tool.ValidaIBAN(model.CtaIBAN_Colones))
+                    {
+                        throw new Exception("invalid_value_for_cta_iban_colones");
+                    }
+                }
+
+                if (String.IsNullOrEmpty(model.CtaIBAN_Dolares) == false) //si la cta iban viene con valor se valida
+                {
+                    if (!tool.ValidaIBAN(model.CtaIBAN_Dolares))
+                    {
+                        throw new Exception("invalid_value_for_cta_iban_dolares");
+                    }
+                }
 
                 if (model.Telefonos.Count == 0)
                 {
@@ -99,6 +114,8 @@ namespace marsh_contable.Controllers
                         OtrasSenas = model.OtrasSenas,
                         fecha_creacion = DateTime.Now,
                         fecha_actualizacion = DateTime.Now
+                        , CtaIBAN_Colones = model.CtaIBAN_Colones,
+                        CtaIBAN_Dolares = model.CtaIBAN_Dolares
                     };
 
                     ctx.Proveedor.Add(nuevo);
@@ -182,6 +199,22 @@ namespace marsh_contable.Controllers
                     throw new Exception("a_phone_is_required");
                 }
 
+                if (String.IsNullOrEmpty(model.CtaIBAN_Colones) == false) //si la cta iban viene con valor se valida
+                {
+                    if (!tool.ValidaIBAN(model.CtaIBAN_Colones))
+                    {
+                        throw new Exception("invalid_value_for_cta_iban_colones");
+                    }
+                }
+
+                if (String.IsNullOrEmpty(model.CtaIBAN_Dolares) == false) //si la cta iban viene con valor se valida
+                {
+                    if (!tool.ValidaIBAN(model.CtaIBAN_Dolares))
+                    {
+                        throw new Exception("invalid_value_for_cta_iban_dolares");
+                    }
+                }
+
                 using (var ctx = new Models.EntitiesModel())
                 {
                     Models.Proveedor p = ctx.Proveedor.FirstOrDefault(u => u.id == id);
@@ -205,6 +238,8 @@ namespace marsh_contable.Controllers
                     p.exonerado = (Int16)model.exonerado;
                     p.OtrasSenas = model.OtrasSenas;
                     p.fecha_actualizacion = DateTime.Now;
+                    p.CtaIBAN_Colones = model.CtaIBAN_Colones;
+                    p.CtaIBAN_Dolares = model.CtaIBAN_Dolares;
 
                     ctx.SaveChanges();
 
@@ -399,7 +434,9 @@ namespace marsh_contable.Controllers
                                  Tipo_identificacion = ti.Nombre,
                                  Provincia = pr.Nombre,
                                  Codigo_actividad = ca.codigo_actividad1,
-                                 Nombre_actividad = ca.nombre_actividad
+                                 Nombre_actividad = ca.nombre_actividad,
+                                 CtaIBAN_Dolares = x.CtaIBAN_Dolares,
+                                 CtaIBAN_Colones = x.CtaIBAN_Colones
                              }).FirstOrDefault();
 
                     if (p == null)
