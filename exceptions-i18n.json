@@ -1,0 +1,800 @@
+{
+  "_meta": {
+    "description": "Catálogo de mensajes de excepción (throw new Exception(\"...\")) encontrados en Controllers/* y Modulos/General.cs, con traducción a inglés y español. Las llaves con '{...}' son plantillas dinámicas armadas con interpolación de strings en el código original.",
+    "languages": ["en", "es"]
+  },
+  "exceptions": {
+    "invalid_model_request_missing": {
+      "en": "The request model is missing or invalid.",
+      "es": "El modelo de la solicitud falta o no es válido."
+    },
+    "invalid_model": {
+      "en": "The request model is invalid.",
+      "es": "El modelo de la solicitud no es válido."
+    },
+    "invalid_value_for_id": {
+      "en": "The provided id value is invalid.",
+      "es": "El valor del id proporcionado no es válido."
+    },
+    "invalid_value_for_parameters": {
+      "en": "One or more of the provided parameters are invalid.",
+      "es": "Uno o más de los parámetros proporcionados no son válidos."
+    },
+
+    "invalid_string_form_identificacion": {
+      "en": "The 'identificacion' field is not a valid text value.",
+      "es": "El campo 'identificacion' no es un valor de texto válido."
+    },
+    "invalid_value_form_tipo_identificacion_id": {
+      "en": "The 'tipo_identificacion_id' value is invalid.",
+      "es": "El valor de 'tipo_identificacion_id' no es válido."
+    },
+    "invalid_string_form_Nombre": {
+      "en": "The 'Nombre' (Name) field is not a valid text value.",
+      "es": "El campo 'Nombre' no es un valor de texto válido."
+    },
+    "invalid_string_form_nombre": {
+      "en": "The 'nombre' (name) field is not a valid text value.",
+      "es": "El campo 'nombre' no es un valor de texto válido."
+    },
+    "invalid_string_form_Apellido1": {
+      "en": "The 'Apellido1' (first last name) field is not a valid text value.",
+      "es": "El campo 'Apellido1' no es un valor de texto válido."
+    },
+    "invalid_string_form_Apellido2": {
+      "en": "The 'Apellido2' (second last name) field is not a valid text value.",
+      "es": "El campo 'Apellido2' no es un valor de texto válido."
+    },
+    "invalid_string_form_correo": {
+      "en": "The 'correo' (email) field is not a valid value.",
+      "es": "El campo 'correo' no es un valor válido."
+    },
+    "invalid_value_form_Provincia_id": {
+      "en": "The 'Provincia_id' value is invalid.",
+      "es": "El valor de 'Provincia_id' no es válido."
+    },
+    "invalid_value_form_Canton_id": {
+      "en": "The 'Canton_id' value is invalid.",
+      "es": "El valor de 'Canton_id' no es válido."
+    },
+    "invalid_value_form_Distrito_id": {
+      "en": "The 'Distrito_id' value is invalid.",
+      "es": "El valor de 'Distrito_id' no es válido."
+    },
+    "invalid_value_form_codigo_actividad_id": {
+      "en": "The 'codigo_actividad_id' value is invalid.",
+      "es": "El valor de 'codigo_actividad_id' no es válido."
+    },
+    "a_phone_is_required": {
+      "en": "At least one phone number is required.",
+      "es": "Se requiere al menos un número de teléfono."
+    },
+    "cliente_not_found": {
+      "en": "Client not found.",
+      "es": "Cliente no encontrado."
+    },
+    "invalid_value_for_cliente_id": {
+      "en": "The provided client id is invalid.",
+      "es": "El id de cliente proporcionado no es válido."
+    },
+    "invalid_value_for_cta_iban_colones": {
+      "en": "The colones IBAN account number is invalid.",
+      "es": "El número de cuenta IBAN en colones no es válido."
+    },
+    "invalid_value_for_cta_iban_dolares": {
+      "en": "The dollars IBAN account number is invalid.",
+      "es": "El número de cuenta IBAN en dólares no es válido."
+    },
+    "proveedor_not_found": {
+      "en": "Supplier not found.",
+      "es": "Proveedor no encontrado."
+    },
+    "invalid_value_for_proveedor_id": {
+      "en": "The provided supplier id is invalid.",
+      "es": "El id de proveedor proporcionado no es válido."
+    },
+
+    "invalid_value_form_Cuenta_Encabezado_id": {
+      "en": "The 'Cuenta_Encabezado_id' value is invalid.",
+      "es": "El valor de 'Cuenta_Encabezado_id' no es válido."
+    },
+    "cuenta_detalle_not_found": {
+      "en": "Account detail record not found.",
+      "es": "Detalle de cuenta no encontrado."
+    },
+    "invalid_value_for_encabezado_id": {
+      "en": "The provided account header (encabezado) id is invalid.",
+      "es": "El id de encabezado de cuenta proporcionado no es válido."
+    },
+
+    "invalid_string_form_Referencia": {
+      "en": "The 'Referencia' field is not a valid text value.",
+      "es": "El campo 'Referencia' no es un valor de texto válido."
+    },
+    "invalid_value_form_Tipo_moneda_id": {
+      "en": "The 'Tipo_moneda_id' (currency type) value is invalid.",
+      "es": "El valor de 'Tipo_moneda_id' (tipo de moneda) no es válido."
+    },
+    "invalid_value_form_Medio_pago_id": {
+      "en": "The 'Medio_pago_id' (payment method) value is invalid.",
+      "es": "El valor de 'Medio_pago_id' (medio de pago) no es válido."
+    },
+    "invalid_value_form_Clientes_id": {
+      "en": "The 'Clientes_id' value is invalid.",
+      "es": "El valor de 'Clientes_id' no es válido."
+    },
+    "invalid_value_form_Tipo_cuentas_id": {
+      "en": "The 'Tipo_cuentas_id' (account type) value is invalid.",
+      "es": "El valor de 'Tipo_cuentas_id' (tipo de cuenta) no es válido."
+    },
+    "invalid_value_form_Cuentas_Contables_id": {
+      "en": "The 'Cuentas_Contables_id' (ledger account) value is invalid.",
+      "es": "El valor de 'Cuentas_Contables_id' (cuenta contable) no es válido."
+    },
+    "invalid_value_form_Centro_Costos_id": {
+      "en": "The 'Centro_Costos_id' (cost center) value is invalid.",
+      "es": "El valor de 'Centro_Costos_id' (centro de costos) no es válido."
+    },
+    "cuenta_encabezado_not_found": {
+      "en": "Account header record not found.",
+      "es": "Encabezado de cuenta no encontrado."
+    },
+
+    "invalid_string_form_Motivo": {
+      "en": "The 'Motivo' (reason) field is not a valid text value.",
+      "es": "El campo 'Motivo' no es un valor de texto válido."
+    },
+    "invalid_value_form_Ingresos_id": {
+      "en": "The 'Ingresos_id' value is invalid.",
+      "es": "El valor de 'Ingresos_id' no es válido."
+    },
+    "invalid_value_form_Monto": {
+      "en": "The 'Monto' (amount) value is invalid.",
+      "es": "El valor de 'Monto' (monto) no es válido."
+    },
+    "devolucion_not_found": {
+      "en": "Return record not found.",
+      "es": "Devolución no encontrada."
+    },
+    "invalid_value_for_ingreso_id": {
+      "en": "The provided income (ingreso) id is invalid.",
+      "es": "El id de ingreso proporcionado no es válido."
+    },
+
+    "invalid_value_form_Gestion_Presupuestaria_id": {
+      "en": "The 'Gestion_Presupuestaria_id' (budget) value is invalid.",
+      "es": "El valor de 'Gestion_Presupuestaria_id' (gestión presupuestaria) no es válido."
+    },
+    "invalid_string_form_detalle_presupuesto": {
+      "en": "The 'detalle_presupuesto' field is not a valid text value.",
+      "es": "El campo 'detalle_presupuesto' no es un valor de texto válido."
+    },
+    "gestion_p_detalle_not_found": {
+      "en": "Budget detail record not found.",
+      "es": "Detalle de gestión presupuestaria no encontrado."
+    },
+    "invalid_value_for_gestion_id": {
+      "en": "The provided budget management (gestion) id is invalid.",
+      "es": "El id de gestión presupuestaria proporcionado no es válido."
+    },
+    "invalid_string_form_Descripcion": {
+      "en": "The 'Descripcion' field is not a valid text value.",
+      "es": "El campo 'Descripcion' no es un valor de texto válido."
+    },
+    "invalid_string_form_anio_presupuesto": {
+      "en": "The 'anio_presupuesto' (budget year) field is not a valid text value.",
+      "es": "El campo 'anio_presupuesto' no es un valor de texto válido."
+    },
+    "periodo_should_be_minor_than_periodo_fin": {
+      "en": "The start period must be earlier than the end period.",
+      "es": "El periodo de inicio debe ser menor que el periodo de fin."
+    },
+    "invalid_format_anio_presupuesto": {
+      "en": "The 'anio_presupuesto' (budget year) format is invalid; it must be a 4-digit year.",
+      "es": "El formato de 'anio_presupuesto' no es válido; debe ser un año de 4 dígitos."
+    },
+    "anio_presupuesto_fuera_de_periodo": {
+      "en": "The budget year is outside the start/end period range.",
+      "es": "El año de presupuesto está fuera del rango del periodo de inicio/fin."
+    },
+    "detalles_are_required": {
+      "en": "At least one detail line is required.",
+      "es": "Se requiere al menos una línea de detalle."
+    },
+    "gestion_presupuestaria_not_found": {
+      "en": "Budget management record not found.",
+      "es": "Gestión presupuestaria no encontrada."
+    },
+    "invalid_value_for_anio_presupuesto": {
+      "en": "The provided budget year value is invalid.",
+      "es": "El valor de año de presupuesto proporcionado no es válido."
+    },
+    "invalid_value_mes_must_be_between_1_and_12": {
+      "en": "The month value must be between 1 and 12.",
+      "es": "El valor del mes debe estar entre 1 y 12."
+    },
+    "gestion_por_anio_for_this_month_already_exists": {
+      "en": "A yearly budget breakdown already exists for this month.",
+      "es": "Ya existe una gestión presupuestaria por año para este mes."
+    },
+    "gestion_presupuestaria_for_current_period_dont_exist": {
+      "en": "No active budget management exists for the current period.",
+      "es": "No existe una gestión presupuestaria activa para el periodo actual."
+    },
+    "gestion_presupuestaria_for_period_exist": {
+      "en": "A budget management record already exists for this period. (Currently disabled/commented out in code.)",
+      "es": "Ya existe una gestión presupuestaria para este periodo. (Actualmente deshabilitado/comentado en el código.)"
+    },
+
+    "invalid_value_form_Facturas_id": {
+      "en": "The 'Facturas_id' (invoice) value is invalid.",
+      "es": "El valor de 'Facturas_id' no es válido."
+    },
+    "invalid_string_form_Detalle": {
+      "en": "The 'Detalle' field is not a valid text value.",
+      "es": "El campo 'Detalle' no es un valor de texto válido."
+    },
+    "invalid_value_form_Cantidad": {
+      "en": "The 'Cantidad' (quantity) value is invalid.",
+      "es": "El valor de 'Cantidad' no es válido."
+    },
+    "factura_detalle_not_found": {
+      "en": "Invoice detail line not found.",
+      "es": "Detalle de factura no encontrado."
+    },
+    "invalid_value_for_factura_id": {
+      "en": "The provided invoice id is invalid.",
+      "es": "El id de factura proporcionado no es válido."
+    },
+    "invalid_string_form_Clave": {
+      "en": "The 'Clave' (electronic invoice key) field is not a valid text value.",
+      "es": "El campo 'Clave' no es un valor de texto válido."
+    },
+    "invalid_string_form_Consecutivo_electronico": {
+      "en": "The 'Consecutivo_electronico' field is not a valid text value.",
+      "es": "El campo 'Consecutivo_electronico' no es un valor de texto válido."
+    },
+    "invalid_value_form_Estado_Factura_id": {
+      "en": "The 'Estado_Factura_id' (invoice status) value is invalid.",
+      "es": "El valor de 'Estado_Factura_id' no es válido."
+    },
+    "invalid_value_form_Tipo_documento_id": {
+      "en": "The 'Tipo_documento_id' (document type) value is invalid.",
+      "es": "El valor de 'Tipo_documento_id' no es válido."
+    },
+    "nothing_changed_on_this_invoice": {
+      "en": "No changes were detected for this invoice.",
+      "es": "No se detectaron cambios en esta factura."
+    },
+    "factura_not_found": {
+      "en": "Invoice not found.",
+      "es": "Factura no encontrada."
+    },
+    "invalid_base64_factura_missing": {
+      "en": "The Base64-encoded invoice is missing.",
+      "es": "Falta la factura codificada en Base64."
+    },
+    "invalid_base64_format": {
+      "en": "The Base64 format is invalid.",
+      "es": "El formato Base64 no es válido."
+    },
+    "invalid_xml_format": {
+      "en": "The XML format is invalid.",
+      "es": "El formato XML no es válido."
+    },
+    "invalid_xml_not_factura_electronica": {
+      "en": "The XML document is not a valid Factura Electrónica document.",
+      "es": "El documento XML no es un documento de Factura Electrónica válido."
+    },
+    "xml_missing_clave": {
+      "en": "The XML document is missing the 'Clave' field.",
+      "es": "Al documento XML le falta el campo 'Clave'."
+    },
+    "xml_missing_emisor": {
+      "en": "The XML document is missing the issuer (Emisor) information.",
+      "es": "Al documento XML le falta la información del Emisor."
+    },
+    "empresa_not_found": {
+      "en": "Company record not found.",
+      "es": "Empresa no encontrada."
+    },
+
+    "invalid_value_form_Gastos_id": {
+      "en": "The 'Gastos_id' (expense) value is invalid.",
+      "es": "El valor de 'Gastos_id' no es válido."
+    },
+    "gasto_detalle_not_found": {
+      "en": "Expense detail line not found.",
+      "es": "Detalle de gasto no encontrado."
+    },
+    "invalid_value_for_gasto_id": {
+      "en": "The provided expense id is invalid.",
+      "es": "El id de gasto proporcionado no es válido."
+    },
+    "invalid_value_form_Categoria_gasto_id": {
+      "en": "The 'Categoria_gasto_id' (expense category) value is invalid.",
+      "es": "El valor de 'Categoria_gasto_id' no es válido."
+    },
+    "invalid_value_form_Proveedor_id": {
+      "en": "The 'Proveedor_id' (supplier) value is invalid.",
+      "es": "El valor de 'Proveedor_id' no es válido."
+    },
+    "invalid_string_form_Doc_Referencia": {
+      "en": "The 'Doc_Referencia' field is not a valid text value.",
+      "es": "El campo 'Doc_Referencia' no es un valor de texto válido."
+    },
+    "detail_is_required": {
+      "en": "At least one detail line is required.",
+      "es": "Se requiere al menos un detalle."
+    },
+    "currency_is_required": {
+      "en": "The currency is required.",
+      "es": "La moneda es requerida."
+    },
+    "presupuesto_not defined": {
+      "en": "No budget has been defined for this record.",
+      "es": "No se ha definido un presupuesto para este registro."
+    },
+    "gasto_not_found": {
+      "en": "Expense not found.",
+      "es": "Gasto no encontrado."
+    },
+
+    "invalid_value_form_Unidad_medida_id": {
+      "en": "The 'Unidad_medida_id' (unit of measure) value is invalid.",
+      "es": "El valor de 'Unidad_medida_id' no es válido."
+    },
+    "ingreso_detalle_not_found": {
+      "en": "Income detail line not found.",
+      "es": "Detalle de ingreso no encontrado."
+    },
+    "invalid_string_form_Codigo": {
+      "en": "The 'Codigo' field is not a valid text value.",
+      "es": "El campo 'Codigo' no es un valor de texto válido."
+    },
+    "ingreso_not_found": {
+      "en": "Income record not found.",
+      "es": "Ingreso no encontrado."
+    },
+
+    "invalid_value_form_correo_or_contrasena": {
+      "en": "The email or password value is invalid.",
+      "es": "El valor de correo o contraseña no es válido."
+    },
+    "invalid_value_form_Correo": {
+      "en": "The 'Correo' (email) value is invalid.",
+      "es": "El valor de 'Correo' no es válido."
+    },
+    "invalid_value_form_Contrasena": {
+      "en": "The 'Contrasena' (password) value is invalid.",
+      "es": "El valor de 'Contrasena' no es válido."
+    },
+    "invalid_username_or_password": {
+      "en": "Invalid username or password.",
+      "es": "Usuario o contraseña inválidos."
+    },
+    "user_blocked_10_minutes": {
+      "en": "User blocked for 10 minutes due to too many failed login attempts.",
+      "es": "Usuario bloqueado por 10 minutos debido a demasiados intentos fallidos de inicio de sesión."
+    },
+    "user_blocked_{minutosRestantes}_minutes": {
+      "en": "User is blocked; please try again in {minutosRestantes} minute(s).",
+      "es": "El usuario está bloqueado; inténtelo de nuevo en {minutosRestantes} minuto(s)."
+    },
+    "invalid_username_or_password_{intentosRestantes}_attempts_remaining": {
+      "en": "Invalid username or password. {intentosRestantes} attempt(s) remaining before the account is blocked.",
+      "es": "Usuario o contraseña inválidos. Quedan {intentosRestantes} intento(s) antes de bloquear la cuenta."
+    },
+    "invalid_value_form_correo": {
+      "en": "The email value is invalid.",
+      "es": "El valor del correo no es válido."
+    },
+    "correo_not_found": {
+      "en": "No account was found with that email address.",
+      "es": "No se encontró ninguna cuenta con ese correo electrónico."
+    },
+    "invalid_value_form_Codigo_recupera_clave": {
+      "en": "The password recovery code value is invalid.",
+      "es": "El valor del código de recuperación de contraseña no es válido."
+    },
+    "invalid_recovery_code": {
+      "en": "The recovery/verification code is invalid.",
+      "es": "El código de recuperación/verificación no es válido."
+    },
+    "recovery_code_expired": {
+      "en": "The recovery code has expired.",
+      "es": "El código de recuperación ha vencido."
+    },
+    "invalid_value_form_Contrasena_confirma": {
+      "en": "The password confirmation value is invalid.",
+      "es": "El valor de confirmación de contraseña no es válido."
+    },
+    "invalid_format_Correo": {
+      "en": "The email format is invalid.",
+      "es": "El formato del correo no es válido."
+    },
+    "invalid_format_Contrasena": {
+      "en": "The password format is invalid.",
+      "es": "El formato de la contraseña no es válido."
+    },
+    "password_and_confirmation_no_match": {
+      "en": "The password and its confirmation do not match.",
+      "es": "La contraseña y su confirmación no coinciden."
+    },
+    "invalid_value_otp": {
+      "en": "The OTP (one-time password) value is invalid.",
+      "es": "El valor del código OTP no es válido."
+    },
+    "invalid_date": {
+      "en": "The date value is invalid.",
+      "es": "El valor de la fecha no es válido."
+    },
+    "otp_expired": {
+      "en": "The OTP code has expired.",
+      "es": "El código OTP ha vencido."
+    },
+    "user_not_found": {
+      "en": "User not found.",
+      "es": "Usuario no encontrado."
+    },
+    "user_already_exist": {
+      "en": "A user with this email already exists.",
+      "es": "Ya existe un usuario con este correo electrónico."
+    },
+    "invalid_value_form_Roles_id": {
+      "en": "The 'Roles_id' (role) value is invalid.",
+      "es": "El valor de 'Roles_id' no es válido."
+    },
+    "invalid_value_for_Contrasena": {
+      "en": "The password does not meet the required format.",
+      "es": "La contraseña no cumple con el formato requerido."
+    },
+
+    "invalid_string_form_Nombre_Archivo": {
+      "en": "The 'Nombre_Archivo' (file name) field is not a valid text value.",
+      "es": "El campo 'Nombre_Archivo' no es un valor de texto válido."
+    },
+    "invalid_string_form_Ruta_Archivo": {
+      "en": "The 'Ruta_Archivo' (file path) field is not a valid text value.",
+      "es": "El campo 'Ruta_Archivo' no es un valor de texto válido."
+    },
+    "invalid_value_form_Tipo_archivo_id": {
+      "en": "The 'Tipo_archivo_id' (file type) value is invalid.",
+      "es": "El valor de 'Tipo_archivo_id' no es válido."
+    },
+    "invalid_value_form_Tablas_referencia_id": {
+      "en": "The 'Tablas_referencia_id' (reference table) value is invalid.",
+      "es": "El valor de 'Tablas_referencia_id' no es válido."
+    },
+    "invalid_value_form_referencia": {
+      "en": "The 'referencia' value is invalid.",
+      "es": "El valor de 'referencia' no es válido."
+    },
+    "invalid_string_form_extension": {
+      "en": "The 'extension' field is not a valid text value.",
+      "es": "El campo 'extension' no es un valor de texto válido."
+    },
+    "adjunto_not_found": {
+      "en": "Attachment not found.",
+      "es": "Adjunto no encontrado."
+    },
+
+    "invalid_string_form_codigo_actividad": {
+      "en": "The 'codigo_actividad' (activity code) field is not a valid text value.",
+      "es": "El campo 'codigo_actividad' no es un valor de texto válido."
+    },
+    "invalid_string_form_nombre_actividad": {
+      "en": "The 'nombre_actividad' (activity name) field is not a valid text value.",
+      "es": "El campo 'nombre_actividad' no es un valor de texto válido."
+    },
+    "codigo_actividad_not_found": {
+      "en": "Activity code not found.",
+      "es": "Código de actividad no encontrado."
+    },
+    "invalid_value_form_Tipo_Cuenta_Contable_id": {
+      "en": "The 'Tipo_Cuenta_Contable_id' (ledger account type) value is invalid.",
+      "es": "El valor de 'Tipo_Cuenta_Contable_id' no es válido."
+    },
+    "invalid_value_form_Usuarios_Usuario_id": {
+      "en": "The 'Usuarios_Usuario_id' (user) value is invalid.",
+      "es": "El valor de 'Usuarios_Usuario_id' no es válido."
+    },
+    "cuentas_contables_not_found": {
+      "en": "Ledger account not found.",
+      "es": "Cuenta contable no encontrada."
+    },
+    "invalid_string_form_codigo": {
+      "en": "The 'codigo' field is not a valid text value.",
+      "es": "El campo 'codigo' no es un valor de texto válido."
+    },
+    "invalid_value_form_Impuesto_id": {
+      "en": "The 'Impuesto_id' (tax) value is invalid.",
+      "es": "El valor de 'Impuesto_id' no es válido."
+    },
+    "codigos_cabys_not_found": {
+      "en": "CABYS code not found.",
+      "es": "Código CABYS no encontrado."
+    },
+    "codigo_comercial_not_found": {
+      "en": "Commercial code not found.",
+      "es": "Código comercial no encontrado."
+    },
+    "invalid_format_monto_presupuesto_anual": {
+      "en": "The annual budget amount format is invalid.",
+      "es": "El formato del monto de presupuesto anual no es válido."
+    },
+    "centro_costos_not_found": {
+      "en": "Cost center not found.",
+      "es": "Centro de costos no encontrado."
+    },
+    "centro_costos_presupuestaria_not_found": {
+      "en": "Cost center budget record not found.",
+      "es": "Registro presupuestario del centro de costos no encontrado."
+    },
+    "centro_costos_tiene_registros_asociados_no_se_puede_eliminar": {
+      "en": "This cost center has associated records and cannot be deleted.",
+      "es": "Este centro de costos tiene registros asociados y no se puede eliminar."
+    },
+    "invalid_string_form_codigo_moneda": {
+      "en": "The 'codigo_moneda' (currency code) field is not a valid text value.",
+      "es": "El campo 'codigo_moneda' no es un valor de texto válido."
+    },
+    "tipo_moneda_not_found": {
+      "en": "Currency type not found.",
+      "es": "Tipo de moneda no encontrado."
+    },
+    "invalid_string_form_Codigo_doc": {
+      "en": "The 'Codigo_doc' (document code) field is not a valid text value.",
+      "es": "El campo 'Codigo_doc' no es un valor de texto válido."
+    },
+    "tipo_documento_not_found": {
+      "en": "Document type not found.",
+      "es": "Tipo de documento no encontrado."
+    },
+    "categoria_gasto_not_found": {
+      "en": "Expense category not found.",
+      "es": "Categoría de gasto no encontrada."
+    },
+    "tipo_archivo_not_found": {
+      "en": "File type not found.",
+      "es": "Tipo de archivo no encontrado."
+    },
+    "estado_factura_not_found": {
+      "en": "Invoice status not found.",
+      "es": "Estado de factura no encontrado."
+    },
+    "unidad_medida_not_found": {
+      "en": "Unit of measure not found.",
+      "es": "Unidad de medida no encontrada."
+    },
+    "invalid_string_form_descripcion": {
+      "en": "The 'descripcion' field is not a valid text value.",
+      "es": "El campo 'descripcion' no es un valor de texto válido."
+    },
+    "medio_pago_not_found": {
+      "en": "Payment method not found.",
+      "es": "Medio de pago no encontrado."
+    },
+    "permisos_not_found": {
+      "en": "Permission not found.",
+      "es": "Permiso no encontrado."
+    },
+    "invalid_string_form_tipo_categoria": {
+      "en": "The 'tipo_categoria' field is not a valid text value.",
+      "es": "El campo 'tipo_categoria' no es un valor de texto válido."
+    },
+    "invalid_monto_presupuestado": {
+      "en": "The budgeted amount is invalid.",
+      "es": "El monto presupuestado no es válido."
+    },
+    "categoria_presupuestaria_not_found": {
+      "en": "Budget category not found.",
+      "es": "Categoría presupuestaria no encontrada."
+    },
+    "categoria_tiene_registros_asociados_no_se_puede_eliminar": {
+      "en": "This category has associated records and cannot be deleted.",
+      "es": "Esta categoría tiene registros asociados y no se puede eliminar."
+    },
+    "invalid_permission_are_required": {
+      "en": "At least one permission is required.",
+      "es": "Se requiere al menos un permiso."
+    },
+    "roles_not_found": {
+      "en": "Role not found.",
+      "es": "Rol no encontrado."
+    },
+    "condicion_venta_not_found": {
+      "en": "Sale condition not found.",
+      "es": "Condición de venta no encontrada."
+    },
+    "invalid_value_form_Porcentaje": {
+      "en": "The 'Porcentaje' (percentage) value is invalid.",
+      "es": "El valor de 'Porcentaje' no es válido."
+    },
+    "impuesto_not_found": {
+      "en": "Tax not found.",
+      "es": "Impuesto no encontrado."
+    },
+    "invalid_string_form_Naturaleza": {
+      "en": "The 'Naturaleza' field is not a valid text value.",
+      "es": "El campo 'Naturaleza' no es un valor de texto válido."
+    },
+    "tipo_cuenta_contable_not_found": {
+      "en": "Ledger account type not found.",
+      "es": "Tipo de cuenta contable no encontrado."
+    },
+    "invalid_value_for_cedula": {
+      "en": "The provided identification number (cedula) is invalid.",
+      "es": "El número de identificación (cédula) proporcionado no es válido."
+    },
+    "cedula_not_found": {
+      "en": "No record found for that identification number (cedula).",
+      "es": "No se encontró ningún registro para esa cédula."
+    },
+    "permiso_x_rol_not_found": {
+      "en": "Role-permission assignment not found. (Currently disabled/commented out in code.)",
+      "es": "Asignación de permiso por rol no encontrada. (Actualmente deshabilitado/comentado en el código.)"
+    },
+    "invalid_value_for_rolId": {
+      "en": "The provided role id is invalid.",
+      "es": "El id de rol proporcionado no es válido."
+    },
+    "permisos_not_found_for_rol": {
+      "en": "No permissions were found for this role.",
+      "es": "No se encontraron permisos para este rol."
+    },
+
+    "invalid_string_form_codigo_tipo_identificacion": {
+      "en": "The 'codigo_tipo_identificacion' field is not a valid text value.",
+      "es": "El campo 'codigo_tipo_identificacion' no es un valor de texto válido."
+    },
+    "tipo_identificacion_not_found": {
+      "en": "Identification type not found.",
+      "es": "Tipo de identificación no encontrado."
+    },
+
+    "provincia_not_found": {
+      "en": "Province not found.",
+      "es": "Provincia no encontrada."
+    },
+    "invalid_string_form_codigo_canton": {
+      "en": "The 'codigo_canton' field is not a valid text value.",
+      "es": "El campo 'codigo_canton' no es un valor de texto válido."
+    },
+    "invalid_string_form_codigo_distrito": {
+      "en": "The 'codigo_distrito' field is not a valid text value.",
+      "es": "El campo 'codigo_distrito' no es un valor de texto válido."
+    },
+    "canton_not_found": {
+      "en": "Canton not found.",
+      "es": "Cantón no encontrado."
+    },
+    "invalid_value_for_provincia_id": {
+      "en": "The provided province id is invalid.",
+      "es": "El id de provincia proporcionado no es válido."
+    },
+    "distrito_not_found": {
+      "en": "District not found.",
+      "es": "Distrito no encontrado."
+    },
+    "invalid_value_for_canton_id": {
+      "en": "The provided canton id is invalid.",
+      "es": "El id de cantón proporcionado no es válido."
+    },
+
+    "invalid_string_form_Nombre_empresa": {
+      "en": "The 'Nombre_empresa' (company name) field is not a valid text value.",
+      "es": "El campo 'Nombre_empresa' no es un valor de texto válido."
+    },
+    "invalid_string_form_Correo_empresa": {
+      "en": "The 'Correo_empresa' (company email) field is not a valid value.",
+      "es": "El campo 'Correo_empresa' no es un valor válido."
+    },
+    "invalid_string_form_Ruta_nas": {
+      "en": "The 'Ruta_nas' (NAS path) field is not a valid text value.",
+      "es": "El campo 'Ruta_nas' no es un valor de texto válido."
+    },
+    "invalid_string_form_Ruta_llave_factura": {
+      "en": "The 'Ruta_llave_factura' (invoice signing key path) field is not a valid text value. (Currently disabled/commented out in code.)",
+      "es": "El campo 'Ruta_llave_factura' no es un valor de texto válido. (Actualmente deshabilitado/comentado en el código.)"
+    },
+    "invalid_value_form_provincia_canton_distrito": {
+      "en": "The province/canton/district combination is invalid.",
+      "es": "La combinación de provincia/cantón/distrito no es válida."
+    },
+    "invalid_value_form_Telefono": {
+      "en": "The 'Telefono' (phone) value is invalid.",
+      "es": "El valor de 'Telefono' no es válido."
+    },
+    "invalid_value_form_codigo_telefono": {
+      "en": "The phone country code value is invalid.",
+      "es": "El valor del código de país del teléfono no es válido."
+    },
+    "invalid_file_not_found": {
+      "en": "File not found.",
+      "es": "Archivo no encontrado."
+    },
+    "invalid_file_name_missing": {
+      "en": "The file name is missing.",
+      "es": "Falta el nombre del archivo."
+    },
+    "invalid_file_extension_must_be_p12": {
+      "en": "The file extension must be .p12.",
+      "es": "La extensión del archivo debe ser .p12."
+    },
+    "invalid_file_base64_format": {
+      "en": "The file's Base64 format is invalid.",
+      "es": "El formato Base64 del archivo no es válido."
+    },
+    "invalid_file_empty": {
+      "en": "The uploaded file is empty.",
+      "es": "El archivo cargado está vacío."
+    },
+    "ruta_nas_not_configured": {
+      "en": "The NAS path (Ruta_nas) has not been configured for the company.",
+      "es": "La ruta NAS (Ruta_nas) no ha sido configurada para la empresa."
+    },
+
+    "invalid_string_form_Numero": {
+      "en": "The 'Numero' (phone number) field is not a valid text value.",
+      "es": "El campo 'Numero' no es un valor de texto válido."
+    },
+    "invalid_string_form_codigo_pais": {
+      "en": "The 'codigo_pais' (country code) field is not a valid text value.",
+      "es": "El campo 'codigo_pais' no es un valor de texto válido."
+    },
+    "invalid_value_form_owner_required": {
+      "en": "A phone owner (client or supplier) is required.",
+      "es": "Se requiere un propietario del teléfono (cliente o proveedor)."
+    },
+    "telefono_not_found": {
+      "en": "Phone number not found.",
+      "es": "Teléfono no encontrado."
+    },
+    "telefonos_not_found": {
+      "en": "No phone numbers were found.",
+      "es": "No se encontraron teléfonos."
+    },
+
+    "codigo_actividad_longer_than_6_characters": {
+      "en": "The activity code cannot be longer than 6 characters.",
+      "es": "El código de actividad no puede tener más de 6 caracteres."
+    },
+    "invalid_value_sede_must_be_between_0_and_999": {
+      "en": "The branch (sede) number must be between 0 and 999.",
+      "es": "El número de sede debe estar entre 0 y 999."
+    },
+    "invalid_value_terminal_must_be_between_0_and_99999": {
+      "en": "The terminal number must be between 0 and 99999.",
+      "es": "El número de terminal debe estar entre 0 y 99999."
+    },
+    "invalid_value_tipo_documento": {
+      "en": "The document type value is invalid.",
+      "es": "El valor del tipo de documento no es válido."
+    },
+    "bccr_api_token_not_configured": {
+      "en": "The BCCR (Costa Rica Central Bank) API token is not configured.",
+      "es": "El token de la API del BCCR (Banco Central de Costa Rica) no está configurado."
+    },
+    "bccr_api_error_{statusCode}": {
+      "en": "The BCCR API returned an error with HTTP status code {statusCode}.",
+      "es": "La API del BCCR devolvió un error con el código de estado HTTP {statusCode}."
+    },
+    "bccr_api_respuesta_invalida": {
+      "en": "The BCCR API returned an invalid response.",
+      "es": "La API del BCCR devolvió una respuesta inválida."
+    },
+    "bccr_api_sin_indicadores": {
+      "en": "The BCCR API response did not include any indicators.",
+      "es": "La respuesta de la API del BCCR no incluyó indicadores."
+    },
+    "bccr_api_valores_no_encontrados": {
+      "en": "The buy/sell exchange rate values were not found in the BCCR API response.",
+      "es": "No se encontraron los valores de compra/venta del tipo de cambio en la respuesta de la API del BCCR."
+    },
+    "tipo_cambio_ya_registrado_hoy": {
+      "en": "An exchange rate has already been registered today.",
+      "es": "Ya se registró un tipo de cambio el día de hoy."
+    }
+  }
+}
