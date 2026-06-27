@@ -50,5 +50,7 @@ namespace marsh_contable.Models
         public virtual Tipo_moneda Tipo_moneda { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Gestion_P_detalle> Gestion_P_detalle { get; set; }
+        public int presupuesto_id { get; set; }
+
     }
 }

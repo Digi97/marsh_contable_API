@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
@@ -69,7 +69,12 @@ namespace marsh_contable.Controllers
                     throw new Exception("currency_is_required");
                 }
 
+                if(model.presupuesto_id ==0)
+                {
+                    throw new Exception("presupuesto_not defined");
+                }
 
+                validacionPresupuesto(model.presupuesto_id, model.Total); //validamos el presupuesto
 
                 using (var ctx = new Models.EntitiesModel())
                 {
@@ -85,42 +90,42 @@ namespace marsh_contable.Controllers
 
 
                     g = new Models.Gastos()
+                    {
+                        Descripcion = model.Descripcion,
+                        Categoria_gasto_id = model.Categoria_gasto_id,
+                        Subtotal = model.Subtotal,
+                        Impuesto = model.Impuesto,
+                        Total = model.Total,
+                        Doc_Referencia = model.Doc_Referencia,
+                        Fecha = DateTime.Now,
+                        Ultima_Fec_Actualizacion = DateTime.Now,
+                        Usuarios_Usuario_id = model.Usuarios_Usuario_id,
+                        Tipo_documento_id = model.Tipo_documento_id,
+                        Medio_pago_id = model.Medio_pago_id,
+                        Proveedor_id = model.Proveedor_id,
+                        Descuento = model.Descuento,
+                        Tipo_moneda_id = (int)model.Tipo_moneda_id
+                    };
+                    ctx.Gastos.Add(g);
+                    ctx.SaveChanges();
+
+
+                    id = g.id;
+                    GastosDetallesController gastosDetalles = new GastosDetallesController();
+                    foreach (var detalles in model.Gastos_Detalles)
+                    {
+                        detalles.Gastos_id = id;
+                        var result = gastosDetalles.CreateGastoDetalle(detalles, ctx);
+                        if (result.CodeStatus != HttpStatusCode.OK)
                         {
-                            Descripcion = model.Descripcion,
-                            Categoria_gasto_id = model.Categoria_gasto_id,
-                            Subtotal = model.Subtotal,
-                            Impuesto = model.Impuesto,
-                            Total = model.Total,
-                            Doc_Referencia = model.Doc_Referencia,
-                            Fecha = DateTime.Now,
-                            Ultima_Fec_Actualizacion = DateTime.Now,
-                            Usuarios_Usuario_id = model.Usuarios_Usuario_id,
-                            Tipo_documento_id = model.Tipo_documento_id,
-                            Medio_pago_id = model.Medio_pago_id,
-                            Proveedor_id = model.Proveedor_id,
-                            Descuento = model.Descuento,
-                            Tipo_moneda_id = (int)model.Tipo_moneda_id
-                        };
-                        ctx.Gastos.Add(g);
-                        ctx.SaveChanges();
 
-
-                             id = g.id;
-                        GastosDetallesController gastosDetalles = new GastosDetallesController();
-                        foreach (var detalles in model.Gastos_Detalles)
-                        {
-                            detalles.Gastos_id = id;
-                            var result = gastosDetalles.CreateGastoDetalle(detalles, ctx);
-                            if (result.CodeStatus != HttpStatusCode.OK)
-                            {
-                             
-                                throw new Exception(result.Message);
-                            }
-
+                            throw new Exception(result.Message);
                         }
-              
-                    
-               
+
+                    }
+
+
+
                 }
 
                 Models.Gestion_P_detalle detalle = new Models.Gestion_P_detalle()
@@ -324,10 +329,10 @@ namespace marsh_contable.Controllers
                     SortDirection = q["order[0][dir]"]
                 };
 
-                // El �ndice de la columna ordenada -> nombre real de la columna
+                // El índice de la columna ordenada -> nombre real de la columna
                 if (int.TryParse(q["order[0][column]"], out var colIdx))
                 {
-                    // columns[colIdx][data] trae el nombre que mand� el front (id, codigo, nombre...)
+                    // columns[colIdx][data] trae el nombre que mandó el front (id, codigo, nombre...)
                     request.SortColumn = q[$"columns[{colIdx}][data]"];
                 }
 
@@ -452,54 +457,6 @@ namespace marsh_contable.Controllers
             }
             catch (Exception ex) { oR.CodeStatus = HttpStatusCode.InternalServerError; oR.Message = ex.Message; return oR; }
         }
-        //public Reply GetAllGastos()
-        //{
-        //    Reply oR = new Reply();
-        //    oR.CodeStatus = 0;
-        //    try
-        //    {
-        //        using (var ctx = new Models.EntitiesModel())
-        //        {
-        //            var lista = (from g in ctx.Gastos
-        //                         join cg in ctx.Categoria_gasto on g.Categoria_gasto_id equals cg.id
-        //                         join td in ctx.Tipo_documento on g.Tipo_documento_id equals td.id
-        //                         join mp in ctx.Medio_pago on g.Medio_pago_id equals mp.id
-        //                         join p in ctx.Proveedor on g.Proveedor_id equals p.id
-        //                         join u in ctx.Usuarios on g.Usuarios_Usuario_id equals u.Usuario_id
-        //                         select new Models.GastosViewModel
-        //                         {
-        //                             id = g.id,
-        //                             Descripcion = g.Descripcion,
-        //                             Categoria_gasto_id = g.Categoria_gasto_id,
-        //                             Subtotal = g.Subtotal,
-        //                             Impuesto = g.Impuesto,
-        //                             Total = g.Total,
-        //                             Doc_Referencia = g.Doc_Referencia,
-        //                             Fecha = g.Fecha,
-        //                             Ultima_Fec_Actualizacion = g.Ultima_Fec_Actualizacion,
-        //                             Usuarios_Usuario_id = g.Usuarios_Usuario_id,
-        //                             Tipo_documento_id = g.Tipo_documento_id,
-        //                             Medio_pago_id = g.Medio_pago_id,
-        //                             Proveedor_id = g.Proveedor_id,
-        //                             Categoria_gasto = cg.Nombre,
-        //                             Tipo_documento = td.Nombre,
-        //                             Medio_pago = mp.descripcion,
-        //                             Proveedor = p.Nombre + " " + p.Apellido1,
-        //                             Usuario = u.Nombre + " " + u.Apellido1
-        //                         }).ToList();
-
-        //            oR.CodeStatus = HttpStatusCode.OK;
-        //            oR.Data = lista;
-        //            return oR;
-        //        }
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        oR.CodeStatus = HttpStatusCode.InternalServerError;
-        //        oR.Message = ex.Message;
-        //        return oR;
-        //    }
-        //}
 
 
         [HttpGet]
@@ -619,6 +576,253 @@ namespace marsh_contable.Controllers
                 oR.CodeStatus = HttpStatusCode.InternalServerError;
                 oR.Message = ex.Message;
                 return oR;
+            }
+        }
+
+
+        private bool validacionPresupuesto(int pid = 0, double gtotal = 0)
+        {
+            General tool = new General();
+            try
+            {
+                using (var ctx = new Models.EntitiesModel())
+                {
+                    ctx.Configuration.LazyLoadingEnabled = false;
+                    ctx.Configuration.ProxyCreationEnabled = false;
+
+                    DateTime currentDate = DateTime.Now;
+
+                    // Buscar presupuesto vigente
+                    Models.Gestion_Presupuestaria gpExist = ctx.Gestion_Presupuestaria
+                        .FirstOrDefault(u => currentDate >= u.periodo_inicio &&
+                                             currentDate <= u.periodo_fin &&
+                                             u.id == pid);
+
+                    if (gpExist == null)
+                        throw new Exception("gestion_presupuestaria_for_current_period_dont_exist");
+
+                    string Symbol = ctx.Tipo_moneda
+                        .Where(t => t.id == gpExist.Tipo_moneda_id)
+                        .Select(t => t.Simbolo)
+                        .FirstOrDefault() ?? "₡";
+
+
+                    // Sumar montos ya ejecutados en gestion_p_detalle
+              
+                    int anioActual = currentDate.Year;
+                    int mesActual = currentDate.Month;
+
+                    double montoEjecutado = (from d in ctx.Gestion_P_detalle
+                                             join gp in ctx.Gestion_Presupuestaria
+                                                 on d.Gestion_Presupuestaria_id equals gp.id
+                                             where d.Gestion_Presupuestaria_id == pid
+                                                && d.activo == 1
+                                                && gp.anio_presupuesto == anioActual.ToString()
+                                                && currentDate >= gp.periodo_inicio
+                                                && currentDate <= gp.periodo_fin
+                                                && d.Fecha_registro.Month == mesActual
+                                                && d.Fecha_registro.Year == anioActual
+                                             select d.Monto)
+                                             .DefaultIfEmpty(0)
+                                             .Sum();
+
+
+                    decimal montoMensual = ctx.Gestion_P_Anio
+                        .Where(d => d.Gestion_Presupuestaria_id == pid && d.anio_presupuesto == currentDate.Year.ToString() && d.mes ==currentDate.Month)
+                        .Select(d => d.monto)
+                        .DefaultIfEmpty(0)
+                        .Sum();
+
+
+
+                    double montoAprobado = (double)montoMensual; //MONTO APROBADO PARA EL MES ACTUAL //gpExist.monto_aprobado;
+                    double montoConNuevoGasto = montoEjecutado + gtotal;
+
+                    // Validar que el nuevo gasto no exceda el presupuesto
+                    if (montoConNuevoGasto >= montoAprobado)
+                    {
+                        double disponible = montoAprobado - montoEjecutado;
+                        throw new Exception(
+                            $"presupuesto_excedido_monto_aprobado_{montoAprobado}_ejecutado_{montoEjecutado}_disponible_{disponible}"
+                        );
+                    }
+
+                    //  Calcular porcentaje de uso con el nuevo gasto
+                    double porcentajeUso = (montoConNuevoGasto / montoAprobado) * 100;
+                    double porcentajeDisponible = 100 - porcentajeUso;
+
+                    // Si queda entre 5% y 10% disponible, notificar por correo
+                    if (porcentajeDisponible <= 10 && porcentajeDisponible >= 5)
+                    {
+                        NotificarPresupuestoBajo(ctx, gpExist, porcentajeUso, montoConNuevoGasto, montoAprobado, tool, Symbol);
+                    }
+
+                    //  Si queda menos de 5%, notificar con urgencia
+                    if (porcentajeDisponible < 5 && porcentajeDisponible > 0)
+                    {
+                        NotificarPresupuestoCritico(ctx, gpExist, porcentajeUso, montoConNuevoGasto, montoAprobado, tool, Symbol);
+                    }
+               
+                }
+                return true;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+
+        /// <summary>
+        /// Notifica a usuarios de Rol 1 cuando el presupuesto está entre 90-95% de uso.
+        /// </summary>
+        private void NotificarPresupuestoBajo(
+            Models.EntitiesModel ctx,
+            Models.Gestion_Presupuestaria gp,
+            double porcentajeUso,
+            double montoEjecutado,
+            double montoAprobado,
+            General tool,
+            string symbol
+            )
+        {
+            try
+            {
+                // Obtener correos de usuarios con Rol 1 (Administración)
+                var correosAdmin = ctx.Usuarios
+                    .Where(u => u.Roles_id == 1 && u.activo == 1)
+                    .Select(u => u.Correo)
+                    .ToList();
+
+                if (!correosAdmin.Any()) return;
+
+                double disponible = montoAprobado - montoEjecutado;
+
+                string asunto = $"Alerta: Presupuesto \"{gp.nombre}\" al {porcentajeUso:F1}% de uso";
+
+                string cuerpo = $@"
+            <h2 style='color:#d4a017;'> Alerta de Presupuesto - Uso Elevado</h2>
+            <p>El presupuesto <strong>{gp.nombre}</strong> ha alcanzado un nivel de uso elevado.</p>
+            <table style='border-collapse:collapse; width:100%; max-width:500px;'>
+                <tr style='background-color:#f8f9fa;'>
+                    <td style='padding:10px; border:1px solid #dee2e6;'><strong>Presupuesto</strong></td>
+                    <td style='padding:10px; border:1px solid #dee2e6;'>{gp.nombre}</td>
+                </tr>
+                <tr>
+                    <td style='padding:10px; border:1px solid #dee2e6;'><strong>Año</strong></td>
+                    <td style='padding:10px; border:1px solid #dee2e6;'>{gp.anio_presupuesto}</td>
+                </tr>
+                <tr style='background-color:#f8f9fa;'>
+                    <td style='padding:10px; border:1px solid #dee2e6;'><strong>Monto Aprobado</strong></td>
+                    <td style='padding:10px; border:1px solid #dee2e6;'>{symbol} {montoAprobado:N2}</td>
+                </tr>
+                <tr>
+                    <td style='padding:10px; border:1px solid #dee2e6;'><strong>Monto Ejecutado</strong></td>
+                    <td style='padding:10px; border:1px solid #dee2e6;'>{symbol} {montoEjecutado:N2}</td>
+                </tr>
+                <tr style='background-color:#fff3cd;'>
+                    <td style='padding:10px; border:1px solid #dee2e6;'><strong>Disponible</strong></td>
+                    <td style='padding:10px; border:1px solid #dee2e6;'>{symbol} {disponible:N2}</td>
+                </tr>
+                <tr style='background-color:#fff3cd;'>
+                    <td style='padding:10px; border:1px solid #dee2e6;'><strong>Porcentaje de Uso</strong></td>
+                    <td style='padding:10px; border:1px solid #dee2e6;'><strong>{porcentajeUso:F1}%</strong></td>
+                </tr>
+            </table>
+            <p style='color:#856404; margin-top:15px;'>
+                El presupuesto se encuentra entre el <strong>90% y 95%</strong> de uso.
+                Se recomienda tomar las previsiones necesarias.
+            </p>
+            <hr/>
+            <small style='color:#6c757d;'>Notificación automática - Marsh Asprose</small>";
+
+                foreach (var correo in correosAdmin)
+                {
+                    tool.Send_Mail(correo, asunto, cuerpo);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+
+        /// <summary>
+        /// Notifica a usuarios de Rol 1 cuando el presupuesto está al 95%+ de uso (crítico).
+        /// </summary>
+        private void NotificarPresupuestoCritico(
+            Models.EntitiesModel ctx,
+            Models.Gestion_Presupuestaria gp,
+            double porcentajeUso,
+            double montoEjecutado,
+            double montoAprobado,
+            General tool,
+            string symbol
+            )
+        {
+            try
+            {
+                var correosAdmin = ctx.Usuarios
+                    .Where(u => u.Roles_id == 1 && u.activo == 1)
+                    .Select(u => u.Correo)
+                    .ToList();
+
+                if (!correosAdmin.Any()) return;
+
+                double disponible = montoAprobado - montoEjecutado;
+
+                string asunto = $"URGENTE: Presupuesto \"{gp.nombre}\" al {porcentajeUso:F1}% de uso";
+
+                string cuerpo = $@"
+            <h2 style='color:#dc3545;'>Alerta Crítica de Presupuesto</h2>
+            <p>El presupuesto <strong>{gp.nombre}</strong> está próximo a agotarse.</p>
+            <table style='border-collapse:collapse; width:100%; max-width:500px;'>
+                <tr style='background-color:#f8f9fa;'>
+                    <td style='padding:10px; border:1px solid #dee2e6;'><strong>Presupuesto</strong></td>
+                    <td style='padding:10px; border:1px solid #dee2e6;'>{gp.nombre}</td>
+                </tr>
+                <tr>
+                    <td style='padding:10px; border:1px solid #dee2e6;'><strong>Año</strong></td>
+                    <td style='padding:10px; border:1px solid #dee2e6;'>{gp.anio_presupuesto}</td>
+                </tr>
+                <tr style='background-color:#f8f9fa;'>
+                    <td style='padding:10px; border:1px solid #dee2e6;'><strong>Monto Aprobado</strong></td>
+                    <td style='padding:10px; border:1px solid #dee2e6;'>{symbol} {montoAprobado:N2}</td>
+                </tr>
+                <tr>
+                    <td style='padding:10px; border:1px solid #dee2e6;'><strong>Monto Ejecutado</strong></td>
+                    <td style='padding:10px; border:1px solid #dee2e6;'>{symbol} {montoEjecutado:N2}</td>
+                </tr>
+                <tr style='background-color:#f8d7da;'>
+                    <td style='padding:10px; border:1px solid #dee2e6;'><strong>Disponible</strong></td>
+                    <td style='padding:10px; border:1px solid #dee2e6; color:#dc3545;'>
+                        <strong>₡ {disponible:N2}</strong>
+                    </td>
+                </tr>
+                <tr style='background-color:#f8d7da;'>
+                    <td style='padding:10px; border:1px solid #dee2e6;'><strong>Porcentaje de Uso</strong></td>
+                    <td style='padding:10px; border:1px solid #dee2e6; color:#dc3545;'>
+                        <strong>{porcentajeUso:F1}%</strong>
+                    </td>
+                </tr>
+            </table>
+            <p style='color:#dc3545; margin-top:15px;'>
+                <strong>ATENCIÓN:</strong> El presupuesto tiene menos del <strong>5%</strong> disponible.
+                Cualquier transacción adicional podría ser rechazada por exceder el monto aprobado.
+            </p>
+            <hr/>
+            <small style='color:#6c757d;'>Notificación automática - Marsh Asprose</small>";
+
+                foreach (var correo in correosAdmin)
+                {
+                    tool.Send_Mail(correo, asunto, cuerpo);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+             
             }
         }
     }
