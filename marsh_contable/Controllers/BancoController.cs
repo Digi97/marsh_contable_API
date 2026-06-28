@@ -634,7 +634,7 @@ namespace marsh_contable.Controllers
         }
 
 
-        public Reply validaBanco(int categoriaPresupuestariaId, int tipoMonedaId, int centroCostosId, decimal totalTransaccion, Tipo_Movimiento_Bancario accion)
+        public bool validaBanco(int categoriaPresupuestariaId, int tipoMonedaId, int centroCostosId, decimal totalTransaccion, Tipo_Movimiento_Bancario accion)
         {
             try
             {
@@ -667,9 +667,10 @@ namespace marsh_contable.Controllers
                             {
                                 throw new Exception("total_transaccion_exceed_the_banco_amount");
                             }
-
                         break;
                     }
+
+                    return true;
 
 
                 }

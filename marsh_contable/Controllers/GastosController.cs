@@ -74,6 +74,9 @@ namespace marsh_contable.Controllers
                     throw new Exception("presupuesto_not defined");
                 }
 
+                BancoController banco = new BancoController();
+      
+
                 validacionPresupuesto(model.presupuesto_id, model.Total); //validamos el presupuesto
 
                 using (var ctx = new Models.EntitiesModel())
@@ -151,7 +154,7 @@ namespace marsh_contable.Controllers
 
 
 
-                BancoController banco = new BancoController();
+           
                 var bmovimiento = banco.RegistrarMovimientoPorGasto(model.Categoria_gasto_id, (int)model.Tipo_moneda_id, gpExist.Centro_Costos_id, id, g.Total, g.Usuarios_Usuario_id, "Registro de Gasto");
 
                 if (bmovimiento.CodeStatus != HttpStatusCode.OK)
@@ -629,67 +632,75 @@ namespace marsh_contable.Controllers
                     if (gpExist == null)
                         throw new Exception("gestion_presupuestaria_for_current_period_dont_exist");
 
-                    string Symbol = ctx.Tipo_moneda
-                        .Where(t => t.id == gpExist.Tipo_moneda_id)
-                        .Select(t => t.Simbolo)
-                        .FirstOrDefault() ?? "₡";
+                    BancoController banco = new BancoController();
+                    if (banco.validaBanco(gpExist.Categoria_presupuestaria_id, (int)gpExist.Tipo_moneda_id, (int)gpExist.Tipo_moneda_id, (decimal)gtotal, Tipo_Movimiento_Bancario.Egreso))
+                    { //si el banco permite el movimiento proseguimos
 
 
-                    // Sumar montos ya ejecutados en gestion_p_detalle
-              
-                    int anioActual = currentDate.Year;
-                    int mesActual = currentDate.Month;
-
-                    double montoEjecutado = (from d in ctx.Gestion_P_detalle
-                                             join gp in ctx.Gestion_Presupuestaria
-                                                 on d.Gestion_Presupuestaria_id equals gp.id
-                                             where d.Gestion_Presupuestaria_id == pid
-                                                && d.activo == 1
-                                                && gp.anio_presupuesto == anioActual.ToString()
-                                                && currentDate >= gp.periodo_inicio
-                                                && currentDate <= gp.periodo_fin
-                                                && d.Fecha_registro.Month == mesActual
-                                                && d.Fecha_registro.Year == anioActual
-                                             select d.Monto)
-                                             .DefaultIfEmpty(0)
-                                             .Sum();
+                        string Symbol = ctx.Tipo_moneda
+                            .Where(t => t.id == gpExist.Tipo_moneda_id)
+                            .Select(t => t.Simbolo)
+                            .FirstOrDefault() ?? "₡";
 
 
-                    decimal montoMensual = ctx.Gestion_P_Anio
-                        .Where(d => d.Gestion_Presupuestaria_id == pid && d.anio_presupuesto == currentDate.Year.ToString() && d.mes ==currentDate.Month)
-                        .Select(d => d.monto)
-                        .DefaultIfEmpty(0)
-                        .Sum();
+                        // Sumar montos ya ejecutados en gestion_p_detalle
+
+                        int anioActual = currentDate.Year;
+                        int mesActual = currentDate.Month;
+
+                        double montoEjecutado = (from d in ctx.Gestion_P_detalle
+                                                 join gp in ctx.Gestion_Presupuestaria
+                                                     on d.Gestion_Presupuestaria_id equals gp.id
+                                                 where d.Gestion_Presupuestaria_id == pid
+                                                    && d.activo == 1
+                                                    && gp.anio_presupuesto == anioActual.ToString()
+                                                    && currentDate >= gp.periodo_inicio
+                                                    && currentDate <= gp.periodo_fin
+                                                    && d.Fecha_registro.Month == mesActual
+                                                    && d.Fecha_registro.Year == anioActual
+                                                 select d.Monto)
+                                                 .DefaultIfEmpty(0)
+                                                 .Sum();
+
+
+                        decimal montoMensual = ctx.Gestion_P_Anio
+                            .Where(d => d.Gestion_Presupuestaria_id == pid && d.anio_presupuesto == currentDate.Year.ToString() && d.mes == currentDate.Month)
+                            .Select(d => d.monto)
+                            .DefaultIfEmpty(0)
+                            .Sum();
 
 
 
-                    double montoAprobado = (double)montoMensual; //MONTO APROBADO PARA EL MES ACTUAL //gpExist.monto_aprobado;
-                    double montoConNuevoGasto = montoEjecutado + gtotal;
+                        double montoAprobado = (double)montoMensual; //MONTO APROBADO PARA EL MES ACTUAL //gpExist.monto_aprobado;
+                        double montoConNuevoGasto = montoEjecutado + gtotal;
 
-                    // Validar que el nuevo gasto no exceda el presupuesto
-                    if (montoConNuevoGasto >= montoAprobado)
-                    {
-                        double disponible = montoAprobado - montoEjecutado;
-                        throw new Exception(
-                            $"presupuesto_excedido_monto_aprobado_{montoAprobado}_ejecutado_{montoEjecutado}_disponible_{disponible}"
-                        );
+                        // Validar que el nuevo gasto no exceda el presupuesto
+                        if (montoConNuevoGasto >= montoAprobado)
+                        {
+                            double disponible = montoAprobado - montoEjecutado;
+                            throw new Exception(
+                                $"presupuesto_excedido_monto_aprobado_{montoAprobado}_ejecutado_{montoEjecutado}_disponible_{disponible}"
+                            );
+                        }
+
+                        //  Calcular porcentaje de uso con el nuevo gasto
+                        double porcentajeUso = (montoConNuevoGasto / montoAprobado) * 100;
+                        double porcentajeDisponible = 100 - porcentajeUso;
+
+                        // Si queda entre 5% y 10% disponible, notificar por correo
+                        if (porcentajeDisponible <= 10 && porcentajeDisponible >= 5)
+                        {
+                            NotificarPresupuestoBajo(ctx, gpExist, porcentajeUso, montoConNuevoGasto, montoAprobado, tool, Symbol);
+                        }
+
+                        //  Si queda menos de 5%, notificar con urgencia
+                        if (porcentajeDisponible < 5 && porcentajeDisponible > 0)
+                        {
+                            NotificarPresupuestoCritico(ctx, gpExist, porcentajeUso, montoConNuevoGasto, montoAprobado, tool, Symbol);
+                        }
+
                     }
-
-                    //  Calcular porcentaje de uso con el nuevo gasto
-                    double porcentajeUso = (montoConNuevoGasto / montoAprobado) * 100;
-                    double porcentajeDisponible = 100 - porcentajeUso;
-
-                    // Si queda entre 5% y 10% disponible, notificar por correo
-                    if (porcentajeDisponible <= 10 && porcentajeDisponible >= 5)
-                    {
-                        NotificarPresupuestoBajo(ctx, gpExist, porcentajeUso, montoConNuevoGasto, montoAprobado, tool, Symbol);
-                    }
-
-                    //  Si queda menos de 5%, notificar con urgencia
-                    if (porcentajeDisponible < 5 && porcentajeDisponible > 0)
-                    {
-                        NotificarPresupuestoCritico(ctx, gpExist, porcentajeUso, montoConNuevoGasto, montoAprobado, tool, Symbol);
-                    }
+                   
                
                 }
                 return true;

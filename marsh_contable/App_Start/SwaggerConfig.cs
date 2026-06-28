@@ -1,3 +1,4 @@
+ï»¿using System.Linq;
 using System.Web;
 using System.Web.Http;
 using Swashbuckle.Application;
@@ -11,31 +12,31 @@ namespace marsh_contable.App_Start
         public static void Register()
         {
             GlobalConfiguration.Configuration
-                .EnableSwagger(c =>
-                {
-                    c.SingleApiVersion("v1", "Marsh Contable API")
-                     .Description("API del Sistema de Gestión Financiero Contable - Marsh Asprose")
-                     .Contact(cc => cc.Name("Marsh Asprose").Email("info@marsh.com"));
+    .EnableSwagger(c =>
+    {
+        c.SingleApiVersion("v1", "Marsh Contable API")
+         .Description("API del Sistema de GestiÃ³n Financiero Contable - Marsh Asprose");
 
-                    // Incluir comentarios XML de los controllers
-                    var xmlPath = System.AppDomain.CurrentDomain.BaseDirectory + @"bin\marsh_contable.xml";
-                    if (System.IO.File.Exists(xmlPath))
-                        c.IncludeXmlComments(xmlPath);
+        // â”€â”€ Resolver rutas duplicadas
+        c.ResolveConflictingActions(apiDescriptions => apiDescriptions.First());
 
-                    // Header X-Session-Id para autenticación
-                    c.ApiKey("X-Session-Id")
-                     .Description("Session ID para autenticación")
-                     .Name("X-Session-Id")
-                     .In("header");
+        var xmlPath = System.AppDomain.CurrentDomain.BaseDirectory + @"bin\marsh_contable.xml";
+        if (System.IO.File.Exists(xmlPath))
+            c.IncludeXmlComments(xmlPath);
 
-                    c.DescribeAllEnumsAsStrings();
-                })
-                .EnableSwaggerUi(c =>
-                {
-                    c.DocumentTitle("Marsh Contable - API Docs");
-                    c.DocExpansion(DocExpansion.List);
-                    c.EnableApiKeySupport("X-Session-Id", "header");
-                });
+        c.ApiKey("X-Session-Id")
+         .Description("Session ID para autenticaciÃ³n")
+         .Name("X-Session-Id")
+         .In("header");
+
+        c.DescribeAllEnumsAsStrings();
+    })
+    .EnableSwaggerUi(c =>
+    {
+        c.DocumentTitle("Marsh Contable - API Docs");
+        c.DocExpansion(DocExpansion.List);
+        c.EnableApiKeySupport("X-Session-Id", "header");
+    });
         }
     }
 }
