@@ -31,6 +31,12 @@ namespace marsh_contable.Models
         public int Tipo_moneda_id { get; set; }
         public string tipo_moneda { get; set; }
 
+        public int mesOrigen { get; set; }
+        public int mesDestino { get; set; }
+
+        public string anioOrigen { get; set; }
+        public string anioDestino { get; set; }
+
         public List<DetalleGestionPViewModel> detalles { get; set; }
     }
 }

@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
@@ -388,7 +388,7 @@ namespace marsh_contable.Controllers
         }
 
 
-        #region "Gestion por a�o"
+        #region "Gestion por año"
 
         [HttpPost]
         [Authorize]
@@ -414,7 +414,7 @@ namespace marsh_contable.Controllers
                 if (model.detalles == null || model.detalles.Count == 0)
                     throw new Exception("detalles_are_required");
 
-                // Validar que los meses sean v�lidos (1-12)
+                // Validar que los meses sean válidos (1-12)
                 if (model.detalles.Any(d => d.mes < 1 || d.mes > 12))
                     throw new Exception("invalid_value_mes_must_be_between_1_and_12");
 
@@ -422,13 +422,13 @@ namespace marsh_contable.Controllers
                 {
                   
 
-                    // Verificar que no existan registros para ese a�o y gesti�n
+                    // Verificar que no existan registros para ese año y gestión
                
                     foreach (var detalle in model.detalles)
                     {
 
 
-                        // Verificar que la gesti�n presupuestaria existe
+                        // Verificar que la gestión presupuestaria existe
                         var gpExist = ctx.Gestion_Presupuestaria
                             .FirstOrDefault(g => g.id == detalle.Gestion_Presupuestaria_id);
 
@@ -489,6 +489,7 @@ namespace marsh_contable.Controllers
         [HttpGet]
         [Authorize]
         [Route("api/v1/gestion_por_anio/{anio}")]
+        [RequierePermiso(PermisosAplica.UsuarioPresupuestos)]
         public Reply GetGestionPorAnio(string anio)
         {
             Reply oR = new Reply();
@@ -536,6 +537,7 @@ namespace marsh_contable.Controllers
 
         [HttpGet]
         [Authorize]
+        [RequierePermiso(PermisosAplica.UsuarioPresupuestos)]
         [Route("api/v1/gestion_presupuestaria_dropdown/{anio_presupuesto}")]
         public Reply GetGestionPDropDown(string anio_presupuesto)
         {
@@ -581,6 +583,291 @@ namespace marsh_contable.Controllers
         }
 
 
+
+        [HttpPut]
+        [Authorize]
+        [Route("api/v1/mover_gestion_presupuestaria/{idOrigen}/{idDestino}")]
+        [RequierePermiso(PermisosAplica.UsuarioPresupuestos)]
+        public Reply MoverPresupuesto(int idOrigen, int idDestino, [FromBody] Models.GestionPresupuestariaViewModel model)
+        {
+            Reply oR = new Reply();
+            oR.CodeStatus = 0;
+            General tool = new General();
+            try
+            {
+                if (!tool.validaNumeros(idOrigen.ToString()))
+                    throw new Exception("invalid_value_for_idOrigen");
+
+                if (!tool.validaNumeros(idDestino.ToString()))
+                    throw new Exception("invalid_value_for_idDestino");
+
+                if (!tool.validaNumeros(model.monto_modificado.ToString()))
+                    throw new Exception("monto_is_invalid");
+
+                if (model.monto_modificado <= 0)
+                    throw new Exception("monto_modificado_must_be_greater_than_zero");
+
+
+              
+
+                if (idOrigen == idDestino)
+                    throw new Exception("origen_and_destino_must_be_different");
+
+                using (var ctx = new Models.EntitiesModel())
+                {
+                    ctx.Configuration.LazyLoadingEnabled = false;
+                    ctx.Configuration.ProxyCreationEnabled = false;
+
+                    int mesActual = DateTime.Now.Month;
+                    int anioActual = DateTime.Now.Year;
+
+                    // ── Validar que los parámetros vengan en el model
+                    if (model.mesOrigen < 1 || model.mesOrigen > 12)
+                        throw new Exception("invalid_value_mes_origen_must_be_between_1_and_12");
+
+                    if (model.mesDestino < 1 || model.mesDestino > 12)
+                        throw new Exception("invalid_value_mes_destino_must_be_between_1_and_12");
+
+                    if (string.IsNullOrEmpty(model.anioOrigen) || model.anioOrigen.Length != 4)
+                        throw new Exception("invalid_format_anio_origen");
+
+                    if (string.IsNullOrEmpty(model.anioDestino) || model.anioDestino.Length != 4)
+                        throw new Exception("invalid_format_anio_destino");
+
+                    int anioOrigenInt = int.Parse(model.anioOrigen);
+                    int anioDestinoInt = int.Parse(model.anioDestino);
+
+                    // ── Validar que no sean períodos pasados
+                    //if (anioOrigenInt < anioActual ||
+                    //   (anioOrigenInt == anioActual && model.mesOrigen < mesActual))
+                    //    throw new Exception("periodo_origen_no_puede_ser_pasado");
+
+                    if (anioDestinoInt < anioActual ||
+                       (anioDestinoInt == anioActual && model.mesDestino < mesActual))
+                        throw new Exception("periodo_destino_no_puede_ser_pasado");
+
+                    // ── Validar existencia de presupuestos
+                    Models.Gestion_Presupuestaria gpOrigen = ctx.Gestion_Presupuestaria
+                        .FirstOrDefault(u => u.id == idOrigen);
+
+                    if (gpOrigen == null)
+                        throw new Exception("gestion_presupuestaria_origin_dont_exist");
+
+                    Models.Gestion_Presupuestaria gpDestino = ctx.Gestion_Presupuestaria
+                        .FirstOrDefault(u => u.id == idDestino);
+
+                    if (gpDestino == null)
+                        throw new Exception("gestion_presupuestaria_destino_dont_exist");
+
+                    // ═══════════════════════════════════════════════════════
+                    // PASO 1: Validar existencia en Gestion_P_Anio con parámetros del model
+                    // ═══════════════════════════════════════════════════════
+
+                    var gpAnioOrigen = ctx.Gestion_P_Anio
+                        .FirstOrDefault(a => a.Gestion_Presupuestaria_id == idOrigen &&
+                                             a.anio_presupuesto == model.anioOrigen &&
+                                             a.mes == model.mesOrigen);
+
+                    if (gpAnioOrigen == null)
+                        throw new Exception($"no_existe_presupuesto_para_mes_{model.mesOrigen}_anio_{model.anioOrigen}_en_origen");
+
+                    // ── Validar destino en Gestion_P_Anio
+                    var gpAnioDestino = ctx.Gestion_P_Anio
+                        .FirstOrDefault(a => a.Gestion_Presupuestaria_id == idDestino &&
+                                             a.anio_presupuesto == model.anioDestino &&
+                                             a.mes == model.mesDestino);
+
+                    if (gpAnioOrigen == null)
+                        throw new Exception($"no_existe_presupuesto_anio_para_mes_{mesActual}_anio_{anioActual}_en_origen");
+
+                    if (gpAnioOrigen.monto <= 0)
+                        throw new Exception($"presupuesto_mes_{mesActual}_sin_monto_disponible_en_origen");
+
+                    if (gpAnioOrigen.monto < (decimal)model.monto_modificado)
+                        throw new Exception($"monto_a_trasladar_excede_presupuesto_mensual_disponible_{gpAnioOrigen.monto}_requerido_{model.monto_modificado}");
+
+                    // ═══════════════════════════════════════════════════════
+                    // PASO 2: Calcular monto ejecutado real en Gestion_P_detalle
+                    //         Gastos = resta | Ingresos y Facturas = suma
+                    // ═══════════════════════════════════════════════════════
+
+                    // Sumar gastos (egresos)
+                    double totalGastos = ctx.Gestion_P_detalle
+                        .Where(d => d.Gestion_Presupuestaria_id == idOrigen &&
+                                    d.activo == 1 &&
+                                    d.Gastos_id != null)
+                        .Select(d => (double)d.Monto_ejecutado)
+                        .DefaultIfEmpty(0)
+                        .Sum();
+
+                    // Sumar ingresos
+                    double totalIngresos = ctx.Gestion_P_detalle
+                        .Where(d => d.Gestion_Presupuestaria_id == idOrigen &&
+                                    d.activo == 1 &&
+                                    d.Ingresos_id != null)
+                        .Select(d => (double)d.Monto_ejecutado)
+                        .DefaultIfEmpty(0)
+                        .Sum();
+
+                    // Sumar facturas
+                    double totalFacturas = ctx.Gestion_P_detalle
+                        .Where(d => d.Gestion_Presupuestaria_id == idOrigen &&
+                                    d.activo == 1 &&
+                                    d.Facturas_id != null)
+                        .Select(d => (double)d.Monto_ejecutado)
+                        .DefaultIfEmpty(0)
+                        .Sum();
+
+                    // Balance real: ingresos + facturas - gastos
+                    double balanceEjecutado = (totalIngresos + totalFacturas) - totalGastos;
+
+                    // Monto neto ejecutado (gastos netos)
+                    double montoEjecutadoNeto = totalGastos - (totalIngresos + totalFacturas);
+
+                    // ═══════════════════════════════════════════════════════
+                    // PASO 3: Validar que el presupuesto no haya sido consumido
+                    // ═══════════════════════════════════════════════════════
+
+                    double montoAnioOrigen = (double)gpAnioOrigen.monto;
+
+                    if (montoEjecutadoNeto >= montoAnioOrigen)
+                        throw new Exception($"no_se_puede_trasladar_presupuesto_ya_fue_ejecutado_ejecutado_{montoEjecutadoNeto}_presupuesto_mes_{montoAnioOrigen}");
+
+                    // ═══════════════════════════════════════════════════════
+                    // PASO 4: Validar que el monto a mover no deje el origen
+                    //         sin cobertura para lo ya ejecutado
+                    // ═══════════════════════════════════════════════════════
+
+                    double disponibleDespuesDeTraslado = montoAnioOrigen - model.monto_modificado;
+
+                    if (disponibleDespuesDeTraslado < montoEjecutadoNeto)
+                        throw new Exception($"traslado_dejaria_presupuesto_sin_cobertura_ejecutado_{montoEjecutadoNeto}_disponible_post_traslado_{disponibleDespuesDeTraslado}");
+
+                    // ═══════════════════════════════════════════════════════
+                    // PASO 5: Ejecutar el traslado
+                    // ═══════════════════════════════════════════════════════
+
+                    // ── Actualizar ORIGEN: restar montos
+                    gpOrigen.monto_aprobado = gpOrigen.monto_aprobado - model.monto_modificado;
+                    gpOrigen.monto_modificado = gpOrigen.monto_modificado - model.monto_modificado;
+                    gpOrigen.fecha_actualizacion = DateTime.Now;
+
+                    // ── Actualizar DESTINO: sumar montos
+                    gpDestino.monto_aprobado = gpDestino.monto_aprobado + model.monto_modificado;
+                    gpDestino.monto_modificado = gpDestino.monto_modificado + model.monto_modificado;
+                    gpDestino.fecha_actualizacion = DateTime.Now;
+
+                    // ── Actualizar Gestion_P_Anio del origen
+                    gpAnioOrigen.monto = gpAnioOrigen.monto - (decimal)model.monto_modificado;
+
+                    // ── Actualizar o crear Gestion_P_Anio del destino
+                    var gpAnioDestinoActualiza = ctx.Gestion_P_Anio
+                        .FirstOrDefault(a => a.Gestion_Presupuestaria_id == idDestino &&
+                                             a.anio_presupuesto == anioDestinoInt.ToString() &&
+                                             a.mes == mesActual);
+
+                    if (gpAnioDestinoActualiza != null)
+                    {
+                        gpAnioDestinoActualiza.monto = gpAnioDestinoActualiza.monto + (decimal)model.monto_modificado;
+                    }
+                    else
+                    {
+                        Models.Gestion_P_Anio nuevoAnioDestino = new Models.Gestion_P_Anio()
+                        {
+                            Gestion_Presupuestaria_id = idDestino,
+                            anio_presupuesto = model.anioDestino,
+                            monto = (decimal)model.monto_modificado,
+                            mes = model.mesDestino
+                        };
+                        ctx.Gestion_P_Anio.Add(nuevoAnioDestino);
+                    }
+
+                    // ── Registrar movimiento de traslado en detalle (origen - egreso)
+                    Models.Gestion_P_detalle detalleOrigen = new Models.Gestion_P_detalle()
+                    {
+                        Monto = model.monto_modificado * -1, // Negativo porque sale
+                        Monto_aprobado = gpOrigen.monto_aprobado,
+                        Monto_modificado = gpOrigen.monto_modificado,
+                        Monto_compometido = gpOrigen.monto_comprometido,
+                        Monto_ejecutado = (decimal)(model.monto_modificado * -1),
+                        detalle_presupuesto = $"Traslado hacia {gpDestino.nombre}",
+                        Gestion_Presupuestaria_id = idOrigen,
+                        Categoria_presupuestaria_id = gpOrigen.Categoria_presupuestaria_id,
+                        Gastos_id = null,
+                        Ingresos_id = null,
+                        Facturas_id = null,
+                        Usuarios_Usuario_id = model.Usuarios_Usuario_id,
+                        Fecha_registro = DateTime.Now,
+                        Observaciones = $"Traslado presupuestario de {gpOrigen.nombre} a {gpDestino.nombre} | Monto: {model.monto_modificado:N2}",
+                        activo = 1
+                    };
+                    ctx.Gestion_P_detalle.Add(detalleOrigen);
+
+                    // ── Registrar movimiento de traslado en detalle (destino - ingreso)
+                    Models.Gestion_P_detalle detalleDestino = new Models.Gestion_P_detalle()
+                    {
+                        Monto = model.monto_modificado, // Positivo porque entra
+                        Monto_aprobado = gpDestino.monto_aprobado,
+                        Monto_modificado = gpDestino.monto_modificado,
+                        Monto_compometido = gpDestino.monto_comprometido,
+                        Monto_ejecutado = (decimal)model.monto_modificado,
+                        detalle_presupuesto = $"Traslado desde {gpOrigen.nombre}",
+                        Gestion_Presupuestaria_id = idDestino,
+                        Categoria_presupuestaria_id = gpDestino.Categoria_presupuestaria_id,
+                        Gastos_id = null,
+                        Ingresos_id = null,
+                        Facturas_id = null,
+                        Usuarios_Usuario_id = model.Usuarios_Usuario_id,
+                        Fecha_registro = DateTime.Now,
+                        Observaciones = $"Traslado presupuestario de {gpOrigen.nombre} a {gpDestino.nombre} | Monto: {model.monto_modificado:N2}",
+                        activo = 1
+                    };
+                    ctx.Gestion_P_detalle.Add(detalleDestino);
+
+                    ctx.SaveChanges();
+
+                    oR.CodeStatus = HttpStatusCode.OK;
+                    oR.Data = new
+                    {
+                        origen = new
+                        {
+                            id = gpOrigen.id,
+                            nombre = gpOrigen.nombre,
+                            monto_aprobado = gpOrigen.monto_aprobado,
+                            monto_modificado = gpOrigen.monto_modificado
+                        },
+                        destino = new
+                        {
+                            id = gpDestino.id,
+                            nombre = gpDestino.nombre,
+                            monto_aprobado = gpDestino.monto_aprobado,
+                            monto_modificado = gpDestino.monto_modificado
+                        },
+                        monto_trasladado = model.monto_modificado,
+                        mes = mesActual,
+                        anio = anioActual
+                    };
+                    return oR;
+                }
+            }
+            catch (System.Data.Entity.Validation.DbEntityValidationException ex2)
+            {
+                string errorDB = "";
+                foreach (var eve in ex2.EntityValidationErrors)
+                    foreach (var ve in eve.ValidationErrors)
+                        errorDB += ve.ErrorMessage;
+
+                oR.CodeStatus = HttpStatusCode.InternalServerError;
+                oR.Message = errorDB;
+                return oR;
+            }
+            catch (Exception ex)
+            {
+                oR.CodeStatus = HttpStatusCode.InternalServerError;
+                oR.Message = ex.Message;
+                return oR;
+            }
+        }
 
         #endregion
     }

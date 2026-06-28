@@ -634,7 +634,7 @@ namespace marsh_contable.Controllers
         }
 
 
-        public Reply validaBanco(int categoriaPresupuestariaId, int tipoMonedaId, int centroCostosId)
+        public Reply validaBanco(int categoriaPresupuestariaId, int tipoMonedaId, int centroCostosId, decimal totalTransaccion, Tipo_Movimiento_Bancario accion)
         {
             try
             {
@@ -656,6 +656,22 @@ namespace marsh_contable.Controllers
 
                     if (banco == null)
                         throw new Exception("banco_not_found_for_categoria_moneda_centro_costo");
+
+
+                    decimal totalBanco = banco.saldo_actual;
+
+                    switch (accion)
+                    {
+                        case Tipo_Movimiento_Bancario.Ingreso:
+                           if((totalBanco - totalTransaccion) <= 0)
+                            {
+                                throw new Exception("total_transaccion_exceed_the_banco_amount");
+                            }
+
+                        break;
+                    }
+
+
                 }
 
 
