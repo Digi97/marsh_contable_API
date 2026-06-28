@@ -32,10 +32,10 @@ namespace marsh_contable.Models
         public System.DateTime Fecha_actualizacion { get; set; }
         public int Tipo_moneda_id { get; set; }
     
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<Cuenta_Encabezado> Cuenta_Encabezado { get; set; }
         public virtual Tipo_Cuenta_Contable Tipo_Cuenta_Contable { get; set; }
         public virtual Usuarios Usuarios { get; set; }
         public virtual Tipo_moneda Tipo_moneda { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<Cuenta_Encabezado> Cuenta_Encabezado { get; set; }
     }
 }

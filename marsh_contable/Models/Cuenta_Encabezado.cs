@@ -25,32 +25,37 @@ namespace marsh_contable.Models
         public System.DateTime Vigencia_final { get; set; }
         public int Tipo_moneda_id { get; set; }
         public int Medio_pago_id { get; set; }
-        public double Total { get; set; }
-        public double Monto_Proyeccion { get; set; }
+        public decimal Total { get; set; }
+        public decimal Monto_Proyeccion { get; set; }
         public System.DateTime Fecha_creacion { get; set; }
         public System.DateTime Ultima_Fecha_actualizacion { get; set; }
         public int Usuarios_Usuario_id { get; set; }
-        public int Facturas_id { get; set; }
+        public Nullable<int> Facturas_id { get; set; }
         public string Referencia { get; set; }
-        public int Clientes_id { get; set; }
-        public double impuesto { get; set; }
-        public double subtotal { get; set; }
+        public Nullable<int> Clientes_id { get; set; }
+        public decimal impuesto { get; set; }
+        public decimal subtotal { get; set; }
+        public decimal Descuento { get; set; }
         public short Estado { get; set; }
         public int Tipo_cuentas_id { get; set; }
         public int Cuentas_Contables_id { get; set; }
         public int Centro_Costos_id { get; set; }
-        public int Gastos_id { get; set; }
+        public Nullable<int> Gastos_id { get; set; }
+        public Nullable<int> Ingresos_id { get; set; }
+        public Nullable<int> Proveedor_id { get; set; }
     
         public virtual Centro_Costos Centro_Costos { get; set; }
         public virtual Clientes Clientes { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Cuenta_Detalle> Cuenta_Detalle { get; set; }
         public virtual Cuentas_Contables Cuentas_Contables { get; set; }
+        public virtual Facturas Facturas { get; set; }
         public virtual Gastos Gastos { get; set; }
-        public virtual Tipo_cuentas Tipo_cuentas { get; set; }
+        public virtual Ingresos Ingresos { get; set; }
         public virtual Medio_pago Medio_pago { get; set; }
+        public virtual Proveedor Proveedor { get; set; }
+        public virtual Tipo_cuentas Tipo_cuentas { get; set; }
         public virtual Tipo_moneda Tipo_moneda { get; set; }
         public virtual Usuarios Usuarios { get; set; }
-        public virtual Facturas Facturas { get; set; }
     }
 }

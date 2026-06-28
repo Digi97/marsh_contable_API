@@ -17,11 +17,11 @@ namespace marsh_contable.Models
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors")]
         public Facturas()
         {
-            this.Cuenta_Encabezado = new HashSet<Cuenta_Encabezado>();
             this.Factura_Detalles = new HashSet<Factura_Detalles>();
             this.Gestion_P_detalle = new HashSet<Gestion_P_detalle>();
             this.Ingresos = new HashSet<Ingresos>();
             this.Bancos_Movimientos = new HashSet<Bancos_Movimientos>();
+            this.Cuenta_Encabezado = new HashSet<Cuenta_Encabezado>();
         }
     
         public int id { get; set; }
@@ -45,8 +45,6 @@ namespace marsh_contable.Models
     
         public virtual Clientes Clientes { get; set; }
         public virtual Condicion_venta Condicion_venta { get; set; }
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<Cuenta_Encabezado> Cuenta_Encabezado { get; set; }
         public virtual Estado_Factura Estado_Factura { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Factura_Detalles> Factura_Detalles { get; set; }
@@ -60,5 +58,7 @@ namespace marsh_contable.Models
         public virtual Usuarios Usuarios { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Bancos_Movimientos> Bancos_Movimientos { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<Cuenta_Encabezado> Cuenta_Encabezado { get; set; }
     }
 }

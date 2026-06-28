@@ -998,7 +998,7 @@ namespace marsh_contable.Controllers
                     </span>
                 </div>
                 <p>Este código es válido por <strong>15 minutos</strong>. 
-                   Si no solicitaste recuperar tu contraseña, ignorá este mensaje.</p>
+                   Si no solicitaste iniciar sesión, ignorá este mensaje.</p>
                 <hr style='border: none; border-top: 1px solid #ddd; margin: 20px 0;'/>
                 <p style='font-size: 12px; color: #999;'>
                     Este es un correo automático, por favor no respondas a este mensaje.

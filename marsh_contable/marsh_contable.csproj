@@ -466,6 +466,7 @@
     </Compile>
     <Compile Include="Models\TelefonosViewModel.cs" />
     <Compile Include="Models\TipoCambioViewModel.cs" />
+    <Compile Include="Models\TipoCuenta.cs" />
     <Compile Include="Models\TipoCuentasViewModel.cs" />
     <Compile Include="Models\TipoIdentificacionViewModel.cs" />
     <Compile Include="Models\Tipo_archivo.cs">

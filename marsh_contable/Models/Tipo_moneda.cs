@@ -17,7 +17,6 @@ namespace marsh_contable.Models
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors")]
         public Tipo_moneda()
         {
-            this.Cuenta_Encabezado = new HashSet<Cuenta_Encabezado>();
             this.Tipo_cambio = new HashSet<Tipo_cambio>();
             this.Cuentas_Contables = new HashSet<Cuentas_Contables>();
             this.Gastos = new HashSet<Gastos>();
@@ -27,6 +26,7 @@ namespace marsh_contable.Models
             this.Centro_Costos = new HashSet<Centro_Costos>();
             this.Bancos = new HashSet<Bancos>();
             this.Bancos_Movimientos = new HashSet<Bancos_Movimientos>();
+            this.Cuenta_Encabezado = new HashSet<Cuenta_Encabezado>();
         }
     
         public int id { get; set; }
@@ -34,8 +34,6 @@ namespace marsh_contable.Models
         public string Nombre { get; set; }
         public string Simbolo { get; set; }
     
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<Cuenta_Encabezado> Cuenta_Encabezado { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Tipo_cambio> Tipo_cambio { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
@@ -54,5 +52,7 @@ namespace marsh_contable.Models
         public virtual ICollection<Bancos> Bancos { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Bancos_Movimientos> Bancos_Movimientos { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<Cuenta_Encabezado> Cuenta_Encabezado { get; set; }
     }
 }

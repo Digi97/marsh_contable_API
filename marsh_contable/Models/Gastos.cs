@@ -17,10 +17,10 @@ namespace marsh_contable.Models
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors")]
         public Gastos()
         {
-            this.Cuenta_Encabezado = new HashSet<Cuenta_Encabezado>();
             this.Gastos_Detalles = new HashSet<Gastos_Detalles>();
             this.Gestion_P_detalle = new HashSet<Gestion_P_detalle>();
             this.Bancos_Movimientos = new HashSet<Bancos_Movimientos>();
+            this.Cuenta_Encabezado = new HashSet<Cuenta_Encabezado>();
         }
     
         public int id { get; set; }
@@ -38,10 +38,9 @@ namespace marsh_contable.Models
         public int Proveedor_id { get; set; }
         public Nullable<double> Descuento { get; set; }
         public Nullable<int> Tipo_moneda_id { get; set; }
+        public Nullable<int> Condicion_venta_id { get; set; }
     
         public virtual Categoria_gasto Categoria_gasto { get; set; }
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<Cuenta_Encabezado> Cuenta_Encabezado { get; set; }
         public virtual Medio_pago Medio_pago { get; set; }
         public virtual Proveedor Proveedor { get; set; }
         public virtual Tipo_documento Tipo_documento { get; set; }
@@ -53,6 +52,10 @@ namespace marsh_contable.Models
         public virtual ICollection<Gestion_P_detalle> Gestion_P_detalle { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Bancos_Movimientos> Bancos_Movimientos { get; set; }
-        public int presupuesto_id { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<Cuenta_Encabezado> Cuenta_Encabezado { get; set; }
+        public virtual Condicion_venta Condicion_venta { get; set; }
+        
+        public int proveedor_id { get; set; }
     }
 }

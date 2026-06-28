@@ -15,14 +15,20 @@ namespace marsh_contable.Models
     public partial class Cuenta_Detalle
     {
         public int id { get; set; }
-        public double Total { get; set; }
-        public double Monto_Proyeccion { get; set; }
-        public double Fecha_creacion { get; set; }
-        public short Estado { get; set; }
-        public double Impuesto { get; set; }
-        public double Subtotal { get; set; }
         public int Cuenta_Encabezado_id { get; set; }
+        public short Tipo_movimiento { get; set; }
+        public decimal monto { get; set; }
+        public decimal saldo_anterior { get; set; }
+        public decimal saldo_posterior { get; set; }
+        public System.DateTime fecha_movimiento { get; set; }
+        public string referencia_pago { get; set; }
+        public string Observaciones { get; set; }
+        public short activo { get; set; }
+        public int Usuarios_Usuario_id { get; set; }
+        public int Medio_pago_id { get; set; }
     
         public virtual Cuenta_Encabezado Cuenta_Encabezado { get; set; }
+        public virtual Medio_pago Medio_pago { get; set; }
+        public virtual Usuarios Usuarios { get; set; }
     }
 }
