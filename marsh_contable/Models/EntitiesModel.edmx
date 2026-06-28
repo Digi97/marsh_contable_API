@@ -38,6 +38,51 @@
           <Property Name="ValorNuevo" Type="varchar" MaxLength="200" />
           <Property Name="Empresa_Emp_id" Type="int" Nullable="false" />
         </EntityType>
+        <EntityType Name="Bancos">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="nombre_banco" Type="varchar" MaxLength="150" Nullable="false" />
+          <Property Name="numero_cuenta" Type="varchar" MaxLength="30" Nullable="false" />
+          <Property Name="tipo_cuenta" Type="varchar" MaxLength="50" Nullable="false" />
+          <Property Name="moneda_simbolo" Type="varchar" MaxLength="5" />
+          <Property Name="saldo_inicial" Type="decimal" Precision="18" Scale="2" Nullable="false" />
+          <Property Name="saldo_actual" Type="decimal" Precision="18" Scale="2" Nullable="false" />
+          <Property Name="fecha_apertura" Type="datetime" Nullable="false" />
+          <Property Name="fecha_actualizacion" Type="datetime" Nullable="false" />
+          <Property Name="estado" Type="smallint" Nullable="false" />
+          <Property Name="Tipo_moneda_id" Type="int" Nullable="false" />
+          <Property Name="Centro_Costos_id" Type="int" />
+          <Property Name="Categoria_presupuestaria_id" Type="int" />
+          <Property Name="Empresa_Emp_id" Type="int" Nullable="false" />
+          <Property Name="Usuarios_Usuario_id" Type="int" Nullable="false" />
+        </EntityType>
+        <EntityType Name="Bancos_Movimientos">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="Bancos_id" Type="int" Nullable="false" />
+          <Property Name="tipo_movimiento" Type="smallint" Nullable="false" />
+          <Property Name="descripcion" Type="varchar" MaxLength="250" Nullable="false" />
+          <Property Name="monto" Type="decimal" Precision="18" Scale="2" Nullable="false" />
+          <Property Name="saldo_anterior" Type="decimal" Precision="18" Scale="2" Nullable="false" />
+          <Property Name="saldo_posterior" Type="decimal" Precision="18" Scale="2" Nullable="false" />
+          <Property Name="mes" Type="smallint" Nullable="false" />
+          <Property Name="anio" Type="varchar" MaxLength="4" Nullable="false" />
+          <Property Name="fecha_movimiento" Type="datetime" Nullable="false" />
+          <Property Name="referencia" Type="varchar" MaxLength="100" />
+          <Property Name="Centro_Costos_id" Type="int" />
+          <Property Name="Categoria_presupuestaria_id" Type="int" />
+          <Property Name="Tipo_moneda_id" Type="int" Nullable="false" />
+          <Property Name="Gastos_id" Type="int" />
+          <Property Name="Ingresos_id" Type="int" />
+          <Property Name="Facturas_id" Type="int" />
+          <Property Name="Usuarios_Usuario_id" Type="int" Nullable="false" />
+          <Property Name="Observaciones" Type="varchar" MaxLength="250" />
+          <Property Name="activo" Type="smallint" Nullable="false" />
+        </EntityType>
         <EntityType Name="Canton">
           <Key>
             <PropertyRef Name="id" />
@@ -664,6 +709,162 @@
             </Principal>
             <Dependent Role="AuditaTabla">
               <PropertyRef Name="Empresa_Emp_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Bancos_Categoria_presupuestaria">
+          <End Role="Categoria_presupuestaria" Type="Self.Categoria_presupuestaria" Multiplicity="0..1" />
+          <End Role="Bancos" Type="Self.Bancos" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Categoria_presupuestaria">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="Bancos">
+              <PropertyRef Name="Categoria_presupuestaria_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Bancos_Centro_Costos">
+          <End Role="Centro_Costos" Type="Self.Centro_Costos" Multiplicity="0..1" />
+          <End Role="Bancos" Type="Self.Bancos" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Centro_Costos">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="Bancos">
+              <PropertyRef Name="Centro_Costos_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Bancos_Empresa">
+          <End Role="Empresa" Type="Self.Empresa" Multiplicity="1" />
+          <End Role="Bancos" Type="Self.Bancos" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Empresa">
+              <PropertyRef Name="Emp_id" />
+            </Principal>
+            <Dependent Role="Bancos">
+              <PropertyRef Name="Empresa_Emp_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Bancos_Tipo_moneda">
+          <End Role="Tipo_moneda" Type="Self.Tipo_moneda" Multiplicity="1" />
+          <End Role="Bancos" Type="Self.Bancos" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Tipo_moneda">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="Bancos">
+              <PropertyRef Name="Tipo_moneda_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Bancos_Usuarios">
+          <End Role="Usuarios" Type="Self.Usuarios" Multiplicity="1" />
+          <End Role="Bancos" Type="Self.Bancos" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Usuarios">
+              <PropertyRef Name="Usuario_id" />
+            </Principal>
+            <Dependent Role="Bancos">
+              <PropertyRef Name="Usuarios_Usuario_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_BM_Bancos">
+          <End Role="Bancos" Type="Self.Bancos" Multiplicity="1" />
+          <End Role="Bancos_Movimientos" Type="Self.Bancos_Movimientos" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Bancos">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="Bancos_Movimientos">
+              <PropertyRef Name="Bancos_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_BM_Categoria_presupuestaria">
+          <End Role="Categoria_presupuestaria" Type="Self.Categoria_presupuestaria" Multiplicity="0..1" />
+          <End Role="Bancos_Movimientos" Type="Self.Bancos_Movimientos" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Categoria_presupuestaria">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="Bancos_Movimientos">
+              <PropertyRef Name="Categoria_presupuestaria_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_BM_Centro_Costos">
+          <End Role="Centro_Costos" Type="Self.Centro_Costos" Multiplicity="0..1" />
+          <End Role="Bancos_Movimientos" Type="Self.Bancos_Movimientos" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Centro_Costos">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="Bancos_Movimientos">
+              <PropertyRef Name="Centro_Costos_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_BM_Facturas">
+          <End Role="Facturas" Type="Self.Facturas" Multiplicity="0..1" />
+          <End Role="Bancos_Movimientos" Type="Self.Bancos_Movimientos" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Facturas">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="Bancos_Movimientos">
+              <PropertyRef Name="Facturas_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_BM_Gastos">
+          <End Role="Gastos" Type="Self.Gastos" Multiplicity="0..1" />
+          <End Role="Bancos_Movimientos" Type="Self.Bancos_Movimientos" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Gastos">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="Bancos_Movimientos">
+              <PropertyRef Name="Gastos_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_BM_Ingresos">
+          <End Role="Ingresos" Type="Self.Ingresos" Multiplicity="0..1" />
+          <End Role="Bancos_Movimientos" Type="Self.Bancos_Movimientos" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Ingresos">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="Bancos_Movimientos">
+              <PropertyRef Name="Ingresos_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_BM_Tipo_moneda">
+          <End Role="Tipo_moneda" Type="Self.Tipo_moneda" Multiplicity="1" />
+          <End Role="Bancos_Movimientos" Type="Self.Bancos_Movimientos" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Tipo_moneda">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="Bancos_Movimientos">
+              <PropertyRef Name="Tipo_moneda_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_BM_Usuarios">
+          <End Role="Usuarios" Type="Self.Usuarios" Multiplicity="1" />
+          <End Role="Bancos_Movimientos" Type="Self.Bancos_Movimientos" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Usuarios">
+              <PropertyRef Name="Usuario_id" />
+            </Principal>
+            <Dependent Role="Bancos_Movimientos">
+              <PropertyRef Name="Usuarios_Usuario_id" />
             </Dependent>
           </ReferentialConstraint>
         </Association>
@@ -1584,6 +1785,8 @@
         <EntityContainer Name="marsh_contableModelStoreContainer">
           <EntitySet Name="Adjuntos" EntityType="Self.Adjuntos" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="AuditaTabla" EntityType="Self.AuditaTabla" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Bancos" EntityType="Self.Bancos" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Bancos_Movimientos" EntityType="Self.Bancos_Movimientos" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Canton" EntityType="Self.Canton" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Categoria_gasto" EntityType="Self.Categoria_gasto" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Categoria_presupuestaria" EntityType="Self.Categoria_presupuestaria" Schema="dbo" store:Type="Tables" />
@@ -1644,6 +1847,58 @@
           <AssociationSet Name="FK_AuditaTabla_Empresa" Association="Self.FK_AuditaTabla_Empresa">
             <End Role="Empresa" EntitySet="Empresa" />
             <End Role="AuditaTabla" EntitySet="AuditaTabla" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Bancos_Categoria_presupuestaria" Association="Self.FK_Bancos_Categoria_presupuestaria">
+            <End Role="Categoria_presupuestaria" EntitySet="Categoria_presupuestaria" />
+            <End Role="Bancos" EntitySet="Bancos" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Bancos_Centro_Costos" Association="Self.FK_Bancos_Centro_Costos">
+            <End Role="Centro_Costos" EntitySet="Centro_Costos" />
+            <End Role="Bancos" EntitySet="Bancos" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Bancos_Empresa" Association="Self.FK_Bancos_Empresa">
+            <End Role="Empresa" EntitySet="Empresa" />
+            <End Role="Bancos" EntitySet="Bancos" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Bancos_Tipo_moneda" Association="Self.FK_Bancos_Tipo_moneda">
+            <End Role="Tipo_moneda" EntitySet="Tipo_moneda" />
+            <End Role="Bancos" EntitySet="Bancos" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Bancos_Usuarios" Association="Self.FK_Bancos_Usuarios">
+            <End Role="Usuarios" EntitySet="Usuarios" />
+            <End Role="Bancos" EntitySet="Bancos" />
+          </AssociationSet>
+          <AssociationSet Name="FK_BM_Bancos" Association="Self.FK_BM_Bancos">
+            <End Role="Bancos" EntitySet="Bancos" />
+            <End Role="Bancos_Movimientos" EntitySet="Bancos_Movimientos" />
+          </AssociationSet>
+          <AssociationSet Name="FK_BM_Categoria_presupuestaria" Association="Self.FK_BM_Categoria_presupuestaria">
+            <End Role="Categoria_presupuestaria" EntitySet="Categoria_presupuestaria" />
+            <End Role="Bancos_Movimientos" EntitySet="Bancos_Movimientos" />
+          </AssociationSet>
+          <AssociationSet Name="FK_BM_Centro_Costos" Association="Self.FK_BM_Centro_Costos">
+            <End Role="Centro_Costos" EntitySet="Centro_Costos" />
+            <End Role="Bancos_Movimientos" EntitySet="Bancos_Movimientos" />
+          </AssociationSet>
+          <AssociationSet Name="FK_BM_Facturas" Association="Self.FK_BM_Facturas">
+            <End Role="Facturas" EntitySet="Facturas" />
+            <End Role="Bancos_Movimientos" EntitySet="Bancos_Movimientos" />
+          </AssociationSet>
+          <AssociationSet Name="FK_BM_Gastos" Association="Self.FK_BM_Gastos">
+            <End Role="Gastos" EntitySet="Gastos" />
+            <End Role="Bancos_Movimientos" EntitySet="Bancos_Movimientos" />
+          </AssociationSet>
+          <AssociationSet Name="FK_BM_Ingresos" Association="Self.FK_BM_Ingresos">
+            <End Role="Ingresos" EntitySet="Ingresos" />
+            <End Role="Bancos_Movimientos" EntitySet="Bancos_Movimientos" />
+          </AssociationSet>
+          <AssociationSet Name="FK_BM_Tipo_moneda" Association="Self.FK_BM_Tipo_moneda">
+            <End Role="Tipo_moneda" EntitySet="Tipo_moneda" />
+            <End Role="Bancos_Movimientos" EntitySet="Bancos_Movimientos" />
+          </AssociationSet>
+          <AssociationSet Name="FK_BM_Usuarios" Association="Self.FK_BM_Usuarios">
+            <End Role="Usuarios" EntitySet="Usuarios" />
+            <End Role="Bancos_Movimientos" EntitySet="Bancos_Movimientos" />
           </AssociationSet>
           <AssociationSet Name="fk_Canton_Provincia1" Association="Self.fk_Canton_Provincia1">
             <End Role="Provincia" EntitySet="Provincia" />
@@ -2003,6 +2258,8 @@
           <Property Name="Monto_presupuestado" Type="Decimal" Precision="12" Scale="2" />
           <Property Name="Tipo_moneda_id" Type="Int32" />
           <NavigationProperty Name="Tipo_moneda" Relationship="marsh_contableModel.fk_tipo_moneda_cp" FromRole="Categoria_presupuestaria" ToRole="Tipo_moneda" />
+          <NavigationProperty Name="Bancos" Relationship="marsh_contableModel.FK_Bancos_Categoria_presupuestaria" FromRole="Categoria_presupuestaria" ToRole="Bancos" />
+          <NavigationProperty Name="Bancos_Movimientos" Relationship="marsh_contableModel.FK_BM_Categoria_presupuestaria" FromRole="Categoria_presupuestaria" ToRole="Bancos_Movimientos" />
         </EntityType>
         <EntityType Name="Centro_Costos">
           <Key>
@@ -2017,6 +2274,8 @@
           <Property Name="Monto_presupuesto_anual" Type="Decimal" Precision="12" Scale="2" />
           <Property Name="Tipo_moneda_id" Type="Int32" />
           <NavigationProperty Name="Tipo_moneda" Relationship="marsh_contableModel.fk_tipo_moneda_cc" FromRole="Centro_Costos" ToRole="Tipo_moneda" />
+          <NavigationProperty Name="Bancos" Relationship="marsh_contableModel.FK_Bancos_Centro_Costos" FromRole="Centro_Costos" ToRole="Bancos" />
+          <NavigationProperty Name="Bancos_Movimientos" Relationship="marsh_contableModel.FK_BM_Centro_Costos" FromRole="Centro_Costos" ToRole="Bancos_Movimientos" />
         </EntityType>
         <EntityType Name="Clientes">
           <Key>
@@ -2222,6 +2481,7 @@
           <Property Name="Usuario_hacienda" Type="String" MaxLength="200" FixedLength="false" Unicode="false" />
           <Property Name="Contrasena_hacienda" Type="String" MaxLength="200" FixedLength="false" Unicode="false" />
           <NavigationProperty Name="AuditaTabla" Relationship="marsh_contableModel.FK_AuditaTabla_Empresa" FromRole="Empresa" ToRole="AuditaTabla" />
+          <NavigationProperty Name="Bancos" Relationship="marsh_contableModel.FK_Bancos_Empresa" FromRole="Empresa" ToRole="Bancos" />
         </EntityType>
         <EntityType Name="Estado_Factura">
           <Key>
@@ -2260,6 +2520,7 @@
           <Property Name="Tipo_moneda_id" Type="Int32" />
           <NavigationProperty Name="Tipo_moneda" Relationship="marsh_contableModel.FK_Gastos_Tipo_moneda" FromRole="Gastos" ToRole="Tipo_moneda" />
           <NavigationProperty Name="Gestion_P_detalle" Relationship="marsh_contableModel.FK_GP_Detalle_Gastos" FromRole="Gastos" ToRole="Gestion_P_detalle" />
+          <NavigationProperty Name="Bancos_Movimientos" Relationship="marsh_contableModel.FK_BM_Gastos" FromRole="Gastos" ToRole="Bancos_Movimientos" />
         </EntityType>
         <EntityType Name="Gestion_P_detalle">
           <Key>
@@ -2523,6 +2784,8 @@
           <NavigationProperty Name="Facturas" Relationship="marsh_contableModel.fk_Factura_Tipo_moneda1" FromRole="Tipo_moneda" ToRole="Facturas" />
           <NavigationProperty Name="Categoria_presupuestaria" Relationship="marsh_contableModel.fk_tipo_moneda_cp" FromRole="Tipo_moneda" ToRole="Categoria_presupuestaria" />
           <NavigationProperty Name="Centro_Costos" Relationship="marsh_contableModel.fk_tipo_moneda_cc" FromRole="Tipo_moneda" ToRole="Centro_Costos" />
+          <NavigationProperty Name="Bancos" Relationship="marsh_contableModel.FK_Bancos_Tipo_moneda" FromRole="Tipo_moneda" ToRole="Bancos" />
+          <NavigationProperty Name="Bancos_Movimientos" Relationship="marsh_contableModel.FK_BM_Tipo_moneda" FromRole="Tipo_moneda" ToRole="Bancos_Movimientos" />
         </EntityType>
         <EntityType Name="Unidad_medida">
           <Key>
@@ -2566,6 +2829,8 @@
           <NavigationProperty Name="Gestion_P_detalle" Relationship="marsh_contableModel.FK_GP_Detalle_Usuarios" FromRole="Usuarios" ToRole="Gestion_P_detalle" />
           <NavigationProperty Name="Facturas" Relationship="marsh_contableModel.FK_Usuarios_Factura" FromRole="Usuarios" ToRole="Facturas" />
           <NavigationProperty Name="MultiFactor" Relationship="marsh_contableModel.FK_MultiFactor_Usuarios" FromRole="Usuarios" ToRole="MultiFactor" />
+          <NavigationProperty Name="Bancos" Relationship="marsh_contableModel.FK_Bancos_Usuarios" FromRole="Usuarios" ToRole="Bancos" />
+          <NavigationProperty Name="Bancos_Movimientos" Relationship="marsh_contableModel.FK_BM_Usuarios" FromRole="Usuarios" ToRole="Bancos_Movimientos" />
         </EntityType>
         <Association Name="fk_Adjuntos_Tablas_referencia1">
           <End Role="Tablas_referencia" Type="Self.Tablas_referencia" Multiplicity="1" />
@@ -3469,6 +3734,60 @@
             <End Role="Usuarios" EntitySet="Usuarios" />
             <End Role="MultiFactor" EntitySet="MultiFactor" />
           </AssociationSet>
+          <EntitySet Name="Bancos" EntityType="marsh_contableModel.Bancos" />
+          <EntitySet Name="Bancos_Movimientos" EntityType="marsh_contableModel.Bancos_Movimientos" />
+          <AssociationSet Name="FK_Bancos_Categoria_presupuestaria" Association="marsh_contableModel.FK_Bancos_Categoria_presupuestaria">
+            <End Role="Categoria_presupuestaria" EntitySet="Categoria_presupuestaria" />
+            <End Role="Bancos" EntitySet="Bancos" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Bancos_Centro_Costos" Association="marsh_contableModel.FK_Bancos_Centro_Costos">
+            <End Role="Centro_Costos" EntitySet="Centro_Costos" />
+            <End Role="Bancos" EntitySet="Bancos" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Bancos_Empresa" Association="marsh_contableModel.FK_Bancos_Empresa">
+            <End Role="Empresa" EntitySet="Empresa" />
+            <End Role="Bancos" EntitySet="Bancos" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Bancos_Tipo_moneda" Association="marsh_contableModel.FK_Bancos_Tipo_moneda">
+            <End Role="Tipo_moneda" EntitySet="Tipo_moneda" />
+            <End Role="Bancos" EntitySet="Bancos" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Bancos_Usuarios" Association="marsh_contableModel.FK_Bancos_Usuarios">
+            <End Role="Usuarios" EntitySet="Usuarios" />
+            <End Role="Bancos" EntitySet="Bancos" />
+          </AssociationSet>
+          <AssociationSet Name="FK_BM_Bancos" Association="marsh_contableModel.FK_BM_Bancos">
+            <End Role="Bancos" EntitySet="Bancos" />
+            <End Role="Bancos_Movimientos" EntitySet="Bancos_Movimientos" />
+          </AssociationSet>
+          <AssociationSet Name="FK_BM_Categoria_presupuestaria" Association="marsh_contableModel.FK_BM_Categoria_presupuestaria">
+            <End Role="Categoria_presupuestaria" EntitySet="Categoria_presupuestaria" />
+            <End Role="Bancos_Movimientos" EntitySet="Bancos_Movimientos" />
+          </AssociationSet>
+          <AssociationSet Name="FK_BM_Centro_Costos" Association="marsh_contableModel.FK_BM_Centro_Costos">
+            <End Role="Centro_Costos" EntitySet="Centro_Costos" />
+            <End Role="Bancos_Movimientos" EntitySet="Bancos_Movimientos" />
+          </AssociationSet>
+          <AssociationSet Name="FK_BM_Facturas" Association="marsh_contableModel.FK_BM_Facturas">
+            <End Role="Facturas" EntitySet="Facturas" />
+            <End Role="Bancos_Movimientos" EntitySet="Bancos_Movimientos" />
+          </AssociationSet>
+          <AssociationSet Name="FK_BM_Gastos" Association="marsh_contableModel.FK_BM_Gastos">
+            <End Role="Gastos" EntitySet="Gastos" />
+            <End Role="Bancos_Movimientos" EntitySet="Bancos_Movimientos" />
+          </AssociationSet>
+          <AssociationSet Name="FK_BM_Ingresos" Association="marsh_contableModel.FK_BM_Ingresos">
+            <End Role="Ingresos" EntitySet="Ingresos" />
+            <End Role="Bancos_Movimientos" EntitySet="Bancos_Movimientos" />
+          </AssociationSet>
+          <AssociationSet Name="FK_BM_Tipo_moneda" Association="marsh_contableModel.FK_BM_Tipo_moneda">
+            <End Role="Tipo_moneda" EntitySet="Tipo_moneda" />
+            <End Role="Bancos_Movimientos" EntitySet="Bancos_Movimientos" />
+          </AssociationSet>
+          <AssociationSet Name="FK_BM_Usuarios" Association="marsh_contableModel.FK_BM_Usuarios">
+            <End Role="Usuarios" EntitySet="Usuarios" />
+            <End Role="Bancos_Movimientos" EntitySet="Bancos_Movimientos" />
+          </AssociationSet>
         </EntityContainer>
         <Association Name="FK_Cuentas_Contables_Tipo_moneda">
           <End Type="marsh_contableModel.Tipo_moneda" Role="Tipo_moneda" Multiplicity="1" />
@@ -3587,6 +3906,7 @@
           <NavigationProperty Name="Usuarios" Relationship="marsh_contableModel.fk_Ingresos_Usuarios1" FromRole="Ingresos" ToRole="Usuarios" />
           <NavigationProperty Name="Gestion_P_detalle" Relationship="marsh_contableModel.FK_GP_Detalle_Ingresos" FromRole="Ingresos" ToRole="Gestion_P_detalle" />
           <NavigationProperty Name="Facturas" Relationship="marsh_contableModel.fk_Ingresos_Facturas1" FromRole="Ingresos" ToRole="Facturas" />
+          <NavigationProperty Name="Bancos_Movimientos" Relationship="marsh_contableModel.FK_BM_Ingresos" FromRole="Ingresos" ToRole="Bancos_Movimientos" />
         </EntityType>
         <Association Name="fk_Facturas_Clientes10">
           <End Type="marsh_contableModel.Clientes" Role="Clientes" Multiplicity="1" />
@@ -3819,6 +4139,7 @@
           <NavigationProperty Name="Gestion_P_detalle" Relationship="marsh_contableModel.FK_GP_Detalle_Facturas" FromRole="Facturas" ToRole="Gestion_P_detalle" />
           <NavigationProperty Name="Ingresos" Relationship="marsh_contableModel.fk_Ingresos_Facturas1" FromRole="Facturas" ToRole="Ingresos" />
           <NavigationProperty Name="Usuarios" Relationship="marsh_contableModel.FK_Usuarios_Factura" FromRole="Facturas" ToRole="Usuarios" />
+          <NavigationProperty Name="Bancos_Movimientos" Relationship="marsh_contableModel.FK_BM_Facturas" FromRole="Facturas" ToRole="Bancos_Movimientos" />
         </EntityType>
         <Association Name="fk_Facturas_Clientes1">
           <End Type="marsh_contableModel.Clientes" Role="Clientes" Multiplicity="1" />
@@ -4045,6 +4366,221 @@
               <PropertyRef Name="Usuario_id" />
             </Principal>
             <Dependent Role="MultiFactor">
+              <PropertyRef Name="Usuarios_Usuario_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <EntityType Name="Bancos">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="nombre_banco" Type="String" Nullable="false" MaxLength="150" FixedLength="false" Unicode="false" />
+          <Property Name="numero_cuenta" Type="String" Nullable="false" MaxLength="30" FixedLength="false" Unicode="false" />
+          <Property Name="tipo_cuenta" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="moneda_simbolo" Type="String" MaxLength="5" FixedLength="false" Unicode="false" />
+          <Property Name="saldo_inicial" Type="Decimal" Nullable="false" Precision="18" Scale="2" />
+          <Property Name="saldo_actual" Type="Decimal" Nullable="false" Precision="18" Scale="2" />
+          <Property Name="fecha_apertura" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="fecha_actualizacion" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="estado" Type="Int16" Nullable="false" />
+          <Property Name="Tipo_moneda_id" Type="Int32" Nullable="false" />
+          <Property Name="Centro_Costos_id" Type="Int32" />
+          <Property Name="Categoria_presupuestaria_id" Type="Int32" />
+          <Property Name="Empresa_Emp_id" Type="Int32" Nullable="false" />
+          <Property Name="Usuarios_Usuario_id" Type="Int32" Nullable="false" />
+          <NavigationProperty Name="Categoria_presupuestaria" Relationship="marsh_contableModel.FK_Bancos_Categoria_presupuestaria" FromRole="Bancos" ToRole="Categoria_presupuestaria" />
+          <NavigationProperty Name="Centro_Costos" Relationship="marsh_contableModel.FK_Bancos_Centro_Costos" FromRole="Bancos" ToRole="Centro_Costos" />
+          <NavigationProperty Name="Empresa" Relationship="marsh_contableModel.FK_Bancos_Empresa" FromRole="Bancos" ToRole="Empresa" />
+          <NavigationProperty Name="Tipo_moneda" Relationship="marsh_contableModel.FK_Bancos_Tipo_moneda" FromRole="Bancos" ToRole="Tipo_moneda" />
+          <NavigationProperty Name="Usuarios" Relationship="marsh_contableModel.FK_Bancos_Usuarios" FromRole="Bancos" ToRole="Usuarios" />
+          <NavigationProperty Name="Bancos_Movimientos" Relationship="marsh_contableModel.FK_BM_Bancos" FromRole="Bancos" ToRole="Bancos_Movimientos" />
+        </EntityType>
+        <EntityType Name="Bancos_Movimientos">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="Bancos_id" Type="Int32" Nullable="false" />
+          <Property Name="tipo_movimiento" Type="Int16" Nullable="false" />
+          <Property Name="descripcion" Type="String" Nullable="false" MaxLength="250" FixedLength="false" Unicode="false" />
+          <Property Name="monto" Type="Decimal" Nullable="false" Precision="18" Scale="2" />
+          <Property Name="saldo_anterior" Type="Decimal" Nullable="false" Precision="18" Scale="2" />
+          <Property Name="saldo_posterior" Type="Decimal" Nullable="false" Precision="18" Scale="2" />
+          <Property Name="mes" Type="Int16" Nullable="false" />
+          <Property Name="anio" Type="String" Nullable="false" MaxLength="4" FixedLength="false" Unicode="false" />
+          <Property Name="fecha_movimiento" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="referencia" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="Centro_Costos_id" Type="Int32" />
+          <Property Name="Categoria_presupuestaria_id" Type="Int32" />
+          <Property Name="Tipo_moneda_id" Type="Int32" Nullable="false" />
+          <Property Name="Gastos_id" Type="Int32" />
+          <Property Name="Ingresos_id" Type="Int32" />
+          <Property Name="Facturas_id" Type="Int32" />
+          <Property Name="Usuarios_Usuario_id" Type="Int32" Nullable="false" />
+          <Property Name="Observaciones" Type="String" MaxLength="250" FixedLength="false" Unicode="false" />
+          <Property Name="activo" Type="Int16" Nullable="false" />
+          <NavigationProperty Name="Bancos" Relationship="marsh_contableModel.FK_BM_Bancos" FromRole="Bancos_Movimientos" ToRole="Bancos" />
+          <NavigationProperty Name="Categoria_presupuestaria" Relationship="marsh_contableModel.FK_BM_Categoria_presupuestaria" FromRole="Bancos_Movimientos" ToRole="Categoria_presupuestaria" />
+          <NavigationProperty Name="Centro_Costos" Relationship="marsh_contableModel.FK_BM_Centro_Costos" FromRole="Bancos_Movimientos" ToRole="Centro_Costos" />
+          <NavigationProperty Name="Facturas" Relationship="marsh_contableModel.FK_BM_Facturas" FromRole="Bancos_Movimientos" ToRole="Facturas" />
+          <NavigationProperty Name="Gastos" Relationship="marsh_contableModel.FK_BM_Gastos" FromRole="Bancos_Movimientos" ToRole="Gastos" />
+          <NavigationProperty Name="Ingresos" Relationship="marsh_contableModel.FK_BM_Ingresos" FromRole="Bancos_Movimientos" ToRole="Ingresos" />
+          <NavigationProperty Name="Tipo_moneda" Relationship="marsh_contableModel.FK_BM_Tipo_moneda" FromRole="Bancos_Movimientos" ToRole="Tipo_moneda" />
+          <NavigationProperty Name="Usuarios" Relationship="marsh_contableModel.FK_BM_Usuarios" FromRole="Bancos_Movimientos" ToRole="Usuarios" />
+        </EntityType>
+        <Association Name="FK_Bancos_Categoria_presupuestaria">
+          <End Type="marsh_contableModel.Categoria_presupuestaria" Role="Categoria_presupuestaria" Multiplicity="0..1" />
+          <End Type="marsh_contableModel.Bancos" Role="Bancos" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Categoria_presupuestaria">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="Bancos">
+              <PropertyRef Name="Categoria_presupuestaria_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Bancos_Centro_Costos">
+          <End Type="marsh_contableModel.Centro_Costos" Role="Centro_Costos" Multiplicity="0..1" />
+          <End Type="marsh_contableModel.Bancos" Role="Bancos" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Centro_Costos">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="Bancos">
+              <PropertyRef Name="Centro_Costos_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Bancos_Empresa">
+          <End Type="marsh_contableModel.Empresa" Role="Empresa" Multiplicity="1" />
+          <End Type="marsh_contableModel.Bancos" Role="Bancos" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Empresa">
+              <PropertyRef Name="Emp_id" />
+            </Principal>
+            <Dependent Role="Bancos">
+              <PropertyRef Name="Empresa_Emp_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Bancos_Tipo_moneda">
+          <End Type="marsh_contableModel.Tipo_moneda" Role="Tipo_moneda" Multiplicity="1" />
+          <End Type="marsh_contableModel.Bancos" Role="Bancos" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Tipo_moneda">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="Bancos">
+              <PropertyRef Name="Tipo_moneda_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Bancos_Usuarios">
+          <End Type="marsh_contableModel.Usuarios" Role="Usuarios" Multiplicity="1" />
+          <End Type="marsh_contableModel.Bancos" Role="Bancos" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Usuarios">
+              <PropertyRef Name="Usuario_id" />
+            </Principal>
+            <Dependent Role="Bancos">
+              <PropertyRef Name="Usuarios_Usuario_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_BM_Bancos">
+          <End Type="marsh_contableModel.Bancos" Role="Bancos" Multiplicity="1" />
+          <End Type="marsh_contableModel.Bancos_Movimientos" Role="Bancos_Movimientos" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Bancos">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="Bancos_Movimientos">
+              <PropertyRef Name="Bancos_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_BM_Categoria_presupuestaria">
+          <End Type="marsh_contableModel.Categoria_presupuestaria" Role="Categoria_presupuestaria" Multiplicity="0..1" />
+          <End Type="marsh_contableModel.Bancos_Movimientos" Role="Bancos_Movimientos" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Categoria_presupuestaria">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="Bancos_Movimientos">
+              <PropertyRef Name="Categoria_presupuestaria_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_BM_Centro_Costos">
+          <End Type="marsh_contableModel.Centro_Costos" Role="Centro_Costos" Multiplicity="0..1" />
+          <End Type="marsh_contableModel.Bancos_Movimientos" Role="Bancos_Movimientos" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Centro_Costos">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="Bancos_Movimientos">
+              <PropertyRef Name="Centro_Costos_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_BM_Facturas">
+          <End Type="marsh_contableModel.Facturas" Role="Facturas" Multiplicity="0..1" />
+          <End Type="marsh_contableModel.Bancos_Movimientos" Role="Bancos_Movimientos" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Facturas">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="Bancos_Movimientos">
+              <PropertyRef Name="Facturas_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_BM_Gastos">
+          <End Type="marsh_contableModel.Gastos" Role="Gastos" Multiplicity="0..1" />
+          <End Type="marsh_contableModel.Bancos_Movimientos" Role="Bancos_Movimientos" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Gastos">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="Bancos_Movimientos">
+              <PropertyRef Name="Gastos_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_BM_Ingresos">
+          <End Type="marsh_contableModel.Ingresos" Role="Ingresos" Multiplicity="0..1" />
+          <End Type="marsh_contableModel.Bancos_Movimientos" Role="Bancos_Movimientos" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Ingresos">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="Bancos_Movimientos">
+              <PropertyRef Name="Ingresos_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_BM_Tipo_moneda">
+          <End Type="marsh_contableModel.Tipo_moneda" Role="Tipo_moneda" Multiplicity="1" />
+          <End Type="marsh_contableModel.Bancos_Movimientos" Role="Bancos_Movimientos" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Tipo_moneda">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="Bancos_Movimientos">
+              <PropertyRef Name="Tipo_moneda_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_BM_Usuarios">
+          <End Type="marsh_contableModel.Usuarios" Role="Usuarios" Multiplicity="1" />
+          <End Type="marsh_contableModel.Bancos_Movimientos" Role="Bancos_Movimientos" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Usuarios">
+              <PropertyRef Name="Usuario_id" />
+            </Principal>
+            <Dependent Role="Bancos_Movimientos">
               <PropertyRef Name="Usuarios_Usuario_id" />
             </Dependent>
           </ReferentialConstraint>
@@ -4707,6 +5243,53 @@
                 <ScalarProperty Name="Usuarios_Usuario_id" ColumnName="Usuarios_Usuario_id" />
                 <ScalarProperty Name="Fecha" ColumnName="Fecha" />
                 <ScalarProperty Name="OTP" ColumnName="OTP" />
+                <ScalarProperty Name="id" ColumnName="id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Bancos">
+            <EntityTypeMapping TypeName="marsh_contableModel.Bancos">
+              <MappingFragment StoreEntitySet="Bancos">
+                <ScalarProperty Name="Usuarios_Usuario_id" ColumnName="Usuarios_Usuario_id" />
+                <ScalarProperty Name="Empresa_Emp_id" ColumnName="Empresa_Emp_id" />
+                <ScalarProperty Name="Categoria_presupuestaria_id" ColumnName="Categoria_presupuestaria_id" />
+                <ScalarProperty Name="Centro_Costos_id" ColumnName="Centro_Costos_id" />
+                <ScalarProperty Name="Tipo_moneda_id" ColumnName="Tipo_moneda_id" />
+                <ScalarProperty Name="estado" ColumnName="estado" />
+                <ScalarProperty Name="fecha_actualizacion" ColumnName="fecha_actualizacion" />
+                <ScalarProperty Name="fecha_apertura" ColumnName="fecha_apertura" />
+                <ScalarProperty Name="saldo_actual" ColumnName="saldo_actual" />
+                <ScalarProperty Name="saldo_inicial" ColumnName="saldo_inicial" />
+                <ScalarProperty Name="moneda_simbolo" ColumnName="moneda_simbolo" />
+                <ScalarProperty Name="tipo_cuenta" ColumnName="tipo_cuenta" />
+                <ScalarProperty Name="numero_cuenta" ColumnName="numero_cuenta" />
+                <ScalarProperty Name="nombre_banco" ColumnName="nombre_banco" />
+                <ScalarProperty Name="id" ColumnName="id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Bancos_Movimientos">
+            <EntityTypeMapping TypeName="marsh_contableModel.Bancos_Movimientos">
+              <MappingFragment StoreEntitySet="Bancos_Movimientos">
+                <ScalarProperty Name="activo" ColumnName="activo" />
+                <ScalarProperty Name="Observaciones" ColumnName="Observaciones" />
+                <ScalarProperty Name="Usuarios_Usuario_id" ColumnName="Usuarios_Usuario_id" />
+                <ScalarProperty Name="Facturas_id" ColumnName="Facturas_id" />
+                <ScalarProperty Name="Ingresos_id" ColumnName="Ingresos_id" />
+                <ScalarProperty Name="Gastos_id" ColumnName="Gastos_id" />
+                <ScalarProperty Name="Tipo_moneda_id" ColumnName="Tipo_moneda_id" />
+                <ScalarProperty Name="Categoria_presupuestaria_id" ColumnName="Categoria_presupuestaria_id" />
+                <ScalarProperty Name="Centro_Costos_id" ColumnName="Centro_Costos_id" />
+                <ScalarProperty Name="referencia" ColumnName="referencia" />
+                <ScalarProperty Name="fecha_movimiento" ColumnName="fecha_movimiento" />
+                <ScalarProperty Name="anio" ColumnName="anio" />
+                <ScalarProperty Name="mes" ColumnName="mes" />
+                <ScalarProperty Name="saldo_posterior" ColumnName="saldo_posterior" />
+                <ScalarProperty Name="saldo_anterior" ColumnName="saldo_anterior" />
+                <ScalarProperty Name="monto" ColumnName="monto" />
+                <ScalarProperty Name="descripcion" ColumnName="descripcion" />
+                <ScalarProperty Name="tipo_movimiento" ColumnName="tipo_movimiento" />
+                <ScalarProperty Name="Bancos_id" ColumnName="Bancos_id" />
                 <ScalarProperty Name="id" ColumnName="id" />
               </MappingFragment>
             </EntityTypeMapping>

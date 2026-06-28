@@ -20,6 +20,7 @@ namespace marsh_contable.Models
             this.Usuarios = new HashSet<Usuarios>();
             this.Padron = new HashSet<Padron>();
             this.AuditaTabla = new HashSet<AuditaTabla>();
+            this.Bancos = new HashSet<Bancos>();
         }
     
         public int Emp_id { get; set; }
@@ -61,5 +62,7 @@ namespace marsh_contable.Models
         public virtual Provincia Provincia { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<AuditaTabla> AuditaTabla { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<Bancos> Bancos { get; set; }
     }
 }

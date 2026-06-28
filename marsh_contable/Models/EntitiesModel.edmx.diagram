@@ -131,6 +131,21 @@
         <EntityTypeShape EntityType="marsh_contableModel.MultiFactor" Width="1.5" PointX="3.75" PointY="50.5" />
         <AssociationConnector Association="marsh_contableModel.FK_AuditaTabla_Empresa" />
         <AssociationConnector Association="marsh_contableModel.FK_MultiFactor_Usuarios" />
+        <EntityTypeShape EntityType="marsh_contableModel.Bancos" Width="1.5" PointX="9" PointY="36.625" />
+        <EntityTypeShape EntityType="marsh_contableModel.Bancos_Movimientos" Width="1.5" PointX="19.125" PointY="30.375" />
+        <AssociationConnector Association="marsh_contableModel.FK_Bancos_Categoria_presupuestaria" />
+        <AssociationConnector Association="marsh_contableModel.FK_Bancos_Centro_Costos" />
+        <AssociationConnector Association="marsh_contableModel.FK_Bancos_Empresa" />
+        <AssociationConnector Association="marsh_contableModel.FK_Bancos_Tipo_moneda" />
+        <AssociationConnector Association="marsh_contableModel.FK_Bancos_Usuarios" />
+        <AssociationConnector Association="marsh_contableModel.FK_BM_Bancos" />
+        <AssociationConnector Association="marsh_contableModel.FK_BM_Categoria_presupuestaria" />
+        <AssociationConnector Association="marsh_contableModel.FK_BM_Centro_Costos" />
+        <AssociationConnector Association="marsh_contableModel.FK_BM_Facturas" />
+        <AssociationConnector Association="marsh_contableModel.FK_BM_Gastos" />
+        <AssociationConnector Association="marsh_contableModel.FK_BM_Ingresos" />
+        <AssociationConnector Association="marsh_contableModel.FK_BM_Tipo_moneda" />
+        <AssociationConnector Association="marsh_contableModel.FK_BM_Usuarios" />
         </Diagram>
     </edmx:Diagrams>
   </edmx:Designer>

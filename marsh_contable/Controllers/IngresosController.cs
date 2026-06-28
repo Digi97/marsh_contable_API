@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
@@ -460,5 +460,83 @@ namespace marsh_contable.Controllers
                 return oR;
             }
         }
+
+
+        private bool validacionPresupuesto(int pid = 0, double gtotal = 0)
+        {
+            General tool = new General();
+            try
+            {
+                using (var ctx = new Models.EntitiesModel())
+                {
+                    ctx.Configuration.LazyLoadingEnabled = false;
+                    ctx.Configuration.ProxyCreationEnabled = false;
+
+                    DateTime currentDate = DateTime.Now;
+
+                    // Buscar presupuesto vigente
+                    Models.Gestion_Presupuestaria gpExist = ctx.Gestion_Presupuestaria
+                        .FirstOrDefault(u => currentDate >= u.periodo_inicio &&
+                                             currentDate <= u.periodo_fin &&
+                                             u.id == pid);
+
+                    if (gpExist == null)
+                        throw new Exception("gestion_presupuestaria_for_current_period_dont_exist");
+
+                    string Symbol = ctx.Tipo_moneda
+                        .Where(t => t.id == gpExist.Tipo_moneda_id)
+                        .Select(t => t.Simbolo)
+                        .FirstOrDefault() ?? "₡";
+
+
+                    // Sumar montos ya ejecutados en gestion_p_detalle
+
+                    int anioActual = currentDate.Year;
+                    int mesActual = currentDate.Month;
+
+                    double montoEjecutado = (from d in ctx.Gestion_P_detalle
+                                             join gp in ctx.Gestion_Presupuestaria
+                                                 on d.Gestion_Presupuestaria_id equals gp.id
+                                             where d.Gestion_Presupuestaria_id == pid
+                                                && d.activo == 1
+                                                && gp.anio_presupuesto == anioActual.ToString()
+                                                && currentDate >= gp.periodo_inicio
+                                                && currentDate <= gp.periodo_fin
+                                                && d.Fecha_registro.Month == mesActual
+                                                && d.Fecha_registro.Year == anioActual
+                                             select d.Monto)
+                                             .DefaultIfEmpty(0)
+                                             .Sum();
+
+
+                    decimal montoMensual = ctx.Gestion_P_Anio
+                        .Where(d => d.Gestion_Presupuestaria_id == pid && d.anio_presupuesto == currentDate.Year.ToString() && d.mes == currentDate.Month)
+                        .Select(d => d.monto)
+                        .DefaultIfEmpty(0)
+                        .Sum();
+
+
+
+                    double montoAprobado = (double)montoMensual; //MONTO APROBADO PARA EL MES ACTUAL //gpExist.monto_aprobado;
+                    double montoConNuevoGasto = montoEjecutado + gtotal;
+
+                    // Validar que el nuevo gasto no exceda el presupuesto
+                    if (montoConNuevoGasto >= montoAprobado)
+                    {
+                        double disponible = montoAprobado - montoEjecutado;
+                        throw new Exception(
+                            $"presupuesto_excedido_monto_aprobado_{montoAprobado}_ejecutado_{montoEjecutado}_disponible_{disponible}"
+                        );
+                    }
+
+                }
+                return true;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
     }
 }

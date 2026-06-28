@@ -25,6 +25,8 @@ namespace marsh_contable.Models
             this.Facturas = new HashSet<Facturas>();
             this.Categoria_presupuestaria = new HashSet<Categoria_presupuestaria>();
             this.Centro_Costos = new HashSet<Centro_Costos>();
+            this.Bancos = new HashSet<Bancos>();
+            this.Bancos_Movimientos = new HashSet<Bancos_Movimientos>();
         }
     
         public int id { get; set; }
@@ -48,5 +50,9 @@ namespace marsh_contable.Models
         public virtual ICollection<Categoria_presupuestaria> Categoria_presupuestaria { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Centro_Costos> Centro_Costos { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<Bancos> Bancos { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<Bancos_Movimientos> Bancos_Movimientos { get; set; }
     }
 }

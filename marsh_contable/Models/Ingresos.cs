@@ -20,6 +20,7 @@ namespace marsh_contable.Models
             this.Devoluciones = new HashSet<Devoluciones>();
             this.Ingresos_Detalle = new HashSet<Ingresos_Detalle>();
             this.Gestion_P_detalle = new HashSet<Gestion_P_detalle>();
+            this.Bancos_Movimientos = new HashSet<Bancos_Movimientos>();
         }
     
         public int id { get; set; }
@@ -50,5 +51,7 @@ namespace marsh_contable.Models
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Gestion_P_detalle> Gestion_P_detalle { get; set; }
         public virtual Facturas Facturas { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<Bancos_Movimientos> Bancos_Movimientos { get; set; }
     }
 }

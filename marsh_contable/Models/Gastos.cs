@@ -20,6 +20,7 @@ namespace marsh_contable.Models
             this.Cuenta_Encabezado = new HashSet<Cuenta_Encabezado>();
             this.Gastos_Detalles = new HashSet<Gastos_Detalles>();
             this.Gestion_P_detalle = new HashSet<Gestion_P_detalle>();
+            this.Bancos_Movimientos = new HashSet<Bancos_Movimientos>();
         }
     
         public int id { get; set; }
@@ -50,7 +51,8 @@ namespace marsh_contable.Models
         public virtual Tipo_moneda Tipo_moneda { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Gestion_P_detalle> Gestion_P_detalle { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<Bancos_Movimientos> Bancos_Movimientos { get; set; }
         public int presupuesto_id { get; set; }
-
     }
 }

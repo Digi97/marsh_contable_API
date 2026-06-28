@@ -81,8 +81,7 @@ namespace marsh_contable.Controllers
 
                     DateTime currentDate = DateTime.Now;
 
-                    gpExist = ctx.Gestion_Presupuestaria
-    .FirstOrDefault(u => currentDate >= u.periodo_inicio && currentDate <= u.periodo_fin);
+                    gpExist = ctx.Gestion_Presupuestaria.FirstOrDefault(u => currentDate >= u.periodo_inicio && currentDate <= u.periodo_fin && u.id == model.presupuesto_id);
                     if (gpExist == null)
                     {
                         throw new Exception("gestion_presupuestaria_for_current_period_dont_exist");
@@ -110,6 +109,9 @@ namespace marsh_contable.Controllers
                     ctx.SaveChanges();
 
 
+                    gpExist.monto_ejecutado = gpExist.monto_ejecutado + model.Total;
+                    ctx.SaveChanges();
+                    //actualizamos el monto ejecutado para los reportes
                     id = g.id;
                     GastosDetallesController gastosDetalles = new GastosDetallesController();
                     foreach (var detalles in model.Gastos_Detalles)
@@ -126,7 +128,7 @@ namespace marsh_contable.Controllers
 
 
 
-                }
+                } 
 
                 Models.Gestion_P_detalle detalle = new Models.Gestion_P_detalle()
                 {
@@ -148,6 +150,17 @@ namespace marsh_contable.Controllers
                 };
 
 
+
+                BancoController banco = new BancoController();
+                var bmovimiento = banco.RegistrarMovimientoPorGasto(model.Categoria_gasto_id, (int)model.Tipo_moneda_id, gpExist.Centro_Costos_id, id, g.Total, g.Usuarios_Usuario_id, "Registro de Gasto");
+
+                if (bmovimiento.CodeStatus != HttpStatusCode.OK)
+                {
+                    throw new Exception(bmovimiento.Message);
+                }
+
+
+
                 GestionPDetalleController detalleGestion = new GestionPDetalleController();
                 var response = detalleGestion.CreateGestionPDetalle(detalle);
 
@@ -156,7 +169,7 @@ namespace marsh_contable.Controllers
                     throw new Exception(response.Message);
                 }
 
-
+     
 
                 oR.CodeStatus = HttpStatusCode.OK;
                 oR.Data = id;
@@ -213,13 +226,20 @@ namespace marsh_contable.Controllers
                     throw new Exception("currency_is_required");
                 }
 
+                if (model.presupuesto_id == 0)
+                {
+                    throw new Exception("presupuesto_not defined");
+                }
+
+                validacionPresupuesto(model.presupuesto_id, model.Total); //validamos el presupuesto
+
+
                 using (var ctx = new Models.EntitiesModel())
                 {
 
 
                     DateTime currentDate = DateTime.Now;
-                    gpExist = ctx.Gestion_Presupuestaria
-      .FirstOrDefault(u => currentDate >= u.periodo_inicio && currentDate <= u.periodo_fin);
+                    gpExist = ctx.Gestion_Presupuestaria.FirstOrDefault(u => currentDate >= u.periodo_inicio && currentDate <= u.periodo_fin);
                     if (gpExist == null)
                     {
                         throw new Exception("gestion_presupuestaria_for_current_period_dont_exist");
@@ -266,6 +286,14 @@ namespace marsh_contable.Controllers
                     Observaciones = $"Id: {g.id} | Subtotal: {g.Subtotal} | Impuesto: {g.Impuesto} | Descuento: {g.Descuento}",
                     activo = 1
                 };
+
+                BancoController banco = new BancoController();
+                var bmovimiento = banco.EditarMovimientoPorGasto(model.Categoria_gasto_id, (int)model.Tipo_moneda_id, gpExist.Centro_Costos_id, id, g.Total, g.Usuarios_Usuario_id, "Registro de Gasto");
+
+                if (bmovimiento.CodeStatus != HttpStatusCode.OK)
+                {
+                    throw new Exception(bmovimiento.Message);
+                }
 
 
                 GestionPDetalleController detalleGestion = new GestionPDetalleController();
