@@ -52,10 +52,10 @@ namespace marsh_contable.Models
         public virtual ICollection<Gestion_P_detalle> Gestion_P_detalle { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Bancos_Movimientos> Bancos_Movimientos { get; set; }
+        public virtual Condicion_venta Condicion_venta { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Cuenta_Encabezado> Cuenta_Encabezado { get; set; }
-        public virtual Condicion_venta Condicion_venta { get; set; }
-        
-        public int proveedor_id { get; set; }
+        public string presupuesto_id { get; set; }
+        public int dias_credito { get; set; }
     }
 }

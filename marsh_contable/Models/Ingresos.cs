@@ -55,8 +55,9 @@ namespace marsh_contable.Models
         public virtual Facturas Facturas { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Bancos_Movimientos> Bancos_Movimientos { get; set; }
+        public virtual Condicion_venta Condicion_venta { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Cuenta_Encabezado> Cuenta_Encabezado { get; set; }
-        public virtual Condicion_venta Condicion_venta { get; set; }
+        public int dias_credito { get; set; }
     }
 }

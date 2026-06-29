@@ -551,17 +551,20 @@ namespace marsh_contable.Controllers
                 }
                 using (var ctx = new Models.EntitiesModel())
                 {
+
+                    DateTime currenDate = DateTime.Now;
                     var resultado = (from gp in ctx.Gestion_Presupuestaria
                                      join cc in ctx.Centro_Costos on gp.Centro_Costos_id equals cc.id
                                      join cp in ctx.Categoria_presupuestaria on gp.Categoria_presupuestaria_id equals cp.id
                                      join tm in ctx.Tipo_moneda on gp.Tipo_moneda_id equals tm.id
-                                     where gp.anio_presupuesto == anio_presupuesto
+                                     join gpa in ctx.Gestion_P_Anio on new { id = gp.id, gp.anio_presupuesto } equals new { id = gpa.Gestion_Presupuestaria_id, gpa.anio_presupuesto }
+                                     where gp.anio_presupuesto == anio_presupuesto && gpa.mes == currenDate.Month
                                      select new
                                      {
                                          id = gp.id+"_"+gp.Categoria_presupuestaria_id+"_"+ gp.Centro_Costos_id,
                                          gp.nombre,
-                                         descripcion = gp.nombre + " ( " + cp.nombre + "-" + cc.Nombre + " ) ",
-                                         monto = gp.monto_aprobado,
+                                         descripcion = gp.codigo + " ( " + cp.nombre + "-" + cc.Nombre + " ) ",
+                                         monto = gpa.monto,//gp.monto_aprobado,
                                          simbolo = tm.Simbolo
                                      }).ToList();
 

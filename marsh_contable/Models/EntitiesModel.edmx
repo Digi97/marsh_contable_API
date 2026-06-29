@@ -221,22 +221,7 @@
           <Property Name="Gastos_id" Type="int" />
           <Property Name="Ingresos_id" Type="int" />
           <Property Name="Proveedor_id" Type="int" />
-        </EntityType>
-        <EntityType Name="Cuentas_Contables">
-          <Key>
-            <PropertyRef Name="id" />
-          </Key>
-          <Property Name="id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
-          <Property Name="Codigo" Type="varchar" MaxLength="100" Nullable="false" />
-          <Property Name="Nombre" Type="varchar" MaxLength="200" Nullable="false" />
-          <Property Name="Tipo_Cuenta_Contable_id" Type="int" Nullable="false" />
-          <Property Name="Usuarios_Usuario_id" Type="int" Nullable="false" />
-          <Property Name="Estado" Type="smallint" Nullable="false" />
-          <Property Name="Saldo_inicial" Type="float" Nullable="false" />
-          <Property Name="Saldo_actual" Type="float" Nullable="false" />
-          <Property Name="Fecha_Creacion" Type="datetime" Nullable="false" />
-          <Property Name="Fecha_actualizacion" Type="datetime" Nullable="false" />
-          <Property Name="Tipo_moneda_id" Type="int" Nullable="false" />
+          <Property Name="Categoria_presupuestaria_id" Type="int" />
         </EntityType>
         <EntityType Name="Devoluciones">
           <Key>
@@ -602,14 +587,6 @@
           <Property Name="Tipo_moneda_id" Type="int" Nullable="false" />
           <Property Name="Usuarios_Usuario_id" Type="int" Nullable="false" />
         </EntityType>
-        <EntityType Name="Tipo_Cuenta_Contable">
-          <Key>
-            <PropertyRef Name="id" />
-          </Key>
-          <Property Name="id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
-          <Property Name="Nombre" Type="varchar" MaxLength="100" Nullable="false" />
-          <Property Name="Naturaleza" Type="varchar" MaxLength="100" Nullable="false" />
-        </EntityType>
         <EntityType Name="Tipo_cuentas">
           <Key>
             <PropertyRef Name="id" />
@@ -949,18 +926,6 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <Association Name="FK_CE_Cuentas_Contables">
-          <End Role="Cuentas_Contables" Type="Self.Cuentas_Contables" Multiplicity="1" />
-          <End Role="Cuenta_Encabezado" Type="Self.Cuenta_Encabezado" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="Cuentas_Contables">
-              <PropertyRef Name="id" />
-            </Principal>
-            <Dependent Role="Cuenta_Encabezado">
-              <PropertyRef Name="Cuentas_Contables_id" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
         <Association Name="FK_CE_Facturas">
           <End Role="Facturas" Type="Self.Facturas" Multiplicity="0..1" />
           <End Role="Cuenta_Encabezado" Type="Self.Cuenta_Encabezado" Multiplicity="*" />
@@ -1173,39 +1138,15 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <Association Name="fk_Cuentas_Contables_Tipo_Cuenta_Contable1">
-          <End Role="Tipo_Cuenta_Contable" Type="Self.Tipo_Cuenta_Contable" Multiplicity="1" />
-          <End Role="Cuentas_Contables" Type="Self.Cuentas_Contables" Multiplicity="*" />
+        <Association Name="FK_Cuenta_Encabezado_Categoria_Presupuestaria">
+          <End Role="Categoria_presupuestaria" Type="Self.Categoria_presupuestaria" Multiplicity="0..1" />
+          <End Role="Cuenta_Encabezado" Type="Self.Cuenta_Encabezado" Multiplicity="*" />
           <ReferentialConstraint>
-            <Principal Role="Tipo_Cuenta_Contable">
+            <Principal Role="Categoria_presupuestaria">
               <PropertyRef Name="id" />
             </Principal>
-            <Dependent Role="Cuentas_Contables">
-              <PropertyRef Name="Tipo_Cuenta_Contable_id" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
-        <Association Name="FK_Cuentas_Contables_Tipo_moneda">
-          <End Role="Tipo_moneda" Type="Self.Tipo_moneda" Multiplicity="1" />
-          <End Role="Cuentas_Contables" Type="Self.Cuentas_Contables" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="Tipo_moneda">
-              <PropertyRef Name="id" />
-            </Principal>
-            <Dependent Role="Cuentas_Contables">
-              <PropertyRef Name="Tipo_moneda_id" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
-        <Association Name="fk_Cuentas_Contables_Usuarios1">
-          <End Role="Usuarios" Type="Self.Usuarios" Multiplicity="1" />
-          <End Role="Cuentas_Contables" Type="Self.Cuentas_Contables" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="Usuarios">
-              <PropertyRef Name="Usuario_id" />
-            </Principal>
-            <Dependent Role="Cuentas_Contables">
-              <PropertyRef Name="Usuarios_Usuario_id" />
+            <Dependent Role="Cuenta_Encabezado">
+              <PropertyRef Name="Categoria_presupuestaria_id" />
             </Dependent>
           </ReferentialConstraint>
         </Association>
@@ -1879,7 +1820,6 @@
           <EntitySet Name="Condicion_venta" EntityType="Self.Condicion_venta" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Cuenta_Detalle" EntityType="Self.Cuenta_Detalle" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Cuenta_Encabezado" EntityType="Self.Cuenta_Encabezado" Schema="dbo" store:Type="Tables" />
-          <EntitySet Name="Cuentas_Contables" EntityType="Self.Cuentas_Contables" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Devoluciones" EntityType="Self.Devoluciones" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Distrito" EntityType="Self.Distrito" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Empresa" EntityType="Self.Empresa" Schema="dbo" store:Type="Tables" />
@@ -1906,7 +1846,6 @@
           <EntitySet Name="Telefonos" EntityType="Self.Telefonos" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Tipo_archivo" EntityType="Self.Tipo_archivo" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Tipo_cambio" EntityType="Self.Tipo_cambio" Schema="dbo" store:Type="Tables" />
-          <EntitySet Name="Tipo_Cuenta_Contable" EntityType="Self.Tipo_Cuenta_Contable" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Tipo_cuentas" EntityType="Self.Tipo_cuentas" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Tipo_documento" EntityType="Self.Tipo_documento" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="tipo_identificacion" EntityType="Self.tipo_identificacion" Schema="dbo" store:Type="Tables" />
@@ -2005,10 +1944,6 @@
             <End Role="Clientes" EntitySet="Clientes" />
             <End Role="Cuenta_Encabezado" EntitySet="Cuenta_Encabezado" />
           </AssociationSet>
-          <AssociationSet Name="FK_CE_Cuentas_Contables" Association="Self.FK_CE_Cuentas_Contables">
-            <End Role="Cuentas_Contables" EntitySet="Cuentas_Contables" />
-            <End Role="Cuenta_Encabezado" EntitySet="Cuenta_Encabezado" />
-          </AssociationSet>
           <AssociationSet Name="FK_CE_Facturas" Association="Self.FK_CE_Facturas">
             <End Role="Facturas" EntitySet="Facturas" />
             <End Role="Cuenta_Encabezado" EntitySet="Cuenta_Encabezado" />
@@ -2077,17 +2012,9 @@
             <End Role="Condicion_venta" EntitySet="Condicion_venta" />
             <End Role="Ingresos" EntitySet="Ingresos" />
           </AssociationSet>
-          <AssociationSet Name="fk_Cuentas_Contables_Tipo_Cuenta_Contable1" Association="Self.fk_Cuentas_Contables_Tipo_Cuenta_Contable1">
-            <End Role="Tipo_Cuenta_Contable" EntitySet="Tipo_Cuenta_Contable" />
-            <End Role="Cuentas_Contables" EntitySet="Cuentas_Contables" />
-          </AssociationSet>
-          <AssociationSet Name="FK_Cuentas_Contables_Tipo_moneda" Association="Self.FK_Cuentas_Contables_Tipo_moneda">
-            <End Role="Tipo_moneda" EntitySet="Tipo_moneda" />
-            <End Role="Cuentas_Contables" EntitySet="Cuentas_Contables" />
-          </AssociationSet>
-          <AssociationSet Name="fk_Cuentas_Contables_Usuarios1" Association="Self.fk_Cuentas_Contables_Usuarios1">
-            <End Role="Usuarios" EntitySet="Usuarios" />
-            <End Role="Cuentas_Contables" EntitySet="Cuentas_Contables" />
+          <AssociationSet Name="FK_Cuenta_Encabezado_Categoria_Presupuestaria" Association="Self.FK_Cuenta_Encabezado_Categoria_Presupuestaria">
+            <End Role="Categoria_presupuestaria" EntitySet="Categoria_presupuestaria" />
+            <End Role="Cuenta_Encabezado" EntitySet="Cuenta_Encabezado" />
           </AssociationSet>
           <AssociationSet Name="fk_Devoluciones_Ingresos1" Association="Self.fk_Devoluciones_Ingresos1">
             <End Role="Ingresos" EntitySet="Ingresos" />
@@ -2365,6 +2292,7 @@
           <NavigationProperty Name="Tipo_moneda" Relationship="marsh_contableModel.fk_tipo_moneda_cp" FromRole="Categoria_presupuestaria" ToRole="Tipo_moneda" />
           <NavigationProperty Name="Bancos" Relationship="marsh_contableModel.FK_Bancos_Categoria_presupuestaria" FromRole="Categoria_presupuestaria" ToRole="Bancos" />
           <NavigationProperty Name="Bancos_Movimientos" Relationship="marsh_contableModel.FK_BM_Categoria_presupuestaria" FromRole="Categoria_presupuestaria" ToRole="Bancos_Movimientos" />
+          <NavigationProperty Name="Cuenta_Encabezado" Relationship="marsh_contableModel.FK_Cuenta_Encabezado_Categoria_Presupuestaria" FromRole="Categoria_presupuestaria" ToRole="Cuenta_Encabezado" />
         </EntityType>
         <EntityType Name="Centro_Costos">
           <Key>
@@ -2453,27 +2381,7 @@
           <NavigationProperty Name="Facturas" Relationship="marsh_contableModel.fk_Facturas_Condicion_venta1" FromRole="Condicion_venta" ToRole="Facturas" />
           <NavigationProperty Name="Gastos" Relationship="marsh_contableModel.FK_condicion_venta_gasto" FromRole="Condicion_venta" ToRole="Gastos" />
           <NavigationProperty Name="Ingresos" Relationship="marsh_contableModel.FK_condicion_venta_ingreso" FromRole="Condicion_venta" ToRole="Ingresos" />
-        </EntityType>
-        <EntityType Name="Cuentas_Contables">
-          <Key>
-            <PropertyRef Name="id" />
-          </Key>
-          <Property Name="id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
-          <Property Name="Codigo" Type="String" MaxLength="100" FixedLength="false" Unicode="false" Nullable="false" />
-          <Property Name="Nombre" Type="String" MaxLength="200" FixedLength="false" Unicode="false" Nullable="false" />
-          <Property Name="Tipo_Cuenta_Contable_id" Type="Int32" Nullable="false" />
-          <Property Name="Usuarios_Usuario_id" Type="Int32" Nullable="false" />
-          <Property Name="Estado" Type="Int16" Nullable="false" />
-          <Property Name="Saldo_inicial" Type="Double" Nullable="false" />
-          <Property Name="Saldo_actual" Type="Double" Nullable="false" />
-          <Property Name="Fecha_Creacion" Type="DateTime" Nullable="false" Precision="3" />
-          <Property Name="Fecha_actualizacion" Type="DateTime" Nullable="false" Precision="3" />
-          <NavigationProperty Name="Tipo_Cuenta_Contable" Relationship="Self.fk_Cuentas_Contables_Tipo_Cuenta_Contable1" FromRole="Cuentas_Contables" ToRole="Tipo_Cuenta_Contable" />
-          <NavigationProperty Name="Usuarios" Relationship="Self.fk_Cuentas_Contables_Usuarios1" FromRole="Cuentas_Contables" ToRole="Usuarios" />
-          <Property Name="Tipo_moneda_id" Type="Int32" Nullable="false" />
-          <NavigationProperty Name="Tipo_moneda" Relationship="marsh_contableModel.FK_Cuentas_Contables_Tipo_moneda" FromRole="Cuentas_Contables" ToRole="Tipo_moneda" />
-          <NavigationProperty Name="Cuenta_Encabezado" Relationship="marsh_contableModel.FK_CE_Cuentas_Contables" FromRole="Cuentas_Contables" ToRole="Cuenta_Encabezado" />
-        </EntityType>
+          </EntityType>
         <EntityType Name="Devoluciones">
           <Key>
             <PropertyRef Name="id" />
@@ -2578,9 +2486,9 @@
           <NavigationProperty Name="Tipo_moneda" Relationship="marsh_contableModel.FK_Gastos_Tipo_moneda" FromRole="Gastos" ToRole="Tipo_moneda" />
           <NavigationProperty Name="Gestion_P_detalle" Relationship="marsh_contableModel.FK_GP_Detalle_Gastos" FromRole="Gastos" ToRole="Gestion_P_detalle" />
           <NavigationProperty Name="Bancos_Movimientos" Relationship="marsh_contableModel.FK_BM_Gastos" FromRole="Gastos" ToRole="Bancos_Movimientos" />
-          <NavigationProperty Name="Cuenta_Encabezado" Relationship="marsh_contableModel.FK_CE_Gastos" FromRole="Gastos" ToRole="Cuenta_Encabezado" />
           <Property Name="Condicion_venta_id" Type="Int32" />
           <NavigationProperty Name="Condicion_venta" Relationship="marsh_contableModel.FK_condicion_venta_gasto" FromRole="Gastos" ToRole="Condicion_venta" />
+          <NavigationProperty Name="Cuenta_Encabezado" Relationship="marsh_contableModel.FK_CE_Gastos" FromRole="Gastos" ToRole="Cuenta_Encabezado" />
         </EntityType>
         <EntityType Name="Gestion_P_detalle">
           <Key>
@@ -2790,15 +2698,6 @@
           <NavigationProperty Name="Tipo_moneda" Relationship="Self.fk_Tipo_cambio_Tipo_moneda1" FromRole="Tipo_cambio" ToRole="Tipo_moneda" />
           <NavigationProperty Name="Usuarios" Relationship="Self.fk_Tipo_cambio_Usuarios1" FromRole="Tipo_cambio" ToRole="Usuarios" />
         </EntityType>
-        <EntityType Name="Tipo_Cuenta_Contable">
-          <Key>
-            <PropertyRef Name="id" />
-          </Key>
-          <Property Name="id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
-          <Property Name="Nombre" Type="String" MaxLength="100" FixedLength="false" Unicode="false" Nullable="false" />
-          <Property Name="Naturaleza" Type="String" MaxLength="100" FixedLength="false" Unicode="false" Nullable="false" />
-          <NavigationProperty Name="Cuentas_Contables" Relationship="Self.fk_Cuentas_Contables_Tipo_Cuenta_Contable1" FromRole="Tipo_Cuenta_Contable" ToRole="Cuentas_Contables" />
-        </EntityType>
         <EntityType Name="Tipo_cuentas">
           <Key>
             <PropertyRef Name="id" />
@@ -2838,7 +2737,6 @@
           <Property Name="codigo_moneda" Type="String" MaxLength="3" FixedLength="false" Unicode="false" Nullable="false" />
           <Property Name="Nombre" Type="String" MaxLength="45" FixedLength="false" Unicode="false" Nullable="false" />
           <NavigationProperty Name="Tipo_cambio" Relationship="Self.fk_Tipo_cambio_Tipo_moneda1" FromRole="Tipo_moneda" ToRole="Tipo_cambio" />
-          <NavigationProperty Name="Cuentas_Contables" Relationship="marsh_contableModel.FK_Cuentas_Contables_Tipo_moneda" FromRole="Tipo_moneda" ToRole="Cuentas_Contables" />
           <NavigationProperty Name="Gastos" Relationship="marsh_contableModel.FK_Gastos_Tipo_moneda" FromRole="Tipo_moneda" ToRole="Gastos" />
           <Property Name="Simbolo" Type="String" MaxLength="2" FixedLength="false" Unicode="false" />
           <NavigationProperty Name="Ingresos" Relationship="marsh_contableModel.fk_Factura_Tipo_moneda10" FromRole="Tipo_moneda" ToRole="Ingresos" />
@@ -2877,7 +2775,6 @@
           <Property Name="Fec_Actualizacion" Type="DateTime" Precision="3" />
           <Property Name="Fec_Login" Type="DateTime" Precision="3" />
           <NavigationProperty Name="Adjuntos" Relationship="Self.fk_Adjuntos_Usuarios1" FromRole="Usuarios" ToRole="Adjuntos" />
-          <NavigationProperty Name="Cuentas_Contables" Relationship="Self.fk_Cuentas_Contables_Usuarios1" FromRole="Usuarios" ToRole="Cuentas_Contables" />
           <NavigationProperty Name="Empresa" Relationship="Self.fk_Usuario_Empresa1" FromRole="Usuarios" ToRole="Empresa" />
           <NavigationProperty Name="Gastos" Relationship="Self.fk_Gastos_Usuarios1" FromRole="Usuarios" ToRole="Gastos" />
           <NavigationProperty Name="Gestion_Presupuestaria" Relationship="Self.fk_Gestion_Presupuestaria_Usuarios1" FromRole="Usuarios" ToRole="Gestion_Presupuestaria" />
@@ -3078,30 +2975,6 @@
             </Principal>
             <Dependent Role="Codigos_cabys">
               <PropertyRef Name="Impuesto_id" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
-        <Association Name="fk_Cuentas_Contables_Tipo_Cuenta_Contable1">
-          <End Role="Tipo_Cuenta_Contable" Type="Self.Tipo_Cuenta_Contable" Multiplicity="1" />
-          <End Role="Cuentas_Contables" Type="Self.Cuentas_Contables" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="Tipo_Cuenta_Contable">
-              <PropertyRef Name="id" />
-            </Principal>
-            <Dependent Role="Cuentas_Contables">
-              <PropertyRef Name="Tipo_Cuenta_Contable_id" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
-        <Association Name="fk_Cuentas_Contables_Usuarios1">
-          <End Role="Usuarios" Type="Self.Usuarios" Multiplicity="1" />
-          <End Role="Cuentas_Contables" Type="Self.Cuentas_Contables" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="Usuarios">
-              <PropertyRef Name="Usuario_id" />
-            </Principal>
-            <Dependent Role="Cuentas_Contables">
-              <PropertyRef Name="Usuarios_Usuario_id" />
             </Dependent>
           </ReferentialConstraint>
         </Association>
@@ -3336,7 +3209,6 @@
           <EntitySet Name="Codigo_comercial" EntityType="Self.Codigo_comercial" />
           <EntitySet Name="Codigos_cabys" EntityType="Self.Codigos_cabys" />
           <EntitySet Name="Condicion_venta" EntityType="Self.Condicion_venta" />
-          <EntitySet Name="Cuentas_Contables" EntityType="Self.Cuentas_Contables" />
           <EntitySet Name="Devoluciones" EntityType="Self.Devoluciones" />
           <EntitySet Name="Distrito" EntityType="Self.Distrito" />
           <EntitySet Name="Empresa" EntityType="Self.Empresa" />
@@ -3356,7 +3228,6 @@
           <EntitySet Name="Telefonos" EntityType="Self.Telefonos" />
           <EntitySet Name="Tipo_archivo" EntityType="Self.Tipo_archivo" />
           <EntitySet Name="Tipo_cambio" EntityType="Self.Tipo_cambio" />
-          <EntitySet Name="Tipo_Cuenta_Contable" EntityType="Self.Tipo_Cuenta_Contable" />
           <EntitySet Name="Tipo_cuentas" EntityType="Self.Tipo_cuentas" />
           <EntitySet Name="Tipo_documento" EntityType="Self.Tipo_documento" />
           <EntitySet Name="tipo_identificacion" EntityType="Self.tipo_identificacion" />
@@ -3422,14 +3293,6 @@
           <AssociationSet Name="fk_Codigos_cabys_Impuesto1" Association="Self.fk_Codigos_cabys_Impuesto1">
             <End Role="Impuesto" EntitySet="Impuesto" />
             <End Role="Codigos_cabys" EntitySet="Codigos_cabys" />
-          </AssociationSet>
-          <AssociationSet Name="fk_Cuentas_Contables_Tipo_Cuenta_Contable1" Association="Self.fk_Cuentas_Contables_Tipo_Cuenta_Contable1">
-            <End Role="Tipo_Cuenta_Contable" EntitySet="Tipo_Cuenta_Contable" />
-            <End Role="Cuentas_Contables" EntitySet="Cuentas_Contables" />
-          </AssociationSet>
-          <AssociationSet Name="fk_Cuentas_Contables_Usuarios1" Association="Self.fk_Cuentas_Contables_Usuarios1">
-            <End Role="Usuarios" EntitySet="Usuarios" />
-            <End Role="Cuentas_Contables" EntitySet="Cuentas_Contables" />
           </AssociationSet>
           <AssociationSet Name="fk_Clientes_Distrito10" Association="Self.fk_Clientes_Distrito10">
             <End Role="Distrito" EntitySet="Distrito" />
@@ -3502,10 +3365,6 @@
           <AssociationSet Name="fk_Tipo_cambio_Usuarios1" Association="Self.fk_Tipo_cambio_Usuarios1">
             <End Role="Usuarios" EntitySet="Usuarios" />
             <End Role="Tipo_cambio" EntitySet="Tipo_cambio" />
-          </AssociationSet>
-          <AssociationSet Name="FK_Cuentas_Contables_Tipo_moneda" Association="marsh_contableModel.FK_Cuentas_Contables_Tipo_moneda">
-            <End Role="Tipo_moneda" EntitySet="Tipo_moneda" />
-            <End Role="Cuentas_Contables" EntitySet="Cuentas_Contables" />
           </AssociationSet>
           <EntitySet Name="Padron" EntityType="marsh_contableModel.Padron" />
           <AssociationSet Name="FK_Padron_Empresa" Association="marsh_contableModel.FK_Padron_Empresa">
@@ -3702,19 +3561,6 @@
             <End Role="Bancos_Movimientos" EntitySet="Bancos_Movimientos" />
           </AssociationSet>
           <EntitySet Name="Cuenta_Detalle" EntityType="marsh_contableModel.Cuenta_Detalle" />
-          <EntitySet Name="Cuenta_Encabezado" EntityType="marsh_contableModel.Cuenta_Encabezado" />
-          <AssociationSet Name="FK_CE_Centro_Costos" Association="marsh_contableModel.FK_CE_Centro_Costos">
-            <End Role="Centro_Costos" EntitySet="Centro_Costos" />
-            <End Role="Cuenta_Encabezado" EntitySet="Cuenta_Encabezado" />
-          </AssociationSet>
-          <AssociationSet Name="FK_CE_Clientes" Association="marsh_contableModel.FK_CE_Clientes">
-            <End Role="Clientes" EntitySet="Clientes" />
-            <End Role="Cuenta_Encabezado" EntitySet="Cuenta_Encabezado" />
-          </AssociationSet>
-          <AssociationSet Name="FK_CD_Cuenta_Encabezado" Association="marsh_contableModel.FK_CD_Cuenta_Encabezado">
-            <End Role="Cuenta_Encabezado" EntitySet="Cuenta_Encabezado" />
-            <End Role="Cuenta_Detalle" EntitySet="Cuenta_Detalle" />
-          </AssociationSet>
           <AssociationSet Name="FK_CD_Medio_pago" Association="marsh_contableModel.FK_CD_Medio_pago">
             <End Role="Medio_pago" EntitySet="Medio_pago" />
             <End Role="Cuenta_Detalle" EntitySet="Cuenta_Detalle" />
@@ -3723,9 +3569,30 @@
             <End Role="Usuarios" EntitySet="Usuarios" />
             <End Role="Cuenta_Detalle" EntitySet="Cuenta_Detalle" />
           </AssociationSet>
-          <AssociationSet Name="FK_CE_Cuentas_Contables" Association="marsh_contableModel.FK_CE_Cuentas_Contables">
-            <End Role="Cuentas_Contables" EntitySet="Cuentas_Contables" />
+          <EntitySet Name="Cuenta_Encabezado" EntityType="marsh_contableModel.Cuenta_Encabezado" />
+          <AssociationSet Name="FK_Cuenta_Encabezado_Categoria_Presupuestaria" Association="marsh_contableModel.FK_Cuenta_Encabezado_Categoria_Presupuestaria">
+            <End Role="Categoria_presupuestaria" EntitySet="Categoria_presupuestaria" />
             <End Role="Cuenta_Encabezado" EntitySet="Cuenta_Encabezado" />
+          </AssociationSet>
+          <AssociationSet Name="FK_CE_Centro_Costos" Association="marsh_contableModel.FK_CE_Centro_Costos">
+            <End Role="Centro_Costos" EntitySet="Centro_Costos" />
+            <End Role="Cuenta_Encabezado" EntitySet="Cuenta_Encabezado" />
+          </AssociationSet>
+          <AssociationSet Name="FK_CE_Clientes" Association="marsh_contableModel.FK_CE_Clientes">
+            <End Role="Clientes" EntitySet="Clientes" />
+            <End Role="Cuenta_Encabezado" EntitySet="Cuenta_Encabezado" />
+          </AssociationSet>
+          <AssociationSet Name="FK_condicion_venta_gasto" Association="marsh_contableModel.FK_condicion_venta_gasto">
+            <End Role="Condicion_venta" EntitySet="Condicion_venta" />
+            <End Role="Gastos" EntitySet="Gastos" />
+          </AssociationSet>
+          <AssociationSet Name="FK_condicion_venta_ingreso" Association="marsh_contableModel.FK_condicion_venta_ingreso">
+            <End Role="Condicion_venta" EntitySet="Condicion_venta" />
+            <End Role="Ingresos" EntitySet="Ingresos" />
+          </AssociationSet>
+          <AssociationSet Name="FK_CD_Cuenta_Encabezado" Association="marsh_contableModel.FK_CD_Cuenta_Encabezado">
+            <End Role="Cuenta_Encabezado" EntitySet="Cuenta_Encabezado" />
+            <End Role="Cuenta_Detalle" EntitySet="Cuenta_Detalle" />
           </AssociationSet>
           <AssociationSet Name="FK_CE_Facturas" Association="marsh_contableModel.FK_CE_Facturas">
             <End Role="Facturas" EntitySet="Facturas" />
@@ -3759,27 +3626,7 @@
             <End Role="Usuarios" EntitySet="Usuarios" />
             <End Role="Cuenta_Encabezado" EntitySet="Cuenta_Encabezado" />
           </AssociationSet>
-          <AssociationSet Name="FK_condicion_venta_gasto" Association="marsh_contableModel.FK_condicion_venta_gasto">
-            <End Role="Condicion_venta" EntitySet="Condicion_venta" />
-            <End Role="Gastos" EntitySet="Gastos" />
-          </AssociationSet>
-          <AssociationSet Name="FK_condicion_venta_ingreso" Association="marsh_contableModel.FK_condicion_venta_ingreso">
-            <End Role="Condicion_venta" EntitySet="Condicion_venta" />
-            <End Role="Ingresos" EntitySet="Ingresos" />
-          </AssociationSet>
-        </EntityContainer>
-        <Association Name="FK_Cuentas_Contables_Tipo_moneda">
-          <End Type="marsh_contableModel.Tipo_moneda" Role="Tipo_moneda" Multiplicity="1" />
-          <End Type="marsh_contableModel.Cuentas_Contables" Role="Cuentas_Contables" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="Tipo_moneda">
-              <PropertyRef Name="id" />
-            </Principal>
-            <Dependent Role="Cuentas_Contables">
-              <PropertyRef Name="Tipo_moneda_id" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
+          </EntityContainer>
         <EntityType Name="Padron">
           <Key>
             <PropertyRef Name="id" />
@@ -3886,9 +3733,9 @@
           <NavigationProperty Name="Gestion_P_detalle" Relationship="marsh_contableModel.FK_GP_Detalle_Ingresos" FromRole="Ingresos" ToRole="Gestion_P_detalle" />
           <NavigationProperty Name="Facturas" Relationship="marsh_contableModel.fk_Ingresos_Facturas1" FromRole="Ingresos" ToRole="Facturas" />
           <NavigationProperty Name="Bancos_Movimientos" Relationship="marsh_contableModel.FK_BM_Ingresos" FromRole="Ingresos" ToRole="Bancos_Movimientos" />
-          <NavigationProperty Name="Cuenta_Encabezado" Relationship="marsh_contableModel.FK_CE_Ingresos" FromRole="Ingresos" ToRole="Cuenta_Encabezado" />
           <Property Name="Condicion_venta_id" Type="Int32" />
           <NavigationProperty Name="Condicion_venta" Relationship="marsh_contableModel.FK_condicion_venta_ingreso" FromRole="Ingresos" ToRole="Condicion_venta" />
+          <NavigationProperty Name="Cuenta_Encabezado" Relationship="marsh_contableModel.FK_CE_Ingresos" FromRole="Ingresos" ToRole="Cuenta_Encabezado" />
         </EntityType>
         <Association Name="fk_Facturas_Clientes10">
           <End Type="marsh_contableModel.Clientes" Role="Clientes" Multiplicity="1" />
@@ -4571,10 +4418,34 @@
           <Property Name="activo" Type="Int16" Nullable="false" />
           <Property Name="Usuarios_Usuario_id" Type="Int32" Nullable="false" />
           <Property Name="Medio_pago_id" Type="Int32" Nullable="false" />
-          <NavigationProperty Name="Cuenta_Encabezado" Relationship="marsh_contableModel.FK_CD_Cuenta_Encabezado" FromRole="Cuenta_Detalle" ToRole="Cuenta_Encabezado" />
           <NavigationProperty Name="Medio_pago" Relationship="marsh_contableModel.FK_CD_Medio_pago" FromRole="Cuenta_Detalle" ToRole="Medio_pago" />
           <NavigationProperty Name="Usuarios" Relationship="marsh_contableModel.FK_CD_Usuarios" FromRole="Cuenta_Detalle" ToRole="Usuarios" />
+          <NavigationProperty Name="Cuenta_Encabezado" Relationship="marsh_contableModel.FK_CD_Cuenta_Encabezado" FromRole="Cuenta_Detalle" ToRole="Cuenta_Encabezado" />
         </EntityType>
+        <Association Name="FK_CD_Medio_pago">
+          <End Type="marsh_contableModel.Medio_pago" Role="Medio_pago" Multiplicity="1" />
+          <End Type="marsh_contableModel.Cuenta_Detalle" Role="Cuenta_Detalle" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Medio_pago">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="Cuenta_Detalle">
+              <PropertyRef Name="Medio_pago_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_CD_Usuarios">
+          <End Type="marsh_contableModel.Usuarios" Role="Usuarios" Multiplicity="1" />
+          <End Type="marsh_contableModel.Cuenta_Detalle" Role="Cuenta_Detalle" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Usuarios">
+              <PropertyRef Name="Usuario_id" />
+            </Principal>
+            <Dependent Role="Cuenta_Detalle">
+              <PropertyRef Name="Usuarios_Usuario_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
         <EntityType Name="Cuenta_Encabezado">
           <Key>
             <PropertyRef Name="id" />
@@ -4602,10 +4473,11 @@
           <Property Name="Gastos_id" Type="Int32" />
           <Property Name="Ingresos_id" Type="Int32" />
           <Property Name="Proveedor_id" Type="Int32" />
+          <Property Name="Categoria_presupuestaria_id" Type="Int32" />
+          <NavigationProperty Name="Categoria_presupuestaria" Relationship="marsh_contableModel.FK_Cuenta_Encabezado_Categoria_Presupuestaria" FromRole="Cuenta_Encabezado" ToRole="Categoria_presupuestaria" />
           <NavigationProperty Name="Centro_Costos" Relationship="marsh_contableModel.FK_CE_Centro_Costos" FromRole="Cuenta_Encabezado" ToRole="Centro_Costos" />
           <NavigationProperty Name="Clientes" Relationship="marsh_contableModel.FK_CE_Clientes" FromRole="Cuenta_Encabezado" ToRole="Clientes" />
           <NavigationProperty Name="Cuenta_Detalle" Relationship="marsh_contableModel.FK_CD_Cuenta_Encabezado" FromRole="Cuenta_Encabezado" ToRole="Cuenta_Detalle" />
-          <NavigationProperty Name="Cuentas_Contables" Relationship="marsh_contableModel.FK_CE_Cuentas_Contables" FromRole="Cuenta_Encabezado" ToRole="Cuentas_Contables" />
           <NavigationProperty Name="Facturas" Relationship="marsh_contableModel.FK_CE_Facturas" FromRole="Cuenta_Encabezado" ToRole="Facturas" />
           <NavigationProperty Name="Gastos" Relationship="marsh_contableModel.FK_CE_Gastos" FromRole="Cuenta_Encabezado" ToRole="Gastos" />
           <NavigationProperty Name="Ingresos" Relationship="marsh_contableModel.FK_CE_Ingresos" FromRole="Cuenta_Encabezado" ToRole="Ingresos" />
@@ -4615,6 +4487,18 @@
           <NavigationProperty Name="Tipo_moneda" Relationship="marsh_contableModel.FK_CE_Tipo_moneda" FromRole="Cuenta_Encabezado" ToRole="Tipo_moneda" />
           <NavigationProperty Name="Usuarios" Relationship="marsh_contableModel.FK_CE_Usuarios" FromRole="Cuenta_Encabezado" ToRole="Usuarios" />
         </EntityType>
+        <Association Name="FK_Cuenta_Encabezado_Categoria_Presupuestaria">
+          <End Type="marsh_contableModel.Categoria_presupuestaria" Role="Categoria_presupuestaria" Multiplicity="0..1" />
+          <End Type="marsh_contableModel.Cuenta_Encabezado" Role="Cuenta_Encabezado" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Categoria_presupuestaria">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="Cuenta_Encabezado">
+              <PropertyRef Name="Categoria_presupuestaria_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
         <Association Name="FK_CE_Centro_Costos">
           <End Type="marsh_contableModel.Centro_Costos" Role="Centro_Costos" Multiplicity="1" />
           <End Type="marsh_contableModel.Cuenta_Encabezado" Role="Cuenta_Encabezado" Multiplicity="*" />
@@ -4639,6 +4523,30 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
+        <Association Name="FK_condicion_venta_gasto">
+          <End Type="marsh_contableModel.Condicion_venta" Role="Condicion_venta" Multiplicity="0..1" />
+          <End Type="marsh_contableModel.Gastos" Role="Gastos" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Condicion_venta">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="Gastos">
+              <PropertyRef Name="Condicion_venta_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_condicion_venta_ingreso">
+          <End Type="marsh_contableModel.Condicion_venta" Role="Condicion_venta" Multiplicity="0..1" />
+          <End Type="marsh_contableModel.Ingresos" Role="Ingresos" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Condicion_venta">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="Ingresos">
+              <PropertyRef Name="Condicion_venta_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
         <Association Name="FK_CD_Cuenta_Encabezado">
           <End Type="marsh_contableModel.Cuenta_Encabezado" Role="Cuenta_Encabezado" Multiplicity="1" />
           <End Type="marsh_contableModel.Cuenta_Detalle" Role="Cuenta_Detalle" Multiplicity="*" />
@@ -4648,42 +4556,6 @@
             </Principal>
             <Dependent Role="Cuenta_Detalle">
               <PropertyRef Name="Cuenta_Encabezado_id" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
-        <Association Name="FK_CD_Medio_pago">
-          <End Type="marsh_contableModel.Medio_pago" Role="Medio_pago" Multiplicity="1" />
-          <End Type="marsh_contableModel.Cuenta_Detalle" Role="Cuenta_Detalle" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="Medio_pago">
-              <PropertyRef Name="id" />
-            </Principal>
-            <Dependent Role="Cuenta_Detalle">
-              <PropertyRef Name="Medio_pago_id" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
-        <Association Name="FK_CD_Usuarios">
-          <End Type="marsh_contableModel.Usuarios" Role="Usuarios" Multiplicity="1" />
-          <End Type="marsh_contableModel.Cuenta_Detalle" Role="Cuenta_Detalle" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="Usuarios">
-              <PropertyRef Name="Usuario_id" />
-            </Principal>
-            <Dependent Role="Cuenta_Detalle">
-              <PropertyRef Name="Usuarios_Usuario_id" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
-        <Association Name="FK_CE_Cuentas_Contables">
-          <End Type="marsh_contableModel.Cuentas_Contables" Role="Cuentas_Contables" Multiplicity="1" />
-          <End Type="marsh_contableModel.Cuenta_Encabezado" Role="Cuenta_Encabezado" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="Cuentas_Contables">
-              <PropertyRef Name="id" />
-            </Principal>
-            <Dependent Role="Cuenta_Encabezado">
-              <PropertyRef Name="Cuentas_Contables_id" />
             </Dependent>
           </ReferentialConstraint>
         </Association>
@@ -4783,31 +4655,7 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <Association Name="FK_condicion_venta_gasto">
-          <End Type="marsh_contableModel.Condicion_venta" Role="Condicion_venta" Multiplicity="0..1" />
-          <End Type="marsh_contableModel.Gastos" Role="Gastos" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="Condicion_venta">
-              <PropertyRef Name="id" />
-            </Principal>
-            <Dependent Role="Gastos">
-              <PropertyRef Name="Condicion_venta_id" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
-        <Association Name="FK_condicion_venta_ingreso">
-          <End Type="marsh_contableModel.Condicion_venta" Role="Condicion_venta" Multiplicity="0..1" />
-          <End Type="marsh_contableModel.Ingresos" Role="Ingresos" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="Condicion_venta">
-              <PropertyRef Name="id" />
-            </Principal>
-            <Dependent Role="Ingresos">
-              <PropertyRef Name="Condicion_venta_id" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
-      </Schema>
+        </Schema>
     </edmx:ConceptualModels>
     <!-- C-S mapping content -->
     <edmx:Mappings>
@@ -4929,23 +4777,6 @@
                 <ScalarProperty Name="id" ColumnName="id" />
                 <ScalarProperty Name="Codigo" ColumnName="Codigo" />
                 <ScalarProperty Name="Descripcion" ColumnName="Descripcion" />
-              </MappingFragment>
-            </EntityTypeMapping>
-          </EntitySetMapping>
-          <EntitySetMapping Name="Cuentas_Contables">
-            <EntityTypeMapping TypeName="marsh_contableModel.Cuentas_Contables">
-              <MappingFragment StoreEntitySet="Cuentas_Contables">
-                <ScalarProperty Name="Tipo_moneda_id" ColumnName="Tipo_moneda_id" />
-                <ScalarProperty Name="id" ColumnName="id" />
-                <ScalarProperty Name="Codigo" ColumnName="Codigo" />
-                <ScalarProperty Name="Nombre" ColumnName="Nombre" />
-                <ScalarProperty Name="Tipo_Cuenta_Contable_id" ColumnName="Tipo_Cuenta_Contable_id" />
-                <ScalarProperty Name="Usuarios_Usuario_id" ColumnName="Usuarios_Usuario_id" />
-                <ScalarProperty Name="Estado" ColumnName="Estado" />
-                <ScalarProperty Name="Saldo_inicial" ColumnName="Saldo_inicial" />
-                <ScalarProperty Name="Saldo_actual" ColumnName="Saldo_actual" />
-                <ScalarProperty Name="Fecha_Creacion" ColumnName="Fecha_Creacion" />
-                <ScalarProperty Name="Fecha_actualizacion" ColumnName="Fecha_actualizacion" />
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
@@ -5215,15 +5046,6 @@
                 <ScalarProperty Name="venta" ColumnName="venta" />
                 <ScalarProperty Name="Tipo_moneda_id" ColumnName="Tipo_moneda_id" />
                 <ScalarProperty Name="Usuarios_Usuario_id" ColumnName="Usuarios_Usuario_id" />
-              </MappingFragment>
-            </EntityTypeMapping>
-          </EntitySetMapping>
-          <EntitySetMapping Name="Tipo_Cuenta_Contable">
-            <EntityTypeMapping TypeName="marsh_contableModel.Tipo_Cuenta_Contable">
-              <MappingFragment StoreEntitySet="Tipo_Cuenta_Contable">
-                <ScalarProperty Name="id" ColumnName="id" />
-                <ScalarProperty Name="Nombre" ColumnName="Nombre" />
-                <ScalarProperty Name="Naturaleza" ColumnName="Naturaleza" />
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
@@ -5499,6 +5321,7 @@
           <EntitySetMapping Name="Cuenta_Encabezado">
             <EntityTypeMapping TypeName="marsh_contableModel.Cuenta_Encabezado">
               <MappingFragment StoreEntitySet="Cuenta_Encabezado">
+                <ScalarProperty Name="Categoria_presupuestaria_id" ColumnName="Categoria_presupuestaria_id" />
                 <ScalarProperty Name="Proveedor_id" ColumnName="Proveedor_id" />
                 <ScalarProperty Name="Ingresos_id" ColumnName="Ingresos_id" />
                 <ScalarProperty Name="Gastos_id" ColumnName="Gastos_id" />

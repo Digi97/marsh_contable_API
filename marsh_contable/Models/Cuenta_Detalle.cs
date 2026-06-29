@@ -27,8 +27,8 @@ namespace marsh_contable.Models
         public int Usuarios_Usuario_id { get; set; }
         public int Medio_pago_id { get; set; }
     
-        public virtual Cuenta_Encabezado Cuenta_Encabezado { get; set; }
         public virtual Medio_pago Medio_pago { get; set; }
         public virtual Usuarios Usuarios { get; set; }
+        public virtual Cuenta_Encabezado Cuenta_Encabezado { get; set; }
     }
 }

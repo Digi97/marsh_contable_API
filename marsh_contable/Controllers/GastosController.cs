@@ -160,7 +160,7 @@ namespace marsh_contable.Controllers
 
 
            
-                var bmovimiento = banco.RegistrarMovimientoPorGasto(model.Categoria_gasto_id, (int)model.Tipo_moneda_id, gpExist.Centro_Costos_id, id, g.Total, g.Usuarios_Usuario_id, "Registro de Gasto");
+                var bmovimiento = banco.RegistrarMovimientoPorGasto(cpid, (int) model.Tipo_moneda_id, ccid, id, g.Total, g.Usuarios_Usuario_id, "Registro de Gasto");
 
                 if (bmovimiento.CodeStatus != HttpStatusCode.OK)
                 {
@@ -681,7 +681,7 @@ namespace marsh_contable.Controllers
                         throw new Exception("gestion_presupuestaria_for_current_period_dont_exist");
 
                     BancoController banco = new BancoController();
-                    if (banco.validaBanco(gpExist.Categoria_presupuestaria_id, (int)gpExist.Tipo_moneda_id, (int)gpExist.Tipo_moneda_id, (decimal)gtotal, Tipo_Movimiento_Bancario.Egreso))
+                    if (banco.validaBanco(cpid, (int)gpExist.Tipo_moneda_id, ccid, (decimal)gtotal, Tipo_Movimiento_Bancario.Egreso))
                     { //si el banco permite el movimiento proseguimos
 
 
@@ -717,6 +717,12 @@ namespace marsh_contable.Controllers
                             .DefaultIfEmpty(0)
                             .Sum();
 
+                        if(montoMensual == 0)
+                        {
+                            throw new Exception(
+                              $"no_presupuesto_defined_for_month_{currentDate.Month}_and_year_{currentDate.Year}"
+                          );
+                        }
 
 
                         double montoAprobado = (double)montoMensual; //MONTO APROBADO PARA EL MES ACTUAL //gpExist.monto_aprobado;

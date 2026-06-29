@@ -35,7 +35,6 @@ namespace marsh_contable.Models
         public virtual DbSet<Codigo_comercial> Codigo_comercial { get; set; }
         public virtual DbSet<Codigos_cabys> Codigos_cabys { get; set; }
         public virtual DbSet<Condicion_venta> Condicion_venta { get; set; }
-        public virtual DbSet<Cuentas_Contables> Cuentas_Contables { get; set; }
         public virtual DbSet<Devoluciones> Devoluciones { get; set; }
         public virtual DbSet<Distrito> Distrito { get; set; }
         public virtual DbSet<Empresa> Empresa { get; set; }
@@ -55,7 +54,6 @@ namespace marsh_contable.Models
         public virtual DbSet<Telefonos> Telefonos { get; set; }
         public virtual DbSet<Tipo_archivo> Tipo_archivo { get; set; }
         public virtual DbSet<Tipo_cambio> Tipo_cambio { get; set; }
-        public virtual DbSet<Tipo_Cuenta_Contable> Tipo_Cuenta_Contable { get; set; }
         public virtual DbSet<Tipo_cuentas> Tipo_cuentas { get; set; }
         public virtual DbSet<Tipo_documento> Tipo_documento { get; set; }
         public virtual DbSet<tipo_identificacion> tipo_identificacion { get; set; }

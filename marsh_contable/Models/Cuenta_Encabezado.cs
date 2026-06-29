@@ -43,12 +43,13 @@ namespace marsh_contable.Models
         public Nullable<int> Gastos_id { get; set; }
         public Nullable<int> Ingresos_id { get; set; }
         public Nullable<int> Proveedor_id { get; set; }
+        public Nullable<int> Categoria_presupuestaria_id { get; set; }
     
+        public virtual Categoria_presupuestaria Categoria_presupuestaria { get; set; }
         public virtual Centro_Costos Centro_Costos { get; set; }
         public virtual Clientes Clientes { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Cuenta_Detalle> Cuenta_Detalle { get; set; }
-        public virtual Cuentas_Contables Cuentas_Contables { get; set; }
         public virtual Facturas Facturas { get; set; }
         public virtual Gastos Gastos { get; set; }
         public virtual Ingresos Ingresos { get; set; }

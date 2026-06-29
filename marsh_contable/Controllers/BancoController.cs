@@ -469,7 +469,7 @@ namespace marsh_contable.Controllers
                     // ── Buscar banco activo por categoría, tipo moneda y centro de costo
                     var banco = ctx.Bancos.FirstOrDefault(b =>
                         b.Categoria_presupuestaria_id == categoriaPresupuestariaId &&
-                        b.Tipo_moneda_id == tipoMonedaId &&
+                       // b.Tipo_moneda_id == tipoMonedaId && //quitemos validacion por moneda, solo para centros de costos
                         b.Centro_Costos_id == centroCostosId &&
                         b.estado == 1);
 
