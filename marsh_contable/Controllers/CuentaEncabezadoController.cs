@@ -197,7 +197,6 @@ namespace marsh_contable.Controllers
                                 join tm  in ctx.Tipo_moneda      on ce.Tipo_moneda_id       equals tm.id
                                 join mp  in ctx.Medio_pago       on ce.Medio_pago_id        equals mp.id
                                 join tc  in ctx.Tipo_cuentas     on ce.Tipo_cuentas_id      equals tc.id
-                                join cc  in ctx.Cuentas_Contables on ce.Cuentas_Contables_id equals cc.id
                                 join cco in ctx.Centro_Costos    on ce.Centro_Costos_id     equals cco.id
                                 join u   in ctx.Usuarios         on ce.Usuarios_Usuario_id  equals u.Usuario_id
 
@@ -252,7 +251,7 @@ namespace marsh_contable.Controllers
                                     Cliente                    = c != null ? c.Nombre + " " + c.Apellido1 : "",
                                     Proveedor                  = p != null ? p.Nombre + " " + p.Apellido1 : "",
                                     Tipo_cuenta                = tc.Nombre,
-                                    Cuenta_contable            = cc.Nombre,
+                               
                                     Centro_costo               = cco.Nombre,
                                     Usuario                    = u.Nombre + " " + u.Apellido1,
                                     Estado_texto               = ce.Estado == 1 ? "Activo" : "Inactivo"
@@ -299,7 +298,7 @@ namespace marsh_contable.Controllers
                               join tm  in ctx.Tipo_moneda       on x.Tipo_moneda_id       equals tm.id
                               join mp  in ctx.Medio_pago        on x.Medio_pago_id        equals mp.id
                               join tc  in ctx.Tipo_cuentas      on x.Tipo_cuentas_id      equals tc.id
-                              join cc  in ctx.Cuentas_Contables on x.Cuentas_Contables_id equals cc.id
+                           
                               join cco in ctx.Centro_Costos     on x.Centro_Costos_id     equals cco.id
                               join u   in ctx.Usuarios          on x.Usuarios_Usuario_id  equals u.Usuario_id
 
@@ -350,7 +349,6 @@ namespace marsh_contable.Controllers
                                   Cliente                    = c != null ? c.Nombre + " " + c.Apellido1 : "",
                                   Proveedor                  = p != null ? p.Nombre + " " + p.Apellido1 : "",
                                   Tipo_cuenta                = tc.Nombre,
-                                  Cuenta_contable            = cc.Nombre,
                                   Centro_costo               = cco.Nombre,
                                   Usuario                    = u.Nombre + " " + u.Apellido1,
                                   Estado_texto               = x.Estado == 1 ? "Activo" : "Inactivo"

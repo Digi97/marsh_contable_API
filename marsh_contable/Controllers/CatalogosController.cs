@@ -283,194 +283,194 @@ namespace marsh_contable.Controllers
 
         #region "Cuentas_Contables"
 
-        [HttpPost]
-        [Authorize]
-        [Route("api/v1/catalogos/cuentas_contables")]
-        [RequierePermiso(PermisosAplica.UsuarioMantenimiento)]
-        public Reply CreateCuentasContables([FromBody] Models.Cuentas_Contables model)
-        {
-            Reply oR = new Reply();
-            oR.CodeStatus = 0;
-            General tool = new General();
-            try
-            {
-                if (model == null) throw new Exception("invalid_model_request_missing");
-                if (!tool.ValidaTexto(model.Codigo)) throw new Exception("invalid_string_form_Codigo");
-                if (!tool.ValidaTexto(model.Nombre)) throw new Exception("invalid_string_form_Nombre");
-                if (!tool.validaNumeros(model.Tipo_Cuenta_Contable_id.ToString())) throw new Exception("invalid_value_form_Tipo_Cuenta_Contable_id");
-                if (!tool.validaNumeros(model.Usuarios_Usuario_id.ToString())) throw new Exception("invalid_value_form_Usuarios_Usuario_id");
+        //[HttpPost]
+        //[Authorize]
+        //[Route("api/v1/catalogos/cuentas_contables")]
+        //[RequierePermiso(PermisosAplica.UsuarioMantenimiento)]
+        //public Reply CreateCuentasContables([FromBody] Models.Cuentas_Contables model)
+        //{
+        //    Reply oR = new Reply();
+        //    oR.CodeStatus = 0;
+        //    General tool = new General();
+        //    try
+        //    {
+        //        if (model == null) throw new Exception("invalid_model_request_missing");
+        //        if (!tool.ValidaTexto(model.Codigo)) throw new Exception("invalid_string_form_Codigo");
+        //        if (!tool.ValidaTexto(model.Nombre)) throw new Exception("invalid_string_form_Nombre");
+        //        if (!tool.validaNumeros(model.Tipo_Cuenta_Contable_id.ToString())) throw new Exception("invalid_value_form_Tipo_Cuenta_Contable_id");
+        //        if (!tool.validaNumeros(model.Usuarios_Usuario_id.ToString())) throw new Exception("invalid_value_form_Usuarios_Usuario_id");
 
-                using (var ctx = new Models.EntitiesModel())
-                {
-                    Models.Cuentas_Contables cc = new Models.Cuentas_Contables()
-                    {
-                        Codigo = model.Codigo,
-                        Nombre = model.Nombre,
-                        Tipo_Cuenta_Contable_id = model.Tipo_Cuenta_Contable_id,
-                        Usuarios_Usuario_id = model.Usuarios_Usuario_id,
-                        Estado = model.Estado,
-                        Saldo_inicial = model.Saldo_inicial,
-                        Saldo_actual = model.Saldo_actual,
-                        Fecha_Creacion = DateTime.Now,
-                        Fecha_actualizacion = DateTime.Now,
-                        Tipo_moneda_id = model.Tipo_moneda_id
-                    };
-                    ctx.Cuentas_Contables.Add(cc);
-                    ctx.SaveChanges();
-                    oR.CodeStatus = HttpStatusCode.OK;
-                    oR.Data = cc.id;
-                    return oR;
-                }
-            }
-            catch (System.Data.Entity.Validation.DbEntityValidationException ex2)
-            {
-                String errorDB = "";
-                foreach (var eve in ex2.EntityValidationErrors)
-                    foreach (var ve in eve.ValidationErrors)
-                        errorDB += ve.ErrorMessage;
-                oR.CodeStatus = HttpStatusCode.InternalServerError;
-                oR.Message = errorDB;
-                return oR;
-            }
-            catch (Exception ex) { oR.CodeStatus = HttpStatusCode.InternalServerError; oR.Message = ex.Message; return oR; }
-        }
+        //        using (var ctx = new Models.EntitiesModel())
+        //        {
+        //            Models.Cuentas_Contables cc = new Models.Cuentas_Contables()
+        //            {
+        //                Codigo = model.Codigo,
+        //                Nombre = model.Nombre,
+        //                Tipo_Cuenta_Contable_id = model.Tipo_Cuenta_Contable_id,
+        //                Usuarios_Usuario_id = model.Usuarios_Usuario_id,
+        //                Estado = model.Estado,
+        //                Saldo_inicial = model.Saldo_inicial,
+        //                Saldo_actual = model.Saldo_actual,
+        //                Fecha_Creacion = DateTime.Now,
+        //                Fecha_actualizacion = DateTime.Now,
+        //                Tipo_moneda_id = model.Tipo_moneda_id
+        //            };
+        //            ctx.Cuentas_Contables.Add(cc);
+        //            ctx.SaveChanges();
+        //            oR.CodeStatus = HttpStatusCode.OK;
+        //            oR.Data = cc.id;
+        //            return oR;
+        //        }
+        //    }
+        //    catch (System.Data.Entity.Validation.DbEntityValidationException ex2)
+        //    {
+        //        String errorDB = "";
+        //        foreach (var eve in ex2.EntityValidationErrors)
+        //            foreach (var ve in eve.ValidationErrors)
+        //                errorDB += ve.ErrorMessage;
+        //        oR.CodeStatus = HttpStatusCode.InternalServerError;
+        //        oR.Message = errorDB;
+        //        return oR;
+        //    }
+        //    catch (Exception ex) { oR.CodeStatus = HttpStatusCode.InternalServerError; oR.Message = ex.Message; return oR; }
+        //}
 
-        [HttpPut]
-        [Authorize]
-        [Route("api/v1/catalogos/cuentas_contables/{id}")]
-        [RequierePermiso(PermisosAplica.UsuarioMantenimiento)]
-        public Reply UpdateCuentasContables(int id, [FromBody] Models.Cuentas_Contables model)
-        {
-            Reply oR = new Reply();
-            oR.CodeStatus = 0;
-            General tool = new General();
-            try
-            {
-                if (model == null) throw new Exception("invalid_model_request_missing");
-                if (!tool.ValidaTexto(model.Codigo)) throw new Exception("invalid_string_form_Codigo");
-                if (!tool.ValidaTexto(model.Nombre)) throw new Exception("invalid_string_form_Nombre");
-                if (!tool.validaNumeros(model.Tipo_Cuenta_Contable_id.ToString())) throw new Exception("invalid_value_form_Tipo_Cuenta_Contable_id");
+        //[HttpPut]
+        //[Authorize]
+        //[Route("api/v1/catalogos/cuentas_contables/{id}")]
+        //[RequierePermiso(PermisosAplica.UsuarioMantenimiento)]
+        //public Reply UpdateCuentasContables(int id, [FromBody] Models.Cuentas_Contables model)
+        //{
+        //    Reply oR = new Reply();
+        //    oR.CodeStatus = 0;
+        //    General tool = new General();
+        //    try
+        //    {
+        //        if (model == null) throw new Exception("invalid_model_request_missing");
+        //        if (!tool.ValidaTexto(model.Codigo)) throw new Exception("invalid_string_form_Codigo");
+        //        if (!tool.ValidaTexto(model.Nombre)) throw new Exception("invalid_string_form_Nombre");
+        //        if (!tool.validaNumeros(model.Tipo_Cuenta_Contable_id.ToString())) throw new Exception("invalid_value_form_Tipo_Cuenta_Contable_id");
 
-                using (var ctx = new Models.EntitiesModel())
-                {
-                    Models.Cuentas_Contables cc = ctx.Cuentas_Contables.FirstOrDefault(x => x.id == id);
-                    if (cc == null) throw new Exception("cuentas_contables_not_found");
+        //        using (var ctx = new Models.EntitiesModel())
+        //        {
+        //            Models.Cuentas_Contables cc = ctx.Cuentas_Contables.FirstOrDefault(x => x.id == id);
+        //            if (cc == null) throw new Exception("cuentas_contables_not_found");
 
-                    cc.Codigo = model.Codigo;
-                    cc.Nombre = model.Nombre;
-                    cc.Tipo_Cuenta_Contable_id = model.Tipo_Cuenta_Contable_id;
-                    cc.Estado = model.Estado;
-                    cc.Saldo_inicial = model.Saldo_inicial;
-                    cc.Saldo_actual = model.Saldo_actual;
-                    cc.Fecha_actualizacion = DateTime.Now;
-                    cc.Tipo_moneda_id = model.Tipo_moneda_id;
+        //            cc.Codigo = model.Codigo;
+        //            cc.Nombre = model.Nombre;
+        //            cc.Tipo_Cuenta_Contable_id = model.Tipo_Cuenta_Contable_id;
+        //            cc.Estado = model.Estado;
+        //            cc.Saldo_inicial = model.Saldo_inicial;
+        //            cc.Saldo_actual = model.Saldo_actual;
+        //            cc.Fecha_actualizacion = DateTime.Now;
+        //            cc.Tipo_moneda_id = model.Tipo_moneda_id;
 
-                    ctx.SaveChanges();
-                    oR.CodeStatus = HttpStatusCode.OK;
-                    oR.Data = cc.id;
-                    return oR;
-                }
-            }
-            catch (System.Data.Entity.Validation.DbEntityValidationException ex2)
-            {
-                String errorDB = "";
-                foreach (var eve in ex2.EntityValidationErrors)
-                    foreach (var ve in eve.ValidationErrors)
-                        errorDB += ve.ErrorMessage;
-                oR.CodeStatus = HttpStatusCode.InternalServerError;
-                oR.Message = errorDB;
-                return oR;
-            }
-            catch (Exception ex) { oR.CodeStatus = HttpStatusCode.InternalServerError; oR.Message = ex.Message; return oR; }
-        }
+        //            ctx.SaveChanges();
+        //            oR.CodeStatus = HttpStatusCode.OK;
+        //            oR.Data = cc.id;
+        //            return oR;
+        //        }
+        //    }
+        //    catch (System.Data.Entity.Validation.DbEntityValidationException ex2)
+        //    {
+        //        String errorDB = "";
+        //        foreach (var eve in ex2.EntityValidationErrors)
+        //            foreach (var ve in eve.ValidationErrors)
+        //                errorDB += ve.ErrorMessage;
+        //        oR.CodeStatus = HttpStatusCode.InternalServerError;
+        //        oR.Message = errorDB;
+        //        return oR;
+        //    }
+        //    catch (Exception ex) { oR.CodeStatus = HttpStatusCode.InternalServerError; oR.Message = ex.Message; return oR; }
+        //}
 
-        [HttpGet]
-        [Authorize]
-        [Route("api/v1/catalogos/cuentas_contables")]
-        public Reply GetAllCuentasContables()
-        {
-            Reply oR = new Reply();
-            oR.CodeStatus = 0;
-            try
-            {
-                using (var ctx = new Models.EntitiesModel())
-                {
-                    var data = ctx.Cuentas_Contables.Select(x => new {
-                        x.id,
-                        x.Codigo,
-                        x.Nombre,
-                        x.Tipo_Cuenta_Contable_id,
-                        NombreTipoCuenta = x.Tipo_Cuenta_Contable.Nombre,
-                        x.Usuarios_Usuario_id,
-                        x.Estado,
-                        x.Saldo_inicial,
-                        x.Saldo_actual,
-                        x.Fecha_Creacion,
-                        x.Fecha_actualizacion,
-                        x.Tipo_moneda_id,
-                        NombreTipoMoneda = x.Tipo_moneda.Nombre
-                    }).ToList();
-                    oR.CodeStatus = HttpStatusCode.OK;
-                    oR.Data = data;
-                    return oR;
-                }
-            }
-            catch (System.Data.Entity.Validation.DbEntityValidationException ex2)
-            {
-                String errorDB = "";
-                foreach (var eve in ex2.EntityValidationErrors)
-                    foreach (var ve in eve.ValidationErrors)
-                        errorDB += ve.ErrorMessage;
-                oR.CodeStatus = HttpStatusCode.InternalServerError;
-                oR.Message = errorDB;
-                return oR;
-            }
-            catch (Exception ex) { oR.CodeStatus = HttpStatusCode.InternalServerError; oR.Message = ex.Message; return oR; }
-        }
+        //[HttpGet]
+        //[Authorize]
+        //[Route("api/v1/catalogos/cuentas_contables")]
+        //public Reply GetAllCuentasContables()
+        //{
+        //    Reply oR = new Reply();
+        //    oR.CodeStatus = 0;
+        //    try
+        //    {
+        //        using (var ctx = new Models.EntitiesModel())
+        //        {
+        //            var data = ctx.Cuentas_Contables.Select(x => new {
+        //                x.id,
+        //                x.Codigo,
+        //                x.Nombre,
+        //                x.Tipo_Cuenta_Contable_id,
+        //                NombreTipoCuenta = x.Tipo_Cuenta_Contable.Nombre,
+        //                x.Usuarios_Usuario_id,
+        //                x.Estado,
+        //                x.Saldo_inicial,
+        //                x.Saldo_actual,
+        //                x.Fecha_Creacion,
+        //                x.Fecha_actualizacion,
+        //                x.Tipo_moneda_id,
+        //                NombreTipoMoneda = x.Tipo_moneda.Nombre
+        //            }).ToList();
+        //            oR.CodeStatus = HttpStatusCode.OK;
+        //            oR.Data = data;
+        //            return oR;
+        //        }
+        //    }
+        //    catch (System.Data.Entity.Validation.DbEntityValidationException ex2)
+        //    {
+        //        String errorDB = "";
+        //        foreach (var eve in ex2.EntityValidationErrors)
+        //            foreach (var ve in eve.ValidationErrors)
+        //                errorDB += ve.ErrorMessage;
+        //        oR.CodeStatus = HttpStatusCode.InternalServerError;
+        //        oR.Message = errorDB;
+        //        return oR;
+        //    }
+        //    catch (Exception ex) { oR.CodeStatus = HttpStatusCode.InternalServerError; oR.Message = ex.Message; return oR; }
+        //}
 
-        [HttpGet]
-        [Authorize]
-        [Route("api/v1/catalogos/cuentas_contables/{id}")]
-        public Reply GetCuentasContablesById(int id)
-        {
-            Reply oR = new Reply();
-            oR.CodeStatus = 0;
-            try
-            {
-                if (id <= 0) throw new Exception("invalid_value_for_id");
-                using (var ctx = new Models.EntitiesModel())
-                {
-                    var data = ctx.Cuentas_Contables.Where(x => x.id == id).Select(x => new {
-                        x.id,
-                        x.Codigo,
-                        x.Nombre,
-                        x.Tipo_Cuenta_Contable_id,
-                        x.Usuarios_Usuario_id,
-                        x.Estado,
-                        x.Saldo_inicial,
-                        x.Saldo_actual,
-                        x.Fecha_Creacion,
-                        x.Fecha_actualizacion,
-                        x.Tipo_moneda_id
-                    }).FirstOrDefault();
-                    if (data == null) throw new Exception("cuentas_contables_not_found");
-                    oR.CodeStatus = HttpStatusCode.OK;
-                    oR.Data = data;
-                    return oR;
-                }
-            }
-            catch (System.Data.Entity.Validation.DbEntityValidationException ex2)
-            {
-                String errorDB = "";
-                foreach (var eve in ex2.EntityValidationErrors)
-                    foreach (var ve in eve.ValidationErrors)
-                        errorDB += ve.ErrorMessage;
-                oR.CodeStatus = HttpStatusCode.InternalServerError;
-                oR.Message = errorDB;
-                return oR;
-            }
-            catch (Exception ex) { oR.CodeStatus = HttpStatusCode.InternalServerError; oR.Message = ex.Message; return oR; }
-        }
+        //[HttpGet]
+        //[Authorize]
+        //[Route("api/v1/catalogos/cuentas_contables/{id}")]
+        //public Reply GetCuentasContablesById(int id)
+        //{
+        //    Reply oR = new Reply();
+        //    oR.CodeStatus = 0;
+        //    try
+        //    {
+        //        if (id <= 0) throw new Exception("invalid_value_for_id");
+        //        using (var ctx = new Models.EntitiesModel())
+        //        {
+        //            var data = ctx.Cuentas_Contables.Where(x => x.id == id).Select(x => new {
+        //                x.id,
+        //                x.Codigo,
+        //                x.Nombre,
+        //                x.Tipo_Cuenta_Contable_id,
+        //                x.Usuarios_Usuario_id,
+        //                x.Estado,
+        //                x.Saldo_inicial,
+        //                x.Saldo_actual,
+        //                x.Fecha_Creacion,
+        //                x.Fecha_actualizacion,
+        //                x.Tipo_moneda_id
+        //            }).FirstOrDefault();
+        //            if (data == null) throw new Exception("cuentas_contables_not_found");
+        //            oR.CodeStatus = HttpStatusCode.OK;
+        //            oR.Data = data;
+        //            return oR;
+        //        }
+        //    }
+        //    catch (System.Data.Entity.Validation.DbEntityValidationException ex2)
+        //    {
+        //        String errorDB = "";
+        //        foreach (var eve in ex2.EntityValidationErrors)
+        //            foreach (var ve in eve.ValidationErrors)
+        //                errorDB += ve.ErrorMessage;
+        //        oR.CodeStatus = HttpStatusCode.InternalServerError;
+        //        oR.Message = errorDB;
+        //        return oR;
+        //    }
+        //    catch (Exception ex) { oR.CodeStatus = HttpStatusCode.InternalServerError; oR.Message = ex.Message; return oR; }
+        //}
         #endregion
 
         #region "Codigos_cabys"
@@ -1784,27 +1784,27 @@ namespace marsh_contable.Controllers
         #endregion
 
         #region "Tipo_Cuenta_Contable"
-        [HttpPost]
-        [Authorize]
-        [Route("api/v1/catalogos/tipo_cuenta_contable")]
-        [RequierePermiso(PermisosAplica.UsuarioMantenimiento)]
-        public Reply CreateTipoCuentaContable([FromBody] Models.Tipo_Cuenta_Contable model) { Reply oR = new Reply(); oR.CodeStatus = 0; General tool = new General(); try { if (model == null) throw new Exception("invalid_model_request_missing"); if (!tool.ValidaTexto(model.Nombre)) throw new Exception("invalid_string_form_Nombre"); if (!tool.ValidaTexto(model.Naturaleza)) throw new Exception("invalid_string_form_Naturaleza"); using (var ctx = new Models.EntitiesModel()) { Models.Tipo_Cuenta_Contable e = new Models.Tipo_Cuenta_Contable() { Nombre = model.Nombre, Naturaleza = model.Naturaleza }; ctx.Tipo_Cuenta_Contable.Add(e); ctx.SaveChanges(); oR.CodeStatus = HttpStatusCode.OK; oR.Data = e.id; return oR; } } catch (Exception ex) { oR.CodeStatus = HttpStatusCode.InternalServerError; oR.Message = ex.Message; return oR; } }
+        ////[HttpPost]
+        ////[Authorize]
+        ////[Route("api/v1/catalogos/tipo_cuenta_contable")]
+        ////[RequierePermiso(PermisosAplica.UsuarioMantenimiento)]
+        ////public Reply CreateTipoCuentaContable([FromBody] Models.Tipo_Cuenta_Contable model) { Reply oR = new Reply(); oR.CodeStatus = 0; General tool = new General(); try { if (model == null) throw new Exception("invalid_model_request_missing"); if (!tool.ValidaTexto(model.Nombre)) throw new Exception("invalid_string_form_Nombre"); if (!tool.ValidaTexto(model.Naturaleza)) throw new Exception("invalid_string_form_Naturaleza"); using (var ctx = new Models.EntitiesModel()) { Models.Tipo_Cuenta_Contable e = new Models.Tipo_Cuenta_Contable() { Nombre = model.Nombre, Naturaleza = model.Naturaleza }; ctx.Tipo_Cuenta_Contable.Add(e); ctx.SaveChanges(); oR.CodeStatus = HttpStatusCode.OK; oR.Data = e.id; return oR; } } catch (Exception ex) { oR.CodeStatus = HttpStatusCode.InternalServerError; oR.Message = ex.Message; return oR; } }
 
-        [HttpPut]
-        [Authorize]
-        [Route("api/v1/catalogos/tipo_cuenta_contable/{id}")]
-        [RequierePermiso(PermisosAplica.UsuarioMantenimiento)]
-        public Reply UpdateTipoCuentaContable(int id, [FromBody] Models.Tipo_Cuenta_Contable model) { Reply oR = new Reply(); oR.CodeStatus = 0; General tool = new General(); try { if (model == null) throw new Exception("invalid_model_request_missing"); if (!tool.ValidaTexto(model.Nombre)) throw new Exception("invalid_string_form_Nombre"); if (!tool.ValidaTexto(model.Naturaleza)) throw new Exception("invalid_string_form_Naturaleza"); using (var ctx = new Models.EntitiesModel()) { Models.Tipo_Cuenta_Contable e = ctx.Tipo_Cuenta_Contable.FirstOrDefault(x => x.id == id); if (e == null) throw new Exception("tipo_cuenta_contable_not_found"); e.Nombre = model.Nombre; e.Naturaleza = model.Naturaleza; ctx.SaveChanges(); oR.CodeStatus = HttpStatusCode.OK; oR.Data = e.id; return oR; } } catch (Exception ex) { oR.CodeStatus = HttpStatusCode.InternalServerError; oR.Message = ex.Message; return oR; } }
+        ////[HttpPut]
+        ////[Authorize]
+        ////[Route("api/v1/catalogos/tipo_cuenta_contable/{id}")]
+        ////[RequierePermiso(PermisosAplica.UsuarioMantenimiento)]
+        ////public Reply UpdateTipoCuentaContable(int id, [FromBody] Models.Tipo_Cuenta_Contable model) { Reply oR = new Reply(); oR.CodeStatus = 0; General tool = new General(); try { if (model == null) throw new Exception("invalid_model_request_missing"); if (!tool.ValidaTexto(model.Nombre)) throw new Exception("invalid_string_form_Nombre"); if (!tool.ValidaTexto(model.Naturaleza)) throw new Exception("invalid_string_form_Naturaleza"); using (var ctx = new Models.EntitiesModel()) { Models.Tipo_Cuenta_Contable e = ctx.Tipo_Cuenta_Contable.FirstOrDefault(x => x.id == id); if (e == null) throw new Exception("tipo_cuenta_contable_not_found"); e.Nombre = model.Nombre; e.Naturaleza = model.Naturaleza; ctx.SaveChanges(); oR.CodeStatus = HttpStatusCode.OK; oR.Data = e.id; return oR; } } catch (Exception ex) { oR.CodeStatus = HttpStatusCode.InternalServerError; oR.Message = ex.Message; return oR; } }
 
-        [HttpGet]
-        [Authorize]
-        [Route("api/v1/catalogos/tipo_cuenta_contable")]
-        public Reply GetAllTipoCuentaContable() { Reply oR = new Reply(); oR.CodeStatus = 0; try { using (var ctx = new Models.EntitiesModel()) { oR.CodeStatus = HttpStatusCode.OK; oR.Data = ctx.Tipo_Cuenta_Contable.Select(x => new { x.id, x.Nombre, x.Naturaleza }).ToList(); return oR; } } catch (Exception ex) { oR.CodeStatus = HttpStatusCode.InternalServerError; oR.Message = ex.Message; return oR; } }
+        ////[HttpGet]
+        ////[Authorize]
+        ////[Route("api/v1/catalogos/tipo_cuenta_contable")]
+        ////public Reply GetAllTipoCuentaContable() { Reply oR = new Reply(); oR.CodeStatus = 0; try { using (var ctx = new Models.EntitiesModel()) { oR.CodeStatus = HttpStatusCode.OK; oR.Data = ctx.Tipo_Cuenta_Contable.Select(x => new { x.id, x.Nombre, x.Naturaleza }).ToList(); return oR; } } catch (Exception ex) { oR.CodeStatus = HttpStatusCode.InternalServerError; oR.Message = ex.Message; return oR; } }
 
-        [HttpGet]
-        [Authorize]
-        [Route("api/v1/catalogos/tipo_cuenta_contable/{id}")]
-        public Reply GetTipoCuentaContableById(int id) { Reply oR = new Reply(); oR.CodeStatus = 0; try { if (id <= 0) throw new Exception("invalid_value_for_id"); using (var ctx = new Models.EntitiesModel()) { var data = ctx.Tipo_Cuenta_Contable.Where(x => x.id == id).Select(x => new { x.id, x.Nombre, x.Naturaleza }).FirstOrDefault(); if (data == null) throw new Exception("tipo_cuenta_contable_not_found"); oR.CodeStatus = HttpStatusCode.OK; oR.Data = data; return oR; } } catch (Exception ex) { oR.CodeStatus = HttpStatusCode.InternalServerError; oR.Message = ex.Message; return oR; } }
+        ////[HttpGet]
+        ////[Authorize]
+        ////[Route("api/v1/catalogos/tipo_cuenta_contable/{id}")]
+        ////public Reply GetTipoCuentaContableById(int id) { Reply oR = new Reply(); oR.CodeStatus = 0; try { if (id <= 0) throw new Exception("invalid_value_for_id"); using (var ctx = new Models.EntitiesModel()) { var data = ctx.Tipo_Cuenta_Contable.Where(x => x.id == id).Select(x => new { x.id, x.Nombre, x.Naturaleza }).FirstOrDefault(); if (data == null) throw new Exception("tipo_cuenta_contable_not_found"); oR.CodeStatus = HttpStatusCode.OK; oR.Data = data; return oR; } } catch (Exception ex) { oR.CodeStatus = HttpStatusCode.InternalServerError; oR.Message = ex.Message; return oR; } }
         #endregion
 
 
@@ -1880,7 +1880,7 @@ namespace marsh_contable.Controllers
         public Reply CreatePermisosxRol([FromBody] Models.Permisos_x_rol model) { 
             Reply oR = new Reply(); 
             oR.CodeStatus = 0; 
-            General tool = new General(); 
+           
             try { if (model == null) throw new Exception("invalid_model_request_missing");
                 if (model.Permisos_id == 0)
                 { throw new Exception("invalid_string_form_Descripcion"); }

@@ -347,9 +347,6 @@
     </Compile>
     <Compile Include="Models\CuentaDetalleViewModel.cs" />
     <Compile Include="Models\CuentaEncabezadoViewModel.cs" />
-    <Compile Include="Models\Cuentas_Contables.cs">
-      <DependentUpon>EntitiesModel.tt</DependentUpon>
-    </Compile>
     <Compile Include="Models\Cuenta_Detalle.cs">
       <DependentUpon>EntitiesModel.tt</DependentUpon>
     </Compile>
@@ -478,9 +475,6 @@
     <Compile Include="Models\Tipo_cuentas.cs">
       <DependentUpon>EntitiesModel.tt</DependentUpon>
     </Compile>
-    <Compile Include="Models\Tipo_Cuenta_Contable.cs">
-      <DependentUpon>EntitiesModel.tt</DependentUpon>
-    </Compile>
     <Compile Include="Models\Tipo_documento.cs">
       <DependentUpon>EntitiesModel.tt</DependentUpon>
     </Compile>
@@ -500,6 +494,7 @@
     <Compile Include="Models\UsuariosViewModel.cs" />
     <Compile Include="Modulos\AceptaFacturaViewModel.cs" />
     <Compile Include="Modulos\Categoria_presupuestaria.cs" />
+    <Compile Include="Modulos\CondicionVenta.cs" />
     <Compile Include="Modulos\EstadoFactura.cs" />
     <Compile Include="Modulos\General.cs" />
     <Compile Include="Modulos\PermisosAplica.cs" />

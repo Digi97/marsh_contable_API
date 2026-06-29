@@ -103,8 +103,8 @@ namespace marsh_contable.Controllers
                         Clientes_id = model.Clientes_id,
                         Condicion_venta_id = model.Condicion_venta_id,
                         Medio_pago_id = model.Medio_pago_id,
-                        Usuarios_Usuario_id = model.Usuarios_Usuario_id
-                    };
+                        Usuarios_Usuario_id = model.Usuarios_Usuario_id,
+                                           };
                     ctx.Facturas.Add(f);
                     ctx.SaveChanges();
                     id = f.id;
@@ -120,7 +120,50 @@ namespace marsh_contable.Controllers
                         }
 
                     }
+
+
+                    if (model.Condicion_venta_id == (int)CondicionVenta.Credito)
+                    {
+
+                        // Obtener días de crédito según condición de venta
+                        var condicion = ctx.Condicion_venta.FirstOrDefault(c => c.id == model.Condicion_venta_id);
+                        int diasCredito = condicion != null ? model.dias_credito : 30;
+
+                        Models.Cuenta_Encabezado cxc = new Models.Cuenta_Encabezado()
+                        {
+                            Vigencia_inicial = DateTime.Now,
+                            Vigencia_final = DateTime.Now.AddDays(diasCredito),
+                            Tipo_moneda_id = f.Tipo_moneda_id,
+                            Medio_pago_id = f.Medio_pago_id,
+                            Total = (decimal)f.Total,
+                            Monto_Proyeccion = (decimal)f.Total,
+                            subtotal = (decimal)f.Subtotal,
+                            impuesto = (decimal)f.Impuesto,
+                            Descuento = (decimal)f.Descuento,
+                            Referencia = f.Clave,
+                            Fecha_creacion = DateTime.Now,
+                            Ultima_Fecha_actualizacion = DateTime.Now,
+                            Usuarios_Usuario_id = (int)model.Usuarios_Usuario_id,
+                            Clientes_id = f.Clientes_id,
+                            Facturas_id = f.id,
+                            Proveedor_id = null,
+                            Gastos_id = null,
+                            Ingresos_id = null,
+                            Estado = 1,
+                            Tipo_cuentas_id = (int)TipoCuenta.CuentaPorCobrar,
+                          
+                            Centro_Costos_id = (int)gpExist.Centro_Costos_id,
+                            Categoria_presupuestaria_id = (int) gpExist.Categoria_presupuestaria_id
+                        };
+                        ctx.Cuenta_Encabezado.Add(cxc);
+                        ctx.SaveChanges();
+                    }
+
+
+
                 }
+
+               
 
 
 

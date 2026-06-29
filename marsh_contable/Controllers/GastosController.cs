@@ -69,22 +69,27 @@ namespace marsh_contable.Controllers
                     throw new Exception("currency_is_required");
                 }
 
-                if(model.presupuesto_id ==0)
+                if( String.IsNullOrEmpty(model.presupuesto_id) )
                 {
                     throw new Exception("presupuesto_not defined");
                 }
 
                 BancoController banco = new BancoController();
-      
 
-                validacionPresupuesto(model.presupuesto_id, model.Total); //validamos el presupuesto
+                string[] partes = model.presupuesto_id.Split('_'); // id = gp.id+"_"+gp.Categoria_presupuestaria_id+"_"+ gp.Centro_Costos_id,
+
+                int pid = int.Parse(partes[0]);
+                int cpid = int.Parse(partes[1]);
+                int ccid = int.Parse(partes[2]);
+
+                validacionPresupuesto(pid, model.Total, cpid, ccid); //validamos el presupuesto
 
                 using (var ctx = new Models.EntitiesModel())
                 {
 
                     DateTime currentDate = DateTime.Now;
 
-                    gpExist = ctx.Gestion_Presupuestaria.FirstOrDefault(u => currentDate >= u.periodo_inicio && currentDate <= u.periodo_fin && u.id == model.presupuesto_id);
+                    gpExist = ctx.Gestion_Presupuestaria.FirstOrDefault(u => currentDate >= u.periodo_inicio && currentDate <= u.periodo_fin && u.id == pid);
                     if (gpExist == null)
                     {
                         throw new Exception("gestion_presupuestaria_for_current_period_dont_exist");
@@ -172,7 +177,43 @@ namespace marsh_contable.Controllers
                     throw new Exception(response.Message);
                 }
 
-     
+                // Dentro de CreateGasto, si la condición es crédito
+                if (model.Condicion_venta_id == (int)CondicionVenta.Credito)
+                {
+                    using (var ctx = new Models.EntitiesModel())
+                    {
+                        Models.Cuenta_Encabezado cxp = new Models.Cuenta_Encabezado()
+                        {
+                            Vigencia_inicial = DateTime.Now,
+                            Vigencia_final = DateTime.Now.AddDays(model.dias_credito),
+                            Tipo_moneda_id = (int)g.Tipo_moneda_id,
+                            Medio_pago_id = g.Medio_pago_id,
+                            Total = (decimal)g.Total,
+                            Monto_Proyeccion = (decimal)g.Total,
+                            subtotal = (decimal)g.Subtotal,
+                            impuesto = (decimal)g.Impuesto,
+                            Descuento = (decimal)g.Descuento,
+                            Referencia = g.Doc_Referencia,
+                            Fecha_creacion = DateTime.Now,
+                            Ultima_Fecha_actualizacion = DateTime.Now,
+                            Usuarios_Usuario_id = g.Usuarios_Usuario_id,
+                            Clientes_id = null,
+                            Facturas_id = null,
+                            Proveedor_id = g.Proveedor_id,
+                            Gastos_id = g.id,
+                            Ingresos_id = null,
+                            Estado = 1,
+                            Tipo_cuentas_id = (int)TipoCuenta.CuentaPorPagar,
+                            Categoria_presupuestaria_id = gpExist.Categoria_presupuestaria_id,
+                            Centro_Costos_id = gpExist.Centro_Costos_id
+                        };
+                        ctx.Cuenta_Encabezado.Add(cxp);
+                        ctx.SaveChanges();
+                    }
+                
+                }
+
+
 
                 oR.CodeStatus = HttpStatusCode.OK;
                 oR.Data = id;
@@ -229,12 +270,18 @@ namespace marsh_contable.Controllers
                     throw new Exception("currency_is_required");
                 }
 
-                if (model.presupuesto_id == 0)
+                if (String.IsNullOrEmpty(model.presupuesto_id))
                 {
                     throw new Exception("presupuesto_not defined");
                 }
 
-                validacionPresupuesto(model.presupuesto_id, model.Total); //validamos el presupuesto
+
+                string[] partes = model.presupuesto_id.Split('_'); // id = gp.id+"_"+gp.Categoria_presupuestaria_id+"_"+ gp.Centro_Costos_id,
+
+                int pid = int.Parse(partes[0]);
+                int cpid = int.Parse(partes[1]);
+                int ccid = int.Parse(partes[2]);
+                validacionPresupuesto(pid, model.Total, cpid, ccid); //validamos el presupuesto
 
 
                 using (var ctx = new Models.EntitiesModel())
@@ -611,8 +658,8 @@ namespace marsh_contable.Controllers
         }
 
 
-        private bool validacionPresupuesto(int pid = 0, double gtotal = 0)
-        {
+        private bool validacionPresupuesto(int pid = 0, double gtotal = 0, int cpid =0, int ccid = 0)
+        {//  validacionPresupuesto(pid, model.Total, cpid, ccid
             General tool = new General();
             try
             {
@@ -627,7 +674,8 @@ namespace marsh_contable.Controllers
                     Models.Gestion_Presupuestaria gpExist = ctx.Gestion_Presupuestaria
                         .FirstOrDefault(u => currentDate >= u.periodo_inicio &&
                                              currentDate <= u.periodo_fin &&
-                                             u.id == pid);
+                                             u.id == pid && u.Categoria_presupuestaria_id == cpid
+                                             && u.Centro_Costos_id == ccid);
 
                     if (gpExist == null)
                         throw new Exception("gestion_presupuestaria_for_current_period_dont_exist");

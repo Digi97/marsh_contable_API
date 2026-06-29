@@ -108,37 +108,75 @@ namespace marsh_contable.Controllers
                         }
                     }
 
-          
+
+                    // Dentro de CreateFactura, después del SaveChanges
+                    if (model.Condicion_venta_id != (int)CondicionVenta.Contado)
+                    {
+                        // Obtener días de crédito según condición de venta
+                        var condicion = ctx.Condicion_venta.FirstOrDefault(c => c.id == model.Condicion_venta_id);
+                        int diasCredito = condicion != null ? model.dias_credito : 30;
+
+                        Models.Cuenta_Encabezado cxc = new Models.Cuenta_Encabezado()
+                        {
+                            Vigencia_inicial = DateTime.Now,
+                            Vigencia_final = DateTime.Now.AddDays(diasCredito),
+                            Tipo_moneda_id = i.Tipo_moneda_id,
+                            Medio_pago_id = i.Medio_pago_id,
+                            Total = (decimal)i.Total,
+                            Monto_Proyeccion = (decimal)i.Total,
+                            subtotal = (decimal)i.Subtotal,
+                            impuesto = (decimal)i.Impuesto,
+                            Descuento = (decimal)i.Descuento,
+                            Referencia = i.id.ToString(),
+                            Fecha_creacion = DateTime.Now,
+                            Ultima_Fecha_actualizacion = DateTime.Now,
+                            Usuarios_Usuario_id = model.Usuarios_Usuario_id,
+                            Clientes_id = i.Clientes_id,
+                            Facturas_id = null,
+                            Proveedor_id = null,
+                            Gastos_id = null,
+                            Ingresos_id = i.id,
+                            Estado = 1,
+                            Tipo_cuentas_id = (int)TipoCuenta.CuentaPorCobrar,
+                            Categoria_presupuestaria_id = gpExist.Categoria_presupuestaria_id,
+                            Centro_Costos_id = gpExist.Centro_Costos_id
+                        };
+                        ctx.Cuenta_Encabezado.Add(cxc);
+                        ctx.SaveChanges();
+                    }
+
+                    Models.Gestion_P_detalle detalleP = new Models.Gestion_P_detalle()
+                    {
+                        Monto = i.Total,
+                        Monto_aprobado = gpExist.monto_aprobado,
+                        Monto_modificado = gpExist.monto_modificado,
+                        Monto_compometido = gpExist.monto_comprometido,
+                        Monto_ejecutado = (decimal)i.Total,
+                        detalle_presupuesto = $"Ingresos #{id}",
+                        Gestion_Presupuestaria_id = gpExist.id, // ID del presupuesto activo
+                        Categoria_presupuestaria_id = (int)Modulos.Categoria_presupuestaria.Ingresos,
+                        Gastos_id = null,
+                        Ingresos_id = id,
+                        Facturas_id = null,
+                        Usuarios_Usuario_id = (int)model.Usuarios_Usuario_id,
+                        Fecha_registro = DateTime.Now,
+                        Observaciones = $"Id: {i.id} | Subtotal: {i.Subtotal} | Impuesto: {i.Impuesto} | Descuento: {i.Descuento}",
+                        activo = 1
+                    };
+
+
+                    GestionPDetalleController detalleGestion = new GestionPDetalleController();
+                    var response = detalleGestion.CreateGestionPDetalle(detalleP);
+
+                    if (response.CodeStatus != HttpStatusCode.OK)
+                    {
+                        throw new Exception(response.Message);
+                    }
+
+
                 }
 
 
-                Models.Gestion_P_detalle detalleP = new Models.Gestion_P_detalle()
-                {
-                    Monto = i.Total,
-                    Monto_aprobado = gpExist.monto_aprobado,
-                    Monto_modificado = gpExist.monto_modificado,
-                    Monto_compometido = gpExist.monto_comprometido,
-                    Monto_ejecutado = (decimal)i.Total,
-                    detalle_presupuesto = $"Ingresos #{id}",
-                    Gestion_Presupuestaria_id = gpExist.id, // ID del presupuesto activo
-                    Categoria_presupuestaria_id = (int)Modulos.Categoria_presupuestaria.Ingresos,
-                    Gastos_id = null,
-                    Ingresos_id = id,
-                    Facturas_id = null,
-                    Usuarios_Usuario_id = (int)model.Usuarios_Usuario_id,
-                    Fecha_registro = DateTime.Now,
-                    Observaciones = $"Id: {i.id} | Subtotal: {i.Subtotal} | Impuesto: {i.Impuesto} | Descuento: {i.Descuento}",
-                    activo = 1
-                };
-
-
-                GestionPDetalleController detalleGestion = new GestionPDetalleController();
-                var response = detalleGestion.CreateGestionPDetalle(detalleP);
-
-                if (response.CodeStatus != HttpStatusCode.OK)
-                {
-                    throw new Exception(response.Message);
-                }
 
                 oR.CodeStatus = HttpStatusCode.OK;
                 oR.Data = i.id;
