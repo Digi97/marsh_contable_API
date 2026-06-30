@@ -68,9 +68,9 @@ namespace marsh_contable.Models
         public virtual DbSet<Gestion_P_Anio> Gestion_P_Anio { get; set; }
         public virtual DbSet<AuditaTabla> AuditaTabla { get; set; }
         public virtual DbSet<MultiFactor> MultiFactor { get; set; }
-        public virtual DbSet<Bancos> Bancos { get; set; }
         public virtual DbSet<Bancos_Movimientos> Bancos_Movimientos { get; set; }
         public virtual DbSet<Cuenta_Detalle> Cuenta_Detalle { get; set; }
         public virtual DbSet<Cuenta_Encabezado> Cuenta_Encabezado { get; set; }
+        public virtual DbSet<Bancos> Bancos { get; set; }
     }
 }

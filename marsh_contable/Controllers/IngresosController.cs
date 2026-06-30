@@ -68,8 +68,7 @@ namespace marsh_contable.Controllers
 
                     DateTime currentDate = DateTime.Now;
 
-                    gpExist = ctx.Gestion_Presupuestaria
-       .FirstOrDefault(u => currentDate >= u.periodo_inicio && currentDate <= u.periodo_fin);
+                    gpExist = ctx.Gestion_Presupuestaria.FirstOrDefault(u => currentDate >= u.periodo_inicio && currentDate <= u.periodo_fin);
                     
                     if (gpExist == null)
                     {
@@ -90,6 +89,7 @@ namespace marsh_contable.Controllers
                         Clientes_id = model.Clientes_id,
                         Usuarios_Usuario_id = model.Usuarios_Usuario_id,
                         Medio_pago_id = model.Medio_pago_id,
+                        Condicion_venta_id = model.Condicion_venta_id
                         //Facturas_id = null//model.Facturas_id
                     };
                     ctx.Ingresos.Add(i);
@@ -106,6 +106,12 @@ namespace marsh_contable.Controllers
                         {
                             throw new Exception(result.Message);
                         }
+                    }
+
+
+                    if(model.createElectronicDoc== 1)
+                    {
+                        //TODO: crear Factura y documento Electronico XML tipo Factura
                     }
 
 
@@ -259,6 +265,7 @@ namespace marsh_contable.Controllers
                     i.Clientes_id = model.Clientes_id;
                     i.Medio_pago_id = model.Medio_pago_id;
                     i.Facturas_id = model.Facturas_id;
+                    i.Condicion_venta_id = model.Condicion_venta_id;
                     ctx.SaveChanges();
 
                 }
@@ -419,7 +426,8 @@ namespace marsh_contable.Controllers
                                  Tipo_moneda = tm.Nombre,
                                  Estado_factura = ef.Nombre,
                                  Medio_pago = mp.descripcion,
-                                 Usuario = u.Nombre + " " + u.Apellido1
+                                 Usuario = u.Nombre + " " + u.Apellido1,
+                                 Condicion_venta_id = (int)x.Condicion_venta_id
                              }).FirstOrDefault();
 
                     if (i == null)

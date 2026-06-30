@@ -26,6 +26,7 @@ namespace marsh_contable.Models
         public string Medio_pago { get; set; }
         public string Usuario { get; set; }
 
+        public int Condicion_venta_id { get; set; }
         // Lista de detalles
         public List<IngresosDetalleViewModel> IngresosDetalle { get; set; }
     }

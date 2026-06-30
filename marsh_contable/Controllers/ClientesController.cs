@@ -357,6 +357,49 @@ namespace marsh_contable.Controllers
         }
 
 
+        [HttpGet]
+        [Authorize]
+        [Route("api/v1/clientes_dp")]
+        public Reply GetAllClientesforDropDown()
+        {
+            Reply oR = new Reply();
+            oR.CodeStatus = HttpStatusCode.OK;
+            try
+            {
+              
+
+                using (var ctx = new Models.EntitiesModel())
+                {
+
+                    var clientes = (from c in ctx.Clientes
+                               
+                                 where c.estado == 1 //solo activos
+                                 select new
+                                 {
+                                     c.id,
+                                     Nombre = c.Nombre,
+                                     Apellido1 = c.Apellido1
+                                 }).OrderBy(x => x.Nombre).ToList();
+
+                    oR.Data = clientes;
+                    return oR;
+                }
+            }
+            catch (System.Data.Entity.Validation.DbEntityValidationException ex2)
+            {
+                string errorDB = "";
+                foreach (var eve in ex2.EntityValidationErrors)
+                    foreach (var ve in eve.ValidationErrors)
+                        errorDB += ve.ErrorMessage;
+                oR.CodeStatus = HttpStatusCode.InternalServerError;
+                oR.Message = errorDB;
+                return oR;
+            }
+            catch (Exception ex) { oR.CodeStatus = HttpStatusCode.InternalServerError; oR.Message = ex.Message; return oR; }
+        }
+
+
+
 
         [HttpGet]
         [Authorize]

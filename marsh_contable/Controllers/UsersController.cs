@@ -352,6 +352,63 @@ namespace marsh_contable.Controllers
         }
 
 
+        [HttpDelete]
+        [Authorize]
+        [Route("api/v1/users/{id}")]
+        public Reply DeleteUserById(int id)
+        {
+            Reply oR = new Reply();
+            oR.CodeStatus = 0;
+            try
+            {
+                if (id <= 0)
+                    throw new Exception("invalid_value_for_id");
+
+                using (var ctx = new Models.EntitiesModel())
+                {
+                    Models.Usuarios usuario = ctx.Usuarios.FirstOrDefault(u => u.Usuario_id == id);
+
+                    if (usuario == null)
+                        throw new Exception("user_not_found");
+
+                    try
+                    {
+                        // Intentar eliminar físicamente
+                        ctx.Usuarios.Remove(usuario);
+                        ctx.SaveChanges();
+
+                        oR.CodeStatus = HttpStatusCode.OK;
+                        oR.Message = "user_deleted_successfully";
+                        oR.Data = id;
+                    }
+                    catch (System.Data.Entity.Infrastructure.DbUpdateException)
+                    {
+                        // FK dependency — revertir el delete y desactivar
+                        foreach (var entry in ctx.ChangeTracker.Entries())
+                        {
+                            entry.Reload();
+                        }
+
+                        usuario.activo = 0;
+                        usuario.Fec_Actualizacion = DateTime.Now;
+                        ctx.SaveChanges();
+
+                        oR.CodeStatus = HttpStatusCode.OK;
+                        oR.Message = "user_deactivated_due_to_dependencies";
+                        oR.Data = id;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                oR.CodeStatus = HttpStatusCode.InternalServerError;
+                oR.Message = ex.Message;
+            }
+            return oR;
+        }
+
+
+
         [HttpPost]
         [AllowAnonymous]
         [Route("api/v1/login")]

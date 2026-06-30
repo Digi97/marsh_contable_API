@@ -14,7 +14,18 @@ using Facturacion_C_Sharp.Lib.DocumentoItems;
 
 namespace marsh_contable.Controllers
 {
-  
+    //TODO: CREAR UNA FUNCION QUE RECIBA POR HTTPDELETE LA CUAL CREE UNA COPIA EN LA TABLA FACTURA QUE SEA DE TIPO TipoDocumentoId.NotaCreditoElectronica y cree el respectivo documento electronico
+
+
+    //TODO: MODIFICAR LA  FUNCION HTTPPUT LA CUAL DEBERA RECIBIR TRES DETALLES, LOS QUE YA EXISTEN, NUEVOS Y ELIMINADOS, PARA LOS ELIMINADOS DEBERA CREAR
+    // UNA FACTURA DE TIPO TipoDocumentoId.NotaCreditoElectronica y cree el respectivo documento electronico con los respectivos detalles
+    //PARA EL ARRAY DE NUEVOS DEBERA CREAR UNA FACTURA DE TIPO TipoDocumentoId.NotaDebitoElectronica con los respectivos detalles
+
+    //TODO: AL CREAR UNA FACTURA SE DEBE INGRESAR EN REGISTRO DE CUENTAS Y APLICACION A PRESUPUESTO
+
+    //TODO: VALIDAR FUNCION aceptafactura PARA CREAR EL REGISTRO DE UNA FACTURA INGRESADA DE TIPO TipoDocumentoId.ConfirmacionAceptacionMensajeReceptor Y SU RESPECTIVO DOCUMENTO ELECTRONICO Y VALIDARLO CON HACIENDA
+   //TODO: CONLCUIR VALIDACION CON HACIENDA
+    
     public class FacturasController : ApiController
     {
 
@@ -24,6 +35,8 @@ namespace marsh_contable.Controllers
         [RequierePermiso(PermisosAplica.UsuarioFacturacion)]
         public Reply CreateFactura([FromBody] Models.Facturas model)
         {
+
+            
             int id = 0;
             Models.Gestion_Presupuestaria gpExist;
             Models.Facturas f;
@@ -591,6 +604,7 @@ namespace marsh_contable.Controllers
                 "1",//en linea
                 empresa.codigo_seguridad
             );
+            
 
             return new ClaveViewModel
             {
@@ -598,6 +612,8 @@ namespace marsh_contable.Controllers
                 Clave = claveNumerica
             };
         }
+
+     
 
 
         // Facturas filtradas por cliente

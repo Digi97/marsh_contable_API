@@ -351,7 +351,8 @@ namespace marsh_contable.Controllers
                                   Tipo_cuenta                = tc.Nombre,
                                   Centro_costo               = cco.Nombre,
                                   Usuario                    = u.Nombre + " " + u.Apellido1,
-                                  Estado_texto               = x.Estado == 1 ? "Activo" : "Inactivo"
+                                  Estado_texto               = x.Estado == 1 ? "Activo" : "Inactivo",
+                                  
                               }).FirstOrDefault();
 
                     if (ce == null)

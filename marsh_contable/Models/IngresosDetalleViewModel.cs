@@ -18,6 +18,7 @@ namespace marsh_contable.Models
         public DateTime Fecha { get; set; }
         public DateTime Ultima_fec_actualizacion { get; set; }
         public string Unidad_medida { get; set; }
+        public int Condicion_venta_id { get; set; }
 
     }
 }

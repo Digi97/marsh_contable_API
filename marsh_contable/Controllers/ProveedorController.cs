@@ -284,6 +284,48 @@ namespace marsh_contable.Controllers
 
         [HttpGet]
         [Authorize]
+        [Route("api/v1/proveedor_dp")]
+        public Reply GetAllProveedorforDropDown()
+        {
+            Reply oR = new Reply();
+            oR.CodeStatus = HttpStatusCode.OK;
+            try
+            {
+
+
+                using (var ctx = new Models.EntitiesModel())
+                {
+
+                    var proveedores = (from p in ctx.Proveedor
+
+                                    where p.estado == 1 //solo activos
+                                    select new
+                                    {
+                                        p.id,
+                                        Nombre = p.Nombre,
+                                        Apellido1 = p.Apellido1
+                                    }).OrderBy(x => x.Nombre).ToList();
+
+                    oR.Data = proveedores;
+                    return oR;
+                }
+            }
+            catch (System.Data.Entity.Validation.DbEntityValidationException ex2)
+            {
+                string errorDB = "";
+                foreach (var eve in ex2.EntityValidationErrors)
+                    foreach (var ve in eve.ValidationErrors)
+                        errorDB += ve.ErrorMessage;
+                oR.CodeStatus = HttpStatusCode.InternalServerError;
+                oR.Message = errorDB;
+                return oR;
+            }
+            catch (Exception ex) { oR.CodeStatus = HttpStatusCode.InternalServerError; oR.Message = ex.Message; return oR; }
+        }
+
+
+        [HttpGet]
+        [Authorize]
         [Route("api/v1/proveedor")]
         public Reply GetAllProveedorPaged()
         {

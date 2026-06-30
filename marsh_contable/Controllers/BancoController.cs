@@ -36,14 +36,6 @@ namespace marsh_contable.Controllers
                                  join tm in ctx.Tipo_moneda on b.Tipo_moneda_id equals tm.id
                                  join u in ctx.Usuarios on b.Usuarios_Usuario_id equals u.Usuario_id
 
-                                 // LEFT JOIN Centro_Costos
-                                 join cc in ctx.Centro_Costos on b.Centro_Costos_id equals cc.id into ccGroup
-                                 from cc in ccGroup.DefaultIfEmpty()
-
-                                     // LEFT JOIN Categoria_presupuestaria
-                                 join cp in ctx.Categoria_presupuestaria on b.Categoria_presupuestaria_id equals cp.id into cpGroup
-                                 from cp in cpGroup.DefaultIfEmpty()
-
                                  orderby b.nombre_banco
                                  select new
                                  {
@@ -57,12 +49,9 @@ namespace marsh_contable.Controllers
                                      b.fecha_actualizacion,
                                      b.estado,
                                      b.Tipo_moneda_id,
-                                     b.Centro_Costos_id,
-                                     b.Categoria_presupuestaria_id,
                                      Tipo_moneda = tm.Nombre,
                                      Simbolo = tm.Simbolo,
-                                     Centro_Costos = cc != null ? cc.Nombre : "",
-                                     Categoria_presupuestaria = cp != null ? cp.nombre : "",
+                          
                                      Usuario = u.Nombre + " " + u.Apellido1,
                                      Estado_texto = b.estado == 1 ? "Activo" : "Inactivo"
                                  }).ToList();
@@ -106,12 +95,6 @@ namespace marsh_contable.Controllers
                                  join tm in ctx.Tipo_moneda on b.Tipo_moneda_id equals tm.id
                                  join u in ctx.Usuarios on b.Usuarios_Usuario_id equals u.Usuario_id
 
-                                 join cc in ctx.Centro_Costos on b.Centro_Costos_id equals cc.id into ccGroup
-                                 from cc in ccGroup.DefaultIfEmpty()
-
-                                 join cp in ctx.Categoria_presupuestaria on b.Categoria_presupuestaria_id equals cp.id into cpGroup
-                                 from cp in cpGroup.DefaultIfEmpty()
-
                                  where b.id == id
                                  select new
                                  {
@@ -125,14 +108,11 @@ namespace marsh_contable.Controllers
                                      b.fecha_actualizacion,
                                      b.estado,
                                      b.Tipo_moneda_id,
-                                     b.Centro_Costos_id,
-                                     b.Categoria_presupuestaria_id,
+                                   
                                      b.Empresa_Emp_id,
                                      b.Usuarios_Usuario_id,
                                      Tipo_moneda = tm.Nombre,
                                      Simbolo = tm.Simbolo,
-                                     Centro_Costos = cc != null ? cc.Nombre : "",
-                                     Categoria_presupuestaria = cp != null ? cp.nombre : "",
                                      Usuario = u.Nombre + " " + u.Apellido1
                                  }).FirstOrDefault();
 
@@ -229,8 +209,7 @@ namespace marsh_contable.Controllers
                         fecha_actualizacion = DateTime.Now,
                         estado = 1,
                         Tipo_moneda_id = model.Tipo_moneda_id,
-                        Centro_Costos_id = model.Centro_Costos_id,
-                        Categoria_presupuestaria_id = model.Categoria_presupuestaria_id,
+                      
                         Empresa_Emp_id = 1,
                         Usuarios_Usuario_id = model.Usuarios_Usuario_id
                     };
@@ -310,8 +289,6 @@ namespace marsh_contable.Controllers
                     banco.tipo_cuenta = model.tipo_cuenta;
                     banco.moneda_simbolo = model.moneda_simbolo;
                     banco.Tipo_moneda_id = model.Tipo_moneda_id;
-                    banco.Centro_Costos_id = model.Centro_Costos_id;
-                    banco.Categoria_presupuestaria_id = model.Categoria_presupuestaria_id;
                     banco.fecha_actualizacion = DateTime.Now;
                     banco.estado = model.estado;
 
@@ -468,13 +445,11 @@ namespace marsh_contable.Controllers
 
                     // ── Buscar banco activo por categoría, tipo moneda y centro de costo
                     var banco = ctx.Bancos.FirstOrDefault(b =>
-                        b.Categoria_presupuestaria_id == categoriaPresupuestariaId &&
-                       // b.Tipo_moneda_id == tipoMonedaId && //quitemos validacion por moneda, solo para centros de costos
-                        b.Centro_Costos_id == centroCostosId &&
+                       b.Tipo_moneda_id == tipoMonedaId && 
                         b.estado == 1);
 
                     if (banco == null)
-                        throw new Exception("banco_not_found_for_categoria_moneda_centro_costo");
+                        throw new Exception("banco_not_found_for_tipo_moneda");
 
                     // ── Validar saldo suficiente
                     decimal montoDecimal = (decimal)montoGasto;
@@ -565,9 +540,7 @@ namespace marsh_contable.Controllers
                     ctx.Configuration.ProxyCreationEnabled = false;
 
                     var banco = ctx.Bancos.FirstOrDefault(b =>
-                        b.Categoria_presupuestaria_id == categoriaPresupuestariaId &&
                         b.Tipo_moneda_id == tipoMonedaId &&
-                        b.Centro_Costos_id == centroCostosId &&
                         b.estado == 1);
 
                     if (banco == null)
@@ -649,9 +622,7 @@ namespace marsh_contable.Controllers
 
                     // ── Buscar banco activo por categoría, tipo moneda y centro de costo
                     var banco = ctx.Bancos.FirstOrDefault(b =>
-                        b.Categoria_presupuestaria_id == categoriaPresupuestariaId &&
                         b.Tipo_moneda_id == tipoMonedaId &&
-                        b.Centro_Costos_id == centroCostosId &&
                         b.estado == 1);
 
                     if (banco == null)
@@ -704,9 +675,7 @@ namespace marsh_contable.Controllers
 
                     // ── Buscar banco activo por categoría, tipo moneda y centro de costo
                     var banco = ctx.Bancos.FirstOrDefault(b =>
-                        b.Categoria_presupuestaria_id == categoriaPresupuestariaId &&
                         b.Tipo_moneda_id == tipoMonedaId &&
-                        b.Centro_Costos_id == centroCostosId &&
                         b.estado == 1);
 
                     if (banco == null)
@@ -770,6 +739,64 @@ namespace marsh_contable.Controllers
                 return oR;
             }
         }
+
+
+
+        [HttpDelete]
+        [Authorize]
+        [Route("api/v1/bancos/{id}")]
+        public Reply DeleteBancoById(int id)
+        {
+            Reply oR = new Reply();
+            oR.CodeStatus = 0;
+            try
+            {
+                if (id <= 0)
+                    throw new Exception("invalid_value_for_id");
+
+                using (var ctx = new Models.EntitiesModel())
+                {
+                    Models.Bancos banco = ctx.Bancos.FirstOrDefault(u => u.id == id);
+
+                    if (banco == null)
+                        throw new Exception("user_not_found");
+
+                    try
+                    {
+                        // Intentar eliminar físicamente
+                        ctx.Bancos.Remove(banco);
+                        ctx.SaveChanges();
+
+                        oR.CodeStatus = HttpStatusCode.OK;
+                        oR.Message = "banco_deleted_successfully";
+                        oR.Data = id;
+                    }
+                    catch (System.Data.Entity.Infrastructure.DbUpdateException)
+                    {
+                        // FK dependency — revertir el delete y desactivar
+                        foreach (var entry in ctx.ChangeTracker.Entries())
+                        {
+                            entry.Reload();
+                        }
+
+                        banco.estado = 0;
+                        banco.fecha_actualizacion = DateTime.Now;
+                        ctx.SaveChanges();
+
+                        oR.CodeStatus = HttpStatusCode.OK;
+                        oR.Message = "banco_deactivated_due_to_dependencies";
+                        oR.Data = id;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                oR.CodeStatus = HttpStatusCode.InternalServerError;
+                oR.Message = ex.Message;
+            }
+            return oR;
+        }
+
 
     }
 }

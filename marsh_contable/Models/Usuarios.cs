@@ -25,10 +25,10 @@ namespace marsh_contable.Models
             this.Gestion_P_detalle = new HashSet<Gestion_P_detalle>();
             this.Facturas = new HashSet<Facturas>();
             this.MultiFactor = new HashSet<MultiFactor>();
-            this.Bancos = new HashSet<Bancos>();
             this.Bancos_Movimientos = new HashSet<Bancos_Movimientos>();
             this.Cuenta_Detalle = new HashSet<Cuenta_Detalle>();
             this.Cuenta_Encabezado = new HashSet<Cuenta_Encabezado>();
+            this.Bancos = new HashSet<Bancos>();
         }
     
         public int Usuario_id { get; set; }
@@ -67,12 +67,12 @@ namespace marsh_contable.Models
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<MultiFactor> MultiFactor { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<Bancos> Bancos { get; set; }
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Bancos_Movimientos> Bancos_Movimientos { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Cuenta_Detalle> Cuenta_Detalle { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Cuenta_Encabezado> Cuenta_Encabezado { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<Bancos> Bancos { get; set; }
     }
 }

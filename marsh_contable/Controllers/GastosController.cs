@@ -74,6 +74,7 @@ namespace marsh_contable.Controllers
                     throw new Exception("presupuesto_not defined");
                 }
 
+       
                 BancoController banco = new BancoController();
 
                 string[] partes = model.presupuesto_id.Split('_'); // id = gp.id+"_"+gp.Categoria_presupuestaria_id+"_"+ gp.Centro_Costos_id,
@@ -119,6 +120,12 @@ namespace marsh_contable.Controllers
 
                     gpExist.monto_ejecutado = gpExist.monto_ejecutado + model.Total;
                     ctx.SaveChanges();
+
+
+                    if(model.Tipo_documento_id == (int)TipoDocumentoId.FacturaElectronicaCompra)
+                    {
+                        //TODO: CREAR REGISTRO EN FACTURA Y XML 
+                    }
                     //actualizamos el monto ejecutado para los reportes
                     id = g.id;
                     GastosDetallesController gastosDetalles = new GastosDetallesController();
@@ -312,6 +319,7 @@ namespace marsh_contable.Controllers
                     g.Ultima_Fec_Actualizacion = DateTime.Now;
                     g.Descuento = model.Descuento;
                     g.Tipo_moneda_id = model.Tipo_moneda_id;
+                    g.Condicion_venta_id = model.Condicion_venta_id;
                     
                     ctx.SaveChanges();
                 }
@@ -578,7 +586,10 @@ namespace marsh_contable.Controllers
                                  Tipo_documento = td.Nombre,
                                  Medio_pago = mp.descripcion,
                                  Proveedor = p.Nombre + " " + p.Apellido1,
-                                 Usuario = u.Nombre + " " + u.Apellido1
+                                 Usuario = u.Nombre + " " + u.Apellido1,
+                                 Tipo_moneda_id = (int)x.Tipo_moneda_id,
+                                 condicion_venta_id = (int)x.Condicion_venta_id
+
                                  
                              }).FirstOrDefault();
 

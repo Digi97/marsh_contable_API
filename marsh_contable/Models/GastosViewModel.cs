@@ -31,5 +31,6 @@ namespace marsh_contable.Models
         public string Usuario { get; set; }
         public List<GastosDetallesViewModel> GastosDetalle { get; set; }
         public int presupuesto_id { get; set; }
+        public int condicion_venta_id { get; set; }
     }
 }
