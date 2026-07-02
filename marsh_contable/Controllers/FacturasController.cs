@@ -17,15 +17,17 @@ namespace marsh_contable.Controllers
     //TODO: CREAR UNA FUNCION QUE RECIBA POR HTTPDELETE LA CUAL CREE UNA COPIA EN LA TABLA FACTURA QUE SEA DE TIPO TipoDocumentoId.NotaCreditoElectronica y cree el respectivo documento electronico
 
 
-    //TODO: MODIFICAR LA  FUNCION HTTPPUT LA CUAL DEBERA RECIBIR TRES DETALLES, LOS QUE YA EXISTEN, NUEVOS Y ELIMINADOS, PARA LOS ELIMINADOS DEBERA CREAR
+    //TODO: MODIFICAR LA  FUNCION UpdateFactura LA CUAL DEBERA RECIBIR TRES DETALLES, LOS QUE YA EXISTEN, NUEVOS Y ELIMINADOS, PARA LOS ELIMINADOS DEBERA CREAR
     // UNA FACTURA DE TIPO TipoDocumentoId.NotaCreditoElectronica y cree el respectivo documento electronico con los respectivos detalles
     //PARA EL ARRAY DE NUEVOS DEBERA CREAR UNA FACTURA DE TIPO TipoDocumentoId.NotaDebitoElectronica con los respectivos detalles
 
     //TODO: AL CREAR UNA FACTURA SE DEBE INGRESAR EN REGISTRO DE CUENTAS Y APLICACION A PRESUPUESTO
 
-    //TODO: VALIDAR FUNCION aceptafactura PARA CREAR EL REGISTRO DE UNA FACTURA INGRESADA DE TIPO TipoDocumentoId.ConfirmacionAceptacionMensajeReceptor Y SU RESPECTIVO DOCUMENTO ELECTRONICO Y VALIDARLO CON HACIENDA
-   //TODO: CONLCUIR VALIDACION CON HACIENDA
-    
+
+    //TODO: Modificar la funcion aceptafactura PARA CREAR EL REGISTRO DE UNA FACTURA INGRESADA DE TIPO TipoDocumentoId.ConfirmacionAceptacionMensajeReceptor Y SU RESPECTIVO DOCUMENTO ELECTRONICO Y VALIDARLO CON HACIENDA
+    //
+    //TODO_Manually: CONLCUIR VALIDACION CON HACIENDA
+
     public class FacturasController : ApiController
     {
 
@@ -73,10 +75,6 @@ namespace marsh_contable.Controllers
                 {
                     throw new Exception("invalid_value_form_Tipo_documento_id");
                 }
-
-              
-
-
 
                 using (var ctx = new Models.EntitiesModel())
                 {
@@ -131,13 +129,9 @@ namespace marsh_contable.Controllers
                         {
                             throw new Exception(result.Message);
                         }
-
                     }
-
-
                     if (model.Condicion_venta_id == (int)CondicionVenta.Credito)
                     {
-
                         // Obtener días de crédito según condición de venta
                         var condicion = ctx.Condicion_venta.FirstOrDefault(c => c.id == model.Condicion_venta_id);
                         int diasCredito = condicion != null ? model.dias_credito : 30;
@@ -171,15 +165,7 @@ namespace marsh_contable.Controllers
                         ctx.Cuenta_Encabezado.Add(cxc);
                         ctx.SaveChanges();
                     }
-
-
-
                 }
-
-               
-
-
-
                 Models.Gestion_P_detalle detalle = new Models.Gestion_P_detalle()
                 {
                     Monto = f.Total,
@@ -208,7 +194,7 @@ namespace marsh_contable.Controllers
                     throw new Exception(response.Message);
                 }
                 /// si todo se hace correctamente creamos el doc electronico
-                CreateDocument(id);
+                CreateDocument(id, TipoDocumentoId.FacturaElectronica);
 
                 oR.CodeStatus = HttpStatusCode.OK;
                 oR.Data = id;
@@ -658,7 +644,7 @@ namespace marsh_contable.Controllers
         }
   
     
-        private Boolean CreateDocument(int id)
+        private Boolean CreateDocument(int id, TipoDocumentoId tipoDocumento)
         {
             try
             {
@@ -844,8 +830,46 @@ namespace marsh_contable.Controllers
                     );
 
 
+                String rutaGuardado = empresaEmi.Ruta_nas;
+                Documento.TipoDocumento tipoDoc = 0;
+               
+
+                switch (tipoDocumento)
+                {
+                    case TipoDocumentoId.FacturaElectronica:
+                        rutaGuardado = rutaGuardado + "/Documentos_Electronicos/Facturas/";
+                        tipoDoc = Documento.TipoDocumento.Factura_Electronica;
+                     
+                     break;
+                    case TipoDocumentoId.NotaCreditoElectronica:
+
+                        rutaGuardado = rutaGuardado + "/Documentos_Electronicos/Nota_Credito/";
+                        tipoDoc = Documento.TipoDocumento.Nota_de_crédito;
+                        break;
+                    case TipoDocumentoId.NotaDebitoElectronica:
+                        rutaGuardado = rutaGuardado + "/Documentos_Electronicos/Nota_Debito/";
+                        tipoDoc = Documento.TipoDocumento.Nota_de_débito;
+                        break;
+
+                    case TipoDocumentoId.FacturaElectronicaCompra:
+                        rutaGuardado = rutaGuardado + "/Documentos_Electronicos/FECompra/";
+                        tipoDoc = Documento.TipoDocumento.Factura_Electronica_Compra;
+                        break;
+
+                    case TipoDocumentoId.ConfirmacionAceptacionMensajeReceptor:
+                        rutaGuardado = rutaGuardado + "/Documentos_Electronicos/Aceptacion/";
+                        tipoDoc = Documento.TipoDocumento.Aceptación_del_comprobante_electrónico;
+
+                        break;
+                    default:
+                        rutaGuardado = rutaGuardado + "/Documentos_Electronicos/Facturas/";
+                        tipoDoc = Documento.TipoDocumento.Factura_Electronica;
+                        break;
+                }    
+
+
                 var factura = new Documento(DateTime.Now, emisor, Documento.CondicionVenta.Contado,
-                                            f.Medio_pago, Documento.TipoDocumento.Factura_Electronica,
+                                            f.Medio_pago, tipoDoc,//Documento.TipoDocumento.Factura_Electronica,
                                             items.ToArray(),
                                             resumenFac,
                                             Documento.SituacionDocumento.Normal,
@@ -854,11 +878,13 @@ namespace marsh_contable.Controllers
                                             receptor);
 
 
+
+
                 factura.FirmarDocumento(config);//firmamos documento para guardarlo
 
                 //var xmlFirmado = FirmadorXML.Firmar(factura, empresaEmi.Ruta_llave_factura, tool.Desencriptar(empresaEmi.pin_llave));
-                FH.GuardarXMLEnviado(factura, empresaEmi.Ruta_nas + "/Documentos_Electronicos/");
-                saveXMLFIle(empresaEmi.Ruta_nas + "/Documentos_Electronicos/" + f.Clave + ".xml", id);
+                FH.GuardarXMLEnviado(factura, rutaGuardado);
+                saveXMLFIle(rutaGuardado + f.Clave + ".xml", id, f.Usuarios_Usuario_id, TablasReferencia.Facturas);
 
                 //Enviar a Hacienda
                 var esEnviado = FH.EnviarDocumento(factura);
@@ -911,7 +937,7 @@ namespace marsh_contable.Controllers
 
 
 
-        private bool saveXMLFIle(string rutaArchivo, int  id = 0)
+        private bool saveXMLFIle(string rutaArchivo, int  id = 0, int uid = 0, TablasReferencia tabla = TablasReferencia.Facturas)
         {
             try
             {
@@ -943,10 +969,10 @@ namespace marsh_contable.Controllers
                         Tipo_archivo_id = (int)TipoArchivo.XML,
                         Tamano = tamanoKB,
                         Descripcion = nombreCompleto,
-                        Usuarios_Usuario_id = 1,//administrador por defecto
+                        Usuarios_Usuario_id = uid,//administrador por defecto
                         extension = extension,
                         referencia = id, //id de referencia
-                        Tablas_referencia_id = 1, //Facturas
+                        Tablas_referencia_id = (int)tabla, //Facturas
                         fecha_ingreso = DateTime.Now,
                         fecha_actualizacion = DateTime.Now
                     };
@@ -965,102 +991,135 @@ namespace marsh_contable.Controllers
         }
 
 
+        // ═══════════════════════════════════════════════════════════
+        // ACEPTAR FACTURA — Recibe JSON normalizado del XML y lo
+        // convierte en Factura + Detalles + Presupuesto + CXP
+        // ═══════════════════════════════════════════════════════════
+
         [HttpPost]
         [Authorize]
         [Route("api/v1/aceptafactura")]
         [RequierePermiso(PermisosAplica.UsuarioAceptacionFacturas)]
-        public Reply AceptaFactura([FromBody] AceptaFacturaViewModel model)
+        public Reply AceptaFactura([FromBody] Modulos.AceptaFacturaViewModel model)
         {
             Reply oR = new Reply();
             oR.CodeStatus = 0;
             General tool = new General();
+            int facturaId = 0;
+            int gastoId = 0;
+            Models.Facturas f;
+            Models.Gestion_Presupuestaria gpExist;
+
             try
             {
+                // ═══════════════════════════════════════════════════════
+                // VALIDACIONES
+                // ═══════════════════════════════════════════════════════
+
                 if (model == null)
                     throw new Exception("invalid_model_request_missing");
 
-                if (string.IsNullOrEmpty(model.base64Factura))
-                    throw new Exception("invalid_base64_factura_missing");
+                if (string.IsNullOrEmpty(model.clave))
+                    throw new Exception("invalid_string_form_clave");
 
-                // ── PASO 1: Decodificar Base64 a texto XML
-                string xmlTexto;
-                try
-                {
-                    // Limpiar prefijo data:...;base64, si viene
-                    string base64 = model.base64Factura;
-                    if (base64.Contains(","))
-                        base64 = base64.Split(',')[1];
+                if (string.IsNullOrEmpty(model.numeroConsecutivo))
+                    throw new Exception("invalid_string_form_numero_consecutivo");
 
-                    byte[] xmlBytes = Convert.FromBase64String(base64);
-                    xmlTexto = System.Text.Encoding.UTF8.GetString(xmlBytes);
-                }
-                catch
-                {
-                    throw new Exception("invalid_base64_format");
-                }
+                if (model.emisor == null)
+                    throw new Exception("invalid_emisor_missing");
 
-                // ── PASO 2: Parsear XML
-                System.Xml.Linq.XDocument xmlDoc;
-                try
+                if (string.IsNullOrEmpty(model.emisor.numeroIdentificacion))
+                    throw new Exception("invalid_emisor_identificacion_missing");
+
+                if (model.lineas == null || model.lineas.Count == 0)
+                    throw new Exception("detail_lines_required");
+
+                if (model.resumen == null)
+                    throw new Exception("invalid_resumen_missing");
+
+                if (String.IsNullOrEmpty(model.presupuesto_id))
                 {
-                    xmlDoc = System.Xml.Linq.XDocument.Parse(xmlTexto);
-                }
-                catch
-                {
-                    throw new Exception("invalid_xml_format");
+                    throw new Exception("presupuesto_not defined");
                 }
 
-                // ── PASO 3: Namespace de FacturaElectronica v4.4
-                System.Xml.Linq.XNamespace ns =
-                    "https://cdn.comprobanteselectronicos.go.cr/xml-schemas/v4.4/facturaElectronica";
 
-                var root = xmlDoc.Root;
-                if (root == null || root.Name.LocalName != "FacturaElectronica")
-                    throw new Exception("invalid_xml_not_factura_electronica");
+                string[] partes = model.presupuesto_id.Split('_'); // id = gp.id+"_"+gp.Categoria_presupuestaria_id+"_"+ gp.Centro_Costos_id,
 
-                // ── PASO 4: Extraer datos del XML
-                string clave = root.Element(ns + "Clave")?.Value ?? "";
-                string consecutivo = root.Element(ns + "NumeroConsecutivo")?.Value ?? "";
-                string fechaEmision = root.Element(ns + "FechaEmision")?.Value ?? "";
+                int pid = int.Parse(partes[0]);
+                int cpid = int.Parse(partes[1]);
+                int ccid = int.Parse(partes[2]);
 
-                // Emisor (proveedor)
-                var emisor = root.Element(ns + "Emisor");
-                string emisorNombre = emisor?.Element(ns + "Nombre")?.Value ?? "";
-                string emisorTipo = emisor?.Element(ns + "Identificacion")
-                                            ?.Element(ns + "Tipo")?.Value ?? "";
-                string emisorNumero = emisor?.Element(ns + "Identificacion")
-                                            ?.Element(ns + "Numero")?.Value ?? "";
 
-                // Receptor (la empresa)
-                var receptor = root.Element(ns + "Receptor");
-                string receptorNombre = receptor?.Element(ns + "Nombre")?.Value ?? "";
+                validacionPresupuesto(pid, model.resumen.totalComprobante, cpid, ccid); //validamos el presupuesto
 
-                // Resumen
-                var resumen = root.Element(ns + "ResumenFactura");
-                double totalVenta = double.Parse(resumen?.Element(ns + "TotalVenta")?.Value ?? "0",
-                    System.Globalization.CultureInfo.InvariantCulture);
-                double totalDescuentos = double.Parse(resumen?.Element(ns + "TotalDescuentos")?.Value ?? "0",
-                    System.Globalization.CultureInfo.InvariantCulture);
-                double totalImpuesto = double.Parse(resumen?.Element(ns + "TotalImpuesto")?.Value ?? "0",
-                    System.Globalization.CultureInfo.InvariantCulture);
-                double totalComprobante = double.Parse(resumen?.Element(ns + "TotalComprobante")?.Value ?? "0",
-                    System.Globalization.CultureInfo.InvariantCulture);
+                // ═══════════════════════════════════════════════════════
+                // NORMALIZAR TIPO DE DOCUMENTO
+                // ═══════════════════════════════════════════════════════
 
-                // Validaciones básicas
-                if (string.IsNullOrEmpty(clave))
-                    throw new Exception("xml_missing_clave");
-                if (string.IsNullOrEmpty(emisorNombre))
-                    throw new Exception("xml_missing_emisor");
+                int tipoDocumentoId = NormalizarTipoDocumento(model.tipoDocumento);
 
-                // ── PASO 5: Buscar o crear proveedor por identificación
-                int proveedorId = 0;
+                // ═══════════════════════════════════════════════════════
+                // NORMALIZAR CONDICIÓN DE VENTA
+                // ═══════════════════════════════════════════════════════
+
+                int condicionVentaId = 1; // Default: Contado
+                if (!string.IsNullOrEmpty(model.condicionVenta))
+                {
+                    int.TryParse(model.condicionVenta, out condicionVentaId);
+                    if (condicionVentaId == 0) condicionVentaId = 1;
+                }
+
+                // ═══════════════════════════════════════════════════════
+                // NORMALIZAR TIPO DE MONEDA
+                // ═══════════════════════════════════════════════════════
+
+                int tipoMonedaId = model.Tipo_moneda_id > 0
+                    ? model.Tipo_moneda_id
+                    : NormalizarTipoMoneda(model.resumen.codigoMoneda);
+
+                // ═══════════════════════════════════════════════════════
+                // PARSEAR FECHA DE EMISIÓN
+                // ═══════════════════════════════════════════════════════
+
+                DateTime fechaEmision = DateTime.Now;
+                if (!string.IsNullOrEmpty(model.fechaEmision))
+                {
+                    DateTime.TryParse(model.fechaEmision, out fechaEmision);
+                }
+
                 using (var ctx = new Models.EntitiesModel())
                 {
                     ctx.Configuration.LazyLoadingEnabled = false;
                     ctx.Configuration.ProxyCreationEnabled = false;
 
+                    DateTime currentDate = DateTime.Now;
+
+                    // ═══════════════════════════════════════════════════
+                    // VERIFICAR QUE NO EXISTA LA CLAVE YA REGISTRADA
+                    // ═══════════════════════════════════════════════════
+
+                    bool claveExiste = ctx.Facturas.Any(x => x.Clave == model.clave);
+                    if (claveExiste)
+                        throw new Exception("factura_clave_already_exists");
+
+                    // ═══════════════════════════════════════════════════
+                    // BUSCAR PRESUPUESTO VIGENTE
+                    // ═══════════════════════════════════════════════════
+
+                    gpExist = ctx.Gestion_Presupuestaria
+                        .FirstOrDefault(u => currentDate >= u.periodo_inicio &&
+                                             currentDate <= u.periodo_fin && u.id == pid);
+
+                    if (gpExist == null)
+                        throw new Exception("gestion_presupuestaria_for_current_period_dont_exist");
+
+                    // ═══════════════════════════════════════════════════
+                    // BUSCAR O CREAR PROVEEDOR (EMISOR)
+                    // ═══════════════════════════════════════════════════
+
+                    int proveedorId = 0;
                     var proveedor = ctx.Proveedor
-                        .FirstOrDefault(p => p.identificacion == emisorNumero);
+                        .FirstOrDefault(p => p.identificacion == model.emisor.numeroIdentificacion);
 
                     if (proveedor != null)
                     {
@@ -1068,18 +1127,25 @@ namespace marsh_contable.Controllers
                     }
                     else
                     {
-                        // Crear proveedor automáticamente desde datos del XML
+                        int tipoIdentEmisor = 1;
+                        int.TryParse(model.emisor.tipoIdentificacion, out tipoIdentEmisor);
+                        if (tipoIdentEmisor == 0) tipoIdentEmisor = 1;
+
+                        int provinciaEmisor = 1;
+                        int.TryParse(model.emisor.provincia, out provinciaEmisor);
+                        if (provinciaEmisor == 0) provinciaEmisor = 1;
+
                         var nuevoProveedor = new Models.Proveedor()
                         {
-                            identificacion = emisorNumero,
-                            tipo_identificacion_id = int.Parse(emisorTipo),
-                            Nombre = emisorNombre,
+                            identificacion = model.emisor.numeroIdentificacion,
+                            tipo_identificacion_id = tipoIdentEmisor,
+                            Nombre = model.emisor.nombre ?? "",
                             Apellido1 = "",
                             Apellido2 = "",
-                            correo = emisor?.Element(ns + "CorreoElectronico")?.Value ?? "",
+                            correo = model.emisor.correo ?? "",
                             Distrito_id = 1,
                             Canton_id = 1,
-                            Provincia_id = 1,
+                            Provincia_id = provinciaEmisor,
                             codigo_actividad_id = 1,
                             estado = 1,
                             fecha_creacion = DateTime.Now,
@@ -1090,121 +1156,226 @@ namespace marsh_contable.Controllers
                         ctx.SaveChanges();
                         proveedorId = nuevoProveedor.id;
                     }
-                }
 
-                // ── PASO 6: Guardar como Gasto con detalles
-                using (var ctx = new Models.EntitiesModel())
-                {
-                    ctx.Configuration.LazyLoadingEnabled = false;
-                    ctx.Configuration.ProxyCreationEnabled = false;
+                    // ═══════════════════════════════════════════════════
+                    // BUSCAR CLIENTE (RECEPTOR) — la empresa receptora
+                    // ═══════════════════════════════════════════════════
 
-                    Models.Gastos g = new Models.Gastos()
+                    int clienteId = 0;
+                    if (!string.IsNullOrEmpty(model.receptor?.numeroIdentificacion))
                     {
-                        Descripcion = $"Factura {emisorNombre} - Clave: {clave}",
-                        Categoria_gasto_id = model.Categoria_gasto_id,
-                        Subtotal = totalVenta,
-                        Impuesto = totalImpuesto,
-                        Total = totalComprobante,
-                        Doc_Referencia = clave,
-                        Fecha = DateTime.Now,
-                        Ultima_Fec_Actualizacion = DateTime.Now,
+                        var cliente = ctx.Clientes
+                            .FirstOrDefault(c => c.identificacion == model.receptor.numeroIdentificacion);
+
+                        if (cliente != null)
+                            clienteId = cliente.id;
+                    }
+
+                    // ═══════════════════════════════════════════════════
+                    // OBTENER CONSECUTIVO
+                    // ═══════════════════════════════════════════════════
+
+                    int siguienteConsecutivo = ctx.Facturas
+                        .Where(x => x.Tipo_documento_id == tipoDocumentoId)
+                        .Select(x => x.consecutivo)
+                        .DefaultIfEmpty(0)
+                        .Max() + 1;
+
+                    // ═══════════════════════════════════════════════════
+                    // CREAR FACTURA NORMALIZADA
+                    // ═══════════════════════════════════════════════════
+
+                    f = new Models.Facturas()
+                    {
+                        Clave = model.clave,
+                        Consecutivo_electronico = model.numeroConsecutivo,
+                        fecha = fechaEmision,
+                        consecutivo = siguienteConsecutivo,
+                        Tipo_moneda_id = tipoMonedaId,
+                        Estado_Factura_id = (int)EstadoFactura.AceptadoPorHacienda,
+                        Tipo_documento_id = tipoDocumentoId,
+                        Subtotal = model.resumen.totalVenta,
+                        Impuesto = model.resumen.totalImpuesto,
+                        Total = model.resumen.totalComprobante,
+                        Descuento = model.resumen.totalDescuentos,
+                        cambio_venta = model.resumen.tipoCambio,
+                        cambio_compra = model.resumen.tipoCambio,
+                        Clientes_id = clienteId > 0 ? clienteId : 1,
+                        Condicion_venta_id = condicionVentaId,
+                        Medio_pago_id = model.Medio_pago_id > 0 ? model.Medio_pago_id : 1,
                         Usuarios_Usuario_id = model.Usuarios_Usuario_id,
-                        Tipo_documento_id = (int)TipoDocumentoId.FacturaElectronicaCompra,
-                        Medio_pago_id = model.Medio_pago_id,
-                        Proveedor_id = proveedorId,
-                        Descuento = totalDescuentos,
-                        Tipo_moneda_id = model.Tipo_moneda_id
+                       // dias_credito = model.dias_credito,
+                       // presupuesto_id = model.presupuesto_id
                     };
-                    ctx.Gastos.Add(g);
+
+                    ctx.Facturas.Add(f);
                     ctx.SaveChanges();
+                    facturaId = f.id;
 
-                    // ── Extraer líneas de detalle del XML
-                    var detalleServicio = root.Element(ns + "DetalleServicio");
-                    if (detalleServicio != null)
+                    // ═══════════════════════════════════════════════════
+                    // CREAR LÍNEAS DE DETALLE
+                    // ═══════════════════════════════════════════════════
+
+                    FacturaDetallesController factDetalles = new FacturaDetallesController();
+                    foreach (var linea in model.lineas)
                     {
-                        var lineas = detalleServicio.Elements(ns + "LineaDetalle");
-                        GastosDetallesController gastosDetalles = new GastosDetallesController();
-
-                        foreach (var linea in lineas)
+                        Models.Factura_Detalles detalle = new Models.Factura_Detalles()
                         {
-                            double precioUnit = double.Parse(
-                                linea.Element(ns + "PrecioUnitario")?.Value ?? "0",
-                                System.Globalization.CultureInfo.InvariantCulture);
-                            double montoTotal = double.Parse(
-                                linea.Element(ns + "MontoTotal")?.Value ?? "0",
-                                System.Globalization.CultureInfo.InvariantCulture);
-                            double subTotal = double.Parse(
-                                linea.Element(ns + "SubTotal")?.Value ?? "0",
-                                System.Globalization.CultureInfo.InvariantCulture);
-                            double montoTotalLinea = double.Parse(
-                                linea.Element(ns + "MontoTotalLinea")?.Value ?? "0",
-                                System.Globalization.CultureInfo.InvariantCulture);
-                            int cantidad = int.Parse(
-                                linea.Element(ns + "Cantidad")?.Value ?? "1");
-                            string detalle = linea.Element(ns + "Detalle")?.Value ?? "";
+                            Facturas_id = facturaId,
+                            Subtotal = linea.subTotal,
+                            Impuesto = linea.impuestoMonto,
+                            Total = linea.montoTotalLinea,
+                            Cantidad = linea.cantidad,
+                            Detalle = linea.detalle ?? "",
+                            Descuento = 0,
+                            Fecha = DateTime.Now,
+                            Ultima_fec_actualizacion = DateTime.Now
+                        };
 
-                            // Extraer impuesto de la línea
-                            var impuestoNode = linea.Element(ns + "Impuesto");
-                            double montoImpuesto = 0;
-                            if (impuestoNode != null)
-                            {
-                                montoImpuesto = double.Parse(
-                                    impuestoNode.Element(ns + "Monto")?.Value ?? "0",
-                                    System.Globalization.CultureInfo.InvariantCulture);
-                            }
+                        var result = factDetalles.CreateFacturaDetalle(detalle);
+                        if (result.CodeStatus != HttpStatusCode.OK)
+                            throw new Exception(result.Message);
+                    }
+                    // ═══════════════════════════════════════════════════
+                    // CREAR GASTO — Si gastoRegistrado viene en false
+                    // ═══════════════════════════════════════════════════
 
-                            // Extraer descuento de la línea
-                            var descuentoNode = linea.Element(ns + "Descuento");
-                            double montoDescuento = 0;
-                            if (descuentoNode != null)
-                            {
-                                montoDescuento = double.Parse(
-                                    descuentoNode.Element(ns + "MontoDescuento")?.Value ?? "0",
-                                    System.Globalization.CultureInfo.InvariantCulture);
-                            }
+                    if (!model.gastoRegistrado)
+                    {
+                        Models.Gastos g = new Models.Gastos()
+                        {
+                            Descripcion = $"Factura {model.emisor.nombre} - {model.clave}",
+                            Categoria_gasto_id = 1, // Default
+                            Subtotal = model.resumen.totalVenta,
+                            Impuesto = model.resumen.totalImpuesto,
+                            Total = model.resumen.totalComprobante,
+                            Doc_Referencia = model.clave,
+                            Fecha = fechaEmision,
+                            Ultima_Fec_Actualizacion = DateTime.Now,
+                            Usuarios_Usuario_id = model.Usuarios_Usuario_id,
+                            Tipo_documento_id = tipoDocumentoId,
+                            Medio_pago_id = model.Medio_pago_id > 0 ? model.Medio_pago_id : 1,
+                            Proveedor_id = proveedorId,
+                            Descuento = model.resumen.totalDescuentos,
+                            Tipo_moneda_id = tipoMonedaId
+                        };
+                        ctx.Gastos.Add(g);
+                        ctx.SaveChanges();
+                        gastoId = g.id;
 
-                            // Código comercial
-                            string codigoComercial = "";
-                            var codigoComNode = linea.Element(ns + "CodigoComercial");
-                            if (codigoComNode != null)
-                            {
-                                codigoComercial = codigoComNode.Element(ns + "Codigo")?.Value ?? "";
-                            }
-
+                        // Crear líneas de detalle del gasto
+                        GastosDetallesController gastosDetalles = new GastosDetallesController();
+                        foreach (var linea in model.lineas)
+                        {
                             Models.Gastos_Detalles gd = new Models.Gastos_Detalles()
                             {
-                                Subtotal = subTotal,
-                                Impuesto = montoImpuesto,
-                                Total = montoTotalLinea,
-                                Cantidad = cantidad,
-                                Detalle = detalle,
-                                Descuento = montoDescuento,
-                                codigo_comercial = codigoComercial,
+                                Subtotal = linea.subTotal,
+                                Impuesto = linea.impuestoMonto,
+                                Total = linea.montoTotalLinea,
+                                Cantidad = linea.cantidad,
+                                Detalle = linea.detalle ?? "",
+                                Descuento = 0,
+                                codigo_comercial = linea.codigoCabys ?? "",
                                 Fecha = DateTime.Now,
                                 Ultima_fec_actualizacion = DateTime.Now,
-                                Gastos_id = g.id
+                                Gastos_id = gastoId
                             };
 
-                            var result = gastosDetalles.CreateGastoDetalle(gd, ctx);
-                            if (result.CodeStatus != HttpStatusCode.OK)
-                                throw new Exception(result.Message);
+                            var resultGD = gastosDetalles.CreateGastoDetalle(gd, ctx);
+                            if (resultGD.CodeStatus != HttpStatusCode.OK)
+                                throw new Exception(resultGD.Message);
+                        }
+
+                        BancoController banco = new BancoController();
+                        var bmovimiento = banco.RegistrarMovimientoPorGasto(cpid, (int)model.Tipo_moneda_id, ccid, gastoId, g.Total, g.Usuarios_Usuario_id, "Registro de Gasto");
+
+                        if (bmovimiento.CodeStatus != HttpStatusCode.OK)
+                        {
+                            throw new Exception(bmovimiento.Message);
                         }
                     }
 
-                    oR.CodeStatus = HttpStatusCode.OK;
-                    oR.Data = new
+
+
+                    // ═══════════════════════════════════════════════════
+                    // CXP — Si es crédito, crear Cuenta por Pagar
+                    // ═══════════════════════════════════════════════════
+
+                    if (condicionVentaId == (int)CondicionVenta.Credito)
                     {
-                        gasto_id = g.id,
-                        clave = clave,
-                        consecutivo = consecutivo,
-                        emisor_nombre = emisorNombre,
-                        emisor_identificacion = emisorNumero,
-                        total = totalComprobante,
-                        impuesto = totalImpuesto,
-                        descuento = totalDescuentos
-                    };
-                    return oR;
+                        int diasCredito = model.dias_credito > 0 ? model.dias_credito : 30;
+
+                        Models.Cuenta_Encabezado cxp = new Models.Cuenta_Encabezado()
+                        {
+                            Vigencia_inicial = DateTime.Now,
+                            Vigencia_final = DateTime.Now.AddDays(diasCredito),
+                            Tipo_moneda_id = tipoMonedaId,
+                            Medio_pago_id = f.Medio_pago_id,
+                            Total = (decimal)f.Total,
+                            Monto_Proyeccion = (decimal)f.Total,
+                            subtotal = (decimal)f.Subtotal,
+                            impuesto = (decimal)f.Impuesto,
+                            Descuento = (decimal)f.Descuento,
+                            Referencia = f.Clave,
+                            Fecha_creacion = DateTime.Now,
+                            Ultima_Fecha_actualizacion = DateTime.Now,
+                            Usuarios_Usuario_id = model.Usuarios_Usuario_id,
+                            Clientes_id = null,
+                            Facturas_id = facturaId,
+                            Proveedor_id = proveedorId,
+                            Gastos_id = gastoId > 0 ? (int?)gastoId : null,
+                            Ingresos_id = null,
+                            Estado = 1,
+                            Tipo_cuentas_id = (int)TipoCuenta.CuentaPorPagar,
+                            Centro_Costos_id = (int)gpExist.Centro_Costos_id,
+                            Categoria_presupuestaria_id = (int)gpExist.Categoria_presupuestaria_id
+                        };
+                        ctx.Cuenta_Encabezado.Add(cxp);
+                        ctx.SaveChanges();
+                    }
                 }
+
+                // ═══════════════════════════════════════════════════
+                // REGISTRAR EN GESTIÓN PRESUPUESTARIA (fuera del using)
+                // ═══════════════════════════════════════════════════
+
+                Models.Gestion_P_detalle detalleGP = new Models.Gestion_P_detalle()
+                {
+                    Monto = f.Total,
+                    Monto_aprobado = gpExist.monto_aprobado,
+                    Monto_modificado = gpExist.monto_modificado,
+                    Monto_compometido = gpExist.monto_comprometido,
+                    Monto_ejecutado = (decimal)f.Total,
+                    detalle_presupuesto = $"Aceptación Factura #{facturaId} - Emisor: {model.emisor.nombre}",
+                    Gestion_Presupuestaria_id = gpExist.id,
+                    Categoria_presupuestaria_id = (int)Modulos.Categoria_presupuestaria.Gastos,
+                    Gastos_id = gastoId > 0 ? (int?)gastoId : null,
+                    Ingresos_id = null,
+                    Facturas_id = facturaId,
+                    Usuarios_Usuario_id = model.Usuarios_Usuario_id,
+                    Fecha_registro = DateTime.Now,
+                    Observaciones = $"Clave: {model.clave} | Emisor: {model.emisor.nombre} ({model.emisor.numeroIdentificacion}) | Total: {model.resumen.totalComprobante}",
+                    activo = 1
+                };
+
+                /// si todo se hace correctamente creamos el doc electronico
+                CreateDocument(facturaId, TipoDocumentoId.ConfirmacionAceptacionMensajeReceptor);
+
+                oR.CodeStatus = HttpStatusCode.OK;
+                oR.Data = new
+                {
+                    factura_id = facturaId,
+                    clave = model.clave,
+                    consecutivo = model.numeroConsecutivo,
+                    emisor_nombre = model.emisor.nombre,
+                    emisor_identificacion = model.emisor.numeroIdentificacion,
+                    total = model.resumen.totalComprobante,
+                    impuesto = model.resumen.totalImpuesto,
+                    descuento = model.resumen.totalDescuentos,
+                    tipo_documento = model.tipoDocumento,
+                    lineas_procesadas = model.lineas.Count
+                };
+                return oR;
             }
             catch (System.Data.Entity.Validation.DbEntityValidationException ex2)
             {
@@ -1212,6 +1383,7 @@ namespace marsh_contable.Controllers
                 foreach (var eve in ex2.EntityValidationErrors)
                     foreach (var ve in eve.ValidationErrors)
                         errorDB += ve.ErrorMessage;
+
                 oR.CodeStatus = HttpStatusCode.InternalServerError;
                 oR.Message = errorDB;
                 return oR;
@@ -1224,5 +1396,328 @@ namespace marsh_contable.Controllers
             }
         }
 
+
+        // ═══════════════════════════════════════════════════════════
+        // HELPERS DE NORMALIZACIÓN
+        // ═══════════════════════════════════════════════════════════
+
+        /// <summary>
+        /// Convierte el nombre del tipo de documento del XML al ID de la BD.
+        /// </summary>
+        private int NormalizarTipoDocumento(string tipoDocumento)
+        {
+            if (string.IsNullOrEmpty(tipoDocumento))
+                return (int)TipoDocumentoId.FacturaElectronica;
+
+            switch (tipoDocumento.ToLower().Trim())
+            {
+                case "facturaelectronica":
+                case "factura electrónica":
+                case "factura electronica":
+                    return (int)TipoDocumentoId.FacturaElectronica;
+
+                case "notadebitoelectronica":
+                case "nota de débito electrónica":
+                case "nota debito electronica":
+                    return (int)TipoDocumentoId.NotaDebitoElectronica;
+
+                case "notacreditoelectronica":
+                case "nota de crédito electrónica":
+                case "nota credito electronica":
+                    return (int)TipoDocumentoId.NotaCreditoElectronica;
+
+                case "tiqueteelectronico":
+                case "factura electrónica punto de venta":
+                case "tiquete electronico":
+                    return (int)TipoDocumentoId.FacturaElectronicaPuntoVenta;
+
+                case "facturaelectronicaexportacion":
+                case "factura electrónica de exportación":
+                    return (int)TipoDocumentoId.FacturaElectronicaExportacion;
+
+                case "facturaelectronicacompra":
+                case "factura electrónica de compra":
+                    return (int)TipoDocumentoId.FacturaElectronicaCompra;
+
+                default:
+                    return (int)TipoDocumentoId.FacturaElectronica;
+            }
+        }
+
+        /// <summary>
+        /// Convierte el código de moneda ISO al ID de la BD.
+        /// </summary>
+        private int NormalizarTipoMoneda(string codigoMoneda)
+        {
+            if (string.IsNullOrEmpty(codigoMoneda))
+                return 1; // Default CRC
+
+            switch (codigoMoneda.ToUpper().Trim())
+            {
+                case "CRC": return 1;
+                case "USD": return 2;
+                case "EUR": return 3;
+                default: return 1;
+            }
+        }
+
+        private bool validacionPresupuesto(int pid = 0, double gtotal = 0, int cpid = 0, int ccid = 0)
+        {//  validacionPresupuesto(pid, model.Total, cpid, ccid
+            General tool = new General();
+            try
+            {
+                using (var ctx = new Models.EntitiesModel())
+                {
+                    ctx.Configuration.LazyLoadingEnabled = false;
+                    ctx.Configuration.ProxyCreationEnabled = false;
+
+                    DateTime currentDate = DateTime.Now;
+
+                    // Buscar presupuesto vigente
+                    Models.Gestion_Presupuestaria gpExist = ctx.Gestion_Presupuestaria
+                        .FirstOrDefault(u => currentDate >= u.periodo_inicio &&
+                                             currentDate <= u.periodo_fin &&
+                                             u.id == pid && u.Categoria_presupuestaria_id == cpid
+                                             && u.Centro_Costos_id == ccid);
+
+                    if (gpExist == null)
+                        throw new Exception("gestion_presupuestaria_for_current_period_dont_exist");
+
+                    BancoController banco = new BancoController();
+                    if (banco.validaBanco(cpid, (int)gpExist.Tipo_moneda_id, ccid, (decimal)gtotal, Tipo_Movimiento_Bancario.Egreso))
+                    { //si el banco permite el movimiento proseguimos
+
+
+                        string Symbol = ctx.Tipo_moneda
+                            .Where(t => t.id == gpExist.Tipo_moneda_id)
+                            .Select(t => t.Simbolo)
+                            .FirstOrDefault() ?? "₡";
+
+
+                        // Sumar montos ya ejecutados en gestion_p_detalle
+
+                        int anioActual = currentDate.Year;
+                        int mesActual = currentDate.Month;
+
+                        double montoEjecutado = (from d in ctx.Gestion_P_detalle
+                                                 join gp in ctx.Gestion_Presupuestaria
+                                                     on d.Gestion_Presupuestaria_id equals gp.id
+                                                 where d.Gestion_Presupuestaria_id == pid
+                                                    && d.activo == 1
+                                                    && gp.anio_presupuesto == anioActual.ToString()
+                                                    && currentDate >= gp.periodo_inicio
+                                                    && currentDate <= gp.periodo_fin
+                                                    && d.Fecha_registro.Month == mesActual
+                                                    && d.Fecha_registro.Year == anioActual
+                                                 select d.Monto)
+                                                 .DefaultIfEmpty(0)
+                                                 .Sum();
+
+
+                        decimal montoMensual = ctx.Gestion_P_Anio
+                            .Where(d => d.Gestion_Presupuestaria_id == pid && d.anio_presupuesto == currentDate.Year.ToString() && d.mes == currentDate.Month)
+                            .Select(d => d.monto)
+                            .DefaultIfEmpty(0)
+                            .Sum();
+
+                        if (montoMensual == 0)
+                        {
+                            throw new Exception(
+                              $"no_presupuesto_defined_for_month_{currentDate.Month}_and_year_{currentDate.Year}"
+                          );
+                        }
+
+
+                        double montoAprobado = (double)montoMensual; //MONTO APROBADO PARA EL MES ACTUAL //gpExist.monto_aprobado;
+                        double montoConNuevoGasto = montoEjecutado + gtotal;
+
+                        // Validar que el nuevo gasto no exceda el presupuesto
+                        if (montoConNuevoGasto >= montoAprobado)
+                        {
+                            double disponible = montoAprobado - montoEjecutado;
+                            throw new Exception(
+                                $"presupuesto_excedido_monto_aprobado_{montoAprobado}_ejecutado_{montoEjecutado}_disponible_{disponible}"
+                            );
+                        }
+
+                        //  Calcular porcentaje de uso con el nuevo gasto
+                        double porcentajeUso = (montoConNuevoGasto / montoAprobado) * 100;
+                        double porcentajeDisponible = 100 - porcentajeUso;
+
+                        // Si queda entre 5% y 10% disponible, notificar por correo
+                        if (porcentajeDisponible <= 10 && porcentajeDisponible >= 5)
+                        {
+                            NotificarPresupuestoBajo(ctx, gpExist, porcentajeUso, montoConNuevoGasto, montoAprobado, tool, Symbol);
+                        }
+
+                        //  Si queda menos de 5%, notificar con urgencia
+                        if (porcentajeDisponible < 5 && porcentajeDisponible > 0)
+                        {
+                            NotificarPresupuestoCritico(ctx, gpExist, porcentajeUso, montoConNuevoGasto, montoAprobado, tool, Symbol);
+                        }
+
+                    }
+
+
+                }
+                return true;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+
+
+        private void NotificarPresupuestoBajo(
+          Models.EntitiesModel ctx,
+          Models.Gestion_Presupuestaria gp,
+          double porcentajeUso,
+          double montoEjecutado,
+          double montoAprobado,
+          General tool,
+          string symbol
+          )
+        {
+            try
+            {
+                // Obtener correos de usuarios con Rol 1 (Administración)
+                var correosAdmin = ctx.Usuarios
+                    .Where(u => u.Roles_id == 1 && u.activo == 1)
+                    .Select(u => u.Correo)
+                    .ToList();
+
+                if (!correosAdmin.Any()) return;
+
+                double disponible = montoAprobado - montoEjecutado;
+
+                string asunto = $"Alerta: Presupuesto \"{gp.nombre}\" al {porcentajeUso:F1}% de uso";
+
+                string cuerpo = $@"
+            <h2 style='color:#d4a017;'> Alerta de Presupuesto - Uso Elevado</h2>
+            <p>El presupuesto <strong>{gp.nombre}</strong> ha alcanzado un nivel de uso elevado.</p>
+            <table style='border-collapse:collapse; width:100%; max-width:500px;'>
+                <tr style='background-color:#f8f9fa;'>
+                    <td style='padding:10px; border:1px solid #dee2e6;'><strong>Presupuesto</strong></td>
+                    <td style='padding:10px; border:1px solid #dee2e6;'>{gp.nombre}</td>
+                </tr>
+                <tr>
+                    <td style='padding:10px; border:1px solid #dee2e6;'><strong>Año</strong></td>
+                    <td style='padding:10px; border:1px solid #dee2e6;'>{gp.anio_presupuesto}</td>
+                </tr>
+                <tr style='background-color:#f8f9fa;'>
+                    <td style='padding:10px; border:1px solid #dee2e6;'><strong>Monto Aprobado</strong></td>
+                    <td style='padding:10px; border:1px solid #dee2e6;'>{symbol} {montoAprobado:N2}</td>
+                </tr>
+                <tr>
+                    <td style='padding:10px; border:1px solid #dee2e6;'><strong>Monto Ejecutado</strong></td>
+                    <td style='padding:10px; border:1px solid #dee2e6;'>{symbol} {montoEjecutado:N2}</td>
+                </tr>
+                <tr style='background-color:#fff3cd;'>
+                    <td style='padding:10px; border:1px solid #dee2e6;'><strong>Disponible</strong></td>
+                    <td style='padding:10px; border:1px solid #dee2e6;'>{symbol} {disponible:N2}</td>
+                </tr>
+                <tr style='background-color:#fff3cd;'>
+                    <td style='padding:10px; border:1px solid #dee2e6;'><strong>Porcentaje de Uso</strong></td>
+                    <td style='padding:10px; border:1px solid #dee2e6;'><strong>{porcentajeUso:F1}%</strong></td>
+                </tr>
+            </table>
+            <p style='color:#856404; margin-top:15px;'>
+                El presupuesto se encuentra entre el <strong>90% y 95%</strong> de uso.
+                Se recomienda tomar las previsiones necesarias.
+            </p>
+            <hr/>
+            <small style='color:#6c757d;'>Notificación automática - Marsh Asprose</small>";
+
+                foreach (var correo in correosAdmin)
+                {
+                    tool.Send_Mail(correo, asunto, cuerpo);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+
+        /// <summary>
+        /// Notifica a usuarios de Rol 1 cuando el presupuesto está al 95%+ de uso (crítico).
+        /// </summary>
+        private void NotificarPresupuestoCritico(
+            Models.EntitiesModel ctx,
+            Models.Gestion_Presupuestaria gp,
+            double porcentajeUso,
+            double montoEjecutado,
+            double montoAprobado,
+            General tool,
+            string symbol
+            )
+        {
+            try
+            {
+                var correosAdmin = ctx.Usuarios
+                    .Where(u => u.Roles_id == 1 && u.activo == 1)
+                    .Select(u => u.Correo)
+                    .ToList();
+
+                if (!correosAdmin.Any()) return;
+
+                double disponible = montoAprobado - montoEjecutado;
+
+                string asunto = $"URGENTE: Presupuesto \"{gp.nombre}\" al {porcentajeUso:F1}% de uso";
+
+                string cuerpo = $@"
+            <h2 style='color:#dc3545;'>Alerta Crítica de Presupuesto</h2>
+            <p>El presupuesto <strong>{gp.nombre}</strong> está próximo a agotarse.</p>
+            <table style='border-collapse:collapse; width:100%; max-width:500px;'>
+                <tr style='background-color:#f8f9fa;'>
+                    <td style='padding:10px; border:1px solid #dee2e6;'><strong>Presupuesto</strong></td>
+                    <td style='padding:10px; border:1px solid #dee2e6;'>{gp.nombre}</td>
+                </tr>
+                <tr>
+                    <td style='padding:10px; border:1px solid #dee2e6;'><strong>Año</strong></td>
+                    <td style='padding:10px; border:1px solid #dee2e6;'>{gp.anio_presupuesto}</td>
+                </tr>
+                <tr style='background-color:#f8f9fa;'>
+                    <td style='padding:10px; border:1px solid #dee2e6;'><strong>Monto Aprobado</strong></td>
+                    <td style='padding:10px; border:1px solid #dee2e6;'>{symbol} {montoAprobado:N2}</td>
+                </tr>
+                <tr>
+                    <td style='padding:10px; border:1px solid #dee2e6;'><strong>Monto Ejecutado</strong></td>
+                    <td style='padding:10px; border:1px solid #dee2e6;'>{symbol} {montoEjecutado:N2}</td>
+                </tr>
+                <tr style='background-color:#f8d7da;'>
+                    <td style='padding:10px; border:1px solid #dee2e6;'><strong>Disponible</strong></td>
+                    <td style='padding:10px; border:1px solid #dee2e6; color:#dc3545;'>
+                        <strong>₡ {disponible:N2}</strong>
+                    </td>
+                </tr>
+                <tr style='background-color:#f8d7da;'>
+                    <td style='padding:10px; border:1px solid #dee2e6;'><strong>Porcentaje de Uso</strong></td>
+                    <td style='padding:10px; border:1px solid #dee2e6; color:#dc3545;'>
+                        <strong>{porcentajeUso:F1}%</strong>
+                    </td>
+                </tr>
+            </table>
+            <p style='color:#dc3545; margin-top:15px;'>
+                <strong>ATENCIÓN:</strong> El presupuesto tiene menos del <strong>5%</strong> disponible.
+                Cualquier transacción adicional podría ser rechazada por exceder el monto aprobado.
+            </p>
+            <hr/>
+            <small style='color:#6c757d;'>Notificación automática - Marsh Asprose</small>";
+
+                foreach (var correo in correosAdmin)
+                {
+                    tool.Send_Mail(correo, asunto, cuerpo);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+
+            }
+        }
     }
 }

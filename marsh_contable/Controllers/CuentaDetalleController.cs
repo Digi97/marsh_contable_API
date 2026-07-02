@@ -24,6 +24,7 @@ namespace marsh_contable.Controllers
             General tool = new General();
             try
             {
+                #region "Validaciones"
                 if (model == null)
                     throw new Exception("invalid_model_request_missing");
 
@@ -35,16 +36,15 @@ namespace marsh_contable.Controllers
 
                 if (!tool.validaNumeros(model.Medio_pago_id.ToString()))
                     throw new Exception("invalid_value_form_Medio_pago_id");
+                #endregion
 
                 using (var ctx = new Models.EntitiesModel())
                 {
                     ctx.Configuration.LazyLoadingEnabled   = false;
                     ctx.Configuration.ProxyCreationEnabled = false;
-
                     // Obtener el encabezado para calcular saldos
                     var encabezado = ctx.Cuenta_Encabezado
                         .FirstOrDefault(ce => ce.id == model.Cuenta_Encabezado_id);
-
                     if (encabezado == null)
                         throw new Exception("cuenta_encabezado_not_found");
 

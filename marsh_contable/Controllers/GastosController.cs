@@ -28,6 +28,7 @@ namespace marsh_contable.Controllers
             General tool = new General();
             try
             {
+                #region "validaciones"
                 if (model == null)
                 {
                     throw new Exception("invalid_model_request_missing");
@@ -74,7 +75,7 @@ namespace marsh_contable.Controllers
                     throw new Exception("presupuesto_not defined");
                 }
 
-       
+                #endregion
                 BancoController banco = new BancoController();
 
                 string[] partes = model.presupuesto_id.Split('_'); // id = gp.id+"_"+gp.Categoria_presupuestaria_id+"_"+ gp.Centro_Costos_id,

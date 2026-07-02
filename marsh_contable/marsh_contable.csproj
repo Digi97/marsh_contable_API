@@ -500,6 +500,7 @@
     <Compile Include="Modulos\PermisosAplica.cs" />
     <Compile Include="Modulos\RequierePermisoAttribute.cs" />
     <Compile Include="Modulos\SerializeBCCR.cs" />
+    <Compile Include="Modulos\TablasReferencia.cs" />
     <Compile Include="Modulos\TipoDocumentoCode.cs" />
     <Compile Include="Modulos\TipoDocumentoId.cs" />
     <Compile Include="Modulos\Tipo_Movimiento_Bancario.cs" />

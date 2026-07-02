@@ -25,6 +25,7 @@ namespace marsh_contable.Controllers
             General tool = new General();
             try
             {
+                #region "validaciones"
                 if (model == null)
                 {
                     throw new Exception("invalid_model_request_missing");
@@ -65,33 +66,17 @@ namespace marsh_contable.Controllers
                 {
                     throw new Exception("detalles_are_required");
                 }
-
-
+                #endregion
                 using (var ctx = new Models.EntitiesModel())
                 {
-
-                    //Models.Gestion_Presupuestaria gpExist = ctx.Gestion_Presupuestaria.FirstOrDefault(u => u.periodo_inicio >=  model.periodo_inicio || u.periodo_fin <= model.periodo_fin);
-                    //if (gpExist != null)
-                    //{
-                    //    throw new Exception("gestion_presupuestaria_for_period_exist");
-                    //}
-
-
-
                     foreach(var detalle in model.detalles)
                     {
-
-
                         var codigo = (from cp in ctx.Categoria_presupuestaria
                                          from cc in ctx.Centro_Costos
                                          where cc.id == detalle.centro_Costos_id && cp.id == detalle.categoria_presupuestaria_id
                                          select cc.codigo + "-" + cp.tipo_categoria
                                  ).FirstOrDefault();
-
-
                         var tipo_moneda_id = (from cp in ctx.Categoria_presupuestaria select cp.Tipo_moneda_id ).FirstOrDefault();
-
-
                         Models.Gestion_Presupuestaria gp = new Models.Gestion_Presupuestaria()
                         {
                             codigo = codigo,
@@ -114,14 +99,7 @@ namespace marsh_contable.Controllers
                         };
                         ctx.Gestion_Presupuestaria.Add(gp);
                         ctx.SaveChanges();
-
-
-
                     }
-
-
-
-
                     oR.CodeStatus = HttpStatusCode.OK;
                     oR.Data = 1;
                     return oR;
@@ -401,6 +379,7 @@ namespace marsh_contable.Controllers
             General tool = new General();
             try
             {
+                #region "validaciones"
                 if (model == null)
                     throw new Exception("invalid_model_request_missing");
 
@@ -417,16 +396,14 @@ namespace marsh_contable.Controllers
                 // Validar que los meses sean válidos (1-12)
                 if (model.detalles.Any(d => d.mes < 1 || d.mes > 12))
                     throw new Exception("invalid_value_mes_must_be_between_1_and_12");
+                #endregion
 
                 using (var ctx = new Models.EntitiesModel())
                 {
                   
-
                     // Verificar que no existan registros para ese año y gestión
-               
-                    foreach (var detalle in model.detalles)
+                                   foreach (var detalle in model.detalles)
                     {
-
 
                         // Verificar que la gestión presupuestaria existe
                         var gpExist = ctx.Gestion_Presupuestaria
@@ -538,27 +515,36 @@ namespace marsh_contable.Controllers
         [HttpGet]
         [Authorize]
         [RequierePermiso(PermisosAplica.UsuarioPresupuestos)]
-        [Route("api/v1/gestion_presupuestaria_dropdown/{anio_presupuesto}")]
-        public Reply GetGestionPDropDown(string anio_presupuesto)
+        [Route("api/v1/gestion_presupuestaria_dropdown/{anio_presupuesto}/{mes_presupuesto}")]
+        public Reply GetGestionPDropDown(string anio_presupuesto, int mes_presupuesto = 0)
         {
             Reply oR = new Reply();
             oR.CodeStatus = 0;
+            DateTime currenDate = DateTime.Now;
             try
             {
                 if (String.IsNullOrEmpty(anio_presupuesto))
                 {
                     throw new Exception("invalid_value_for_anio_presupuesto");
                 }
+
+                if(mes_presupuesto == 0)
+                {
+                    mes_presupuesto = currenDate.Month;
+                }
+
+
+
                 using (var ctx = new Models.EntitiesModel())
                 {
 
-                    DateTime currenDate = DateTime.Now;
+                 
                     var resultado = (from gp in ctx.Gestion_Presupuestaria
                                      join cc in ctx.Centro_Costos on gp.Centro_Costos_id equals cc.id
                                      join cp in ctx.Categoria_presupuestaria on gp.Categoria_presupuestaria_id equals cp.id
                                      join tm in ctx.Tipo_moneda on gp.Tipo_moneda_id equals tm.id
                                      join gpa in ctx.Gestion_P_Anio on new { id = gp.id, gp.anio_presupuesto } equals new { id = gpa.Gestion_Presupuestaria_id, gpa.anio_presupuesto }
-                                     where gp.anio_presupuesto == anio_presupuesto && gpa.mes == currenDate.Month
+                                     where gp.anio_presupuesto == anio_presupuesto && gpa.mes == mes_presupuesto
                                      select new
                                      {
                                          id = gp.id+"_"+gp.Categoria_presupuestaria_id+"_"+ gp.Centro_Costos_id,
@@ -587,23 +573,20 @@ namespace marsh_contable.Controllers
 
 
 
+
+
         [HttpPut]
         [Authorize]
         [Route("api/v1/mover_gestion_presupuestaria/{idOrigen}/{idDestino}")]
         [RequierePermiso(PermisosAplica.UsuarioPresupuestos)]
-        public Reply MoverPresupuesto(int idOrigen, int idDestino, [FromBody] Models.GestionPresupuestariaViewModel model)
+        public Reply MoverPresupuesto(string idOrigen, string idDestino, [FromBody] Models.GestionPresupuestariaViewModel model)
         {
             Reply oR = new Reply();
             oR.CodeStatus = 0;
             General tool = new General();
             try
             {
-                if (!tool.validaNumeros(idOrigen.ToString()))
-                    throw new Exception("invalid_value_for_idOrigen");
-
-                if (!tool.validaNumeros(idDestino.ToString()))
-                    throw new Exception("invalid_value_for_idDestino");
-
+               
                 if (!tool.validaNumeros(model.monto_modificado.ToString()))
                     throw new Exception("monto_is_invalid");
 
@@ -615,6 +598,19 @@ namespace marsh_contable.Controllers
 
                 if (idOrigen == idDestino)
                     throw new Exception("origen_and_destino_must_be_different");
+
+
+                string[] partesOrigen = idOrigen.Split('_'); // id = gp.id+"_"+gp.Categoria_presupuestaria_id+"_"+ gp.Centro_Costos_id,
+
+                int pidO = int.Parse(partesOrigen[0]);
+                int cpidO = int.Parse(partesOrigen[1]);
+                int ccidO = int.Parse(partesOrigen[2]);
+
+                string[] partesDestino = idDestino.Split('_'); // id = gp.id+"_"+gp.Categoria_presupuestaria_id+"_"+ gp.Centro_Costos_id,
+
+                int pidD = int.Parse(partesDestino[0]);
+                int cpidD = int.Parse(partesDestino[1]);
+                int ccidD = int.Parse(partesDestino[2]);
 
                 using (var ctx = new Models.EntitiesModel())
                 {
@@ -651,13 +647,13 @@ namespace marsh_contable.Controllers
 
                     // ── Validar existencia de presupuestos
                     Models.Gestion_Presupuestaria gpOrigen = ctx.Gestion_Presupuestaria
-                        .FirstOrDefault(u => u.id == idOrigen);
+                        .FirstOrDefault(u => u.id == pidO && u.Categoria_presupuestaria_id == cpidO && u.Centro_Costos_id == ccidO);
 
                     if (gpOrigen == null)
                         throw new Exception("gestion_presupuestaria_origin_dont_exist");
 
                     Models.Gestion_Presupuestaria gpDestino = ctx.Gestion_Presupuestaria
-                        .FirstOrDefault(u => u.id == idDestino);
+                        .FirstOrDefault(u => u.id == pidD && u.Categoria_presupuestaria_id == cpidD && u.Centro_Costos_id == ccidD);
 
                     if (gpDestino == null)
                         throw new Exception("gestion_presupuestaria_destino_dont_exist");
@@ -667,16 +663,16 @@ namespace marsh_contable.Controllers
                     // ═══════════════════════════════════════════════════════
 
                     var gpAnioOrigen = ctx.Gestion_P_Anio
-                        .FirstOrDefault(a => a.Gestion_Presupuestaria_id == idOrigen &&
+                        .FirstOrDefault(a => a.Gestion_Presupuestaria_id == pidO &&
                                              a.anio_presupuesto == model.anioOrigen &&
-                                             a.mes == model.mesOrigen);
+                                             a.mes == model.mesOrigen );
 
                     if (gpAnioOrigen == null)
                         throw new Exception($"no_existe_presupuesto_para_mes_{model.mesOrigen}_anio_{model.anioOrigen}_en_origen");
 
                     // ── Validar destino en Gestion_P_Anio
                     var gpAnioDestino = ctx.Gestion_P_Anio
-                        .FirstOrDefault(a => a.Gestion_Presupuestaria_id == idDestino &&
+                        .FirstOrDefault(a => a.Gestion_Presupuestaria_id == pidD &&
                                              a.anio_presupuesto == model.anioDestino &&
                                              a.mes == model.mesDestino);
 
@@ -696,7 +692,7 @@ namespace marsh_contable.Controllers
 
                     // Sumar gastos (egresos)
                     double totalGastos = ctx.Gestion_P_detalle
-                        .Where(d => d.Gestion_Presupuestaria_id == idOrigen &&
+                        .Where(d => d.Gestion_Presupuestaria_id == pidO &&
                                     d.activo == 1 &&
                                     d.Gastos_id != null)
                         .Select(d => (double)d.Monto_ejecutado)
@@ -705,7 +701,7 @@ namespace marsh_contable.Controllers
 
                     // Sumar ingresos
                     double totalIngresos = ctx.Gestion_P_detalle
-                        .Where(d => d.Gestion_Presupuestaria_id == idOrigen &&
+                        .Where(d => d.Gestion_Presupuestaria_id == pidD &&
                                     d.activo == 1 &&
                                     d.Ingresos_id != null)
                         .Select(d => (double)d.Monto_ejecutado)
@@ -714,7 +710,7 @@ namespace marsh_contable.Controllers
 
                     // Sumar facturas
                     double totalFacturas = ctx.Gestion_P_detalle
-                        .Where(d => d.Gestion_Presupuestaria_id == idOrigen &&
+                        .Where(d => d.Gestion_Presupuestaria_id == pidO &&
                                     d.activo == 1 &&
                                     d.Facturas_id != null)
                         .Select(d => (double)d.Monto_ejecutado)
@@ -765,7 +761,7 @@ namespace marsh_contable.Controllers
 
                     // ── Actualizar o crear Gestion_P_Anio del destino
                     var gpAnioDestinoActualiza = ctx.Gestion_P_Anio
-                        .FirstOrDefault(a => a.Gestion_Presupuestaria_id == idDestino &&
+                        .FirstOrDefault(a => a.Gestion_Presupuestaria_id == pidD &&
                                              a.anio_presupuesto == anioDestinoInt.ToString() &&
                                              a.mes == mesActual);
 
@@ -777,7 +773,7 @@ namespace marsh_contable.Controllers
                     {
                         Models.Gestion_P_Anio nuevoAnioDestino = new Models.Gestion_P_Anio()
                         {
-                            Gestion_Presupuestaria_id = idDestino,
+                            Gestion_Presupuestaria_id = pidD,
                             anio_presupuesto = model.anioDestino,
                             monto = (decimal)model.monto_modificado,
                             mes = model.mesDestino
@@ -794,7 +790,7 @@ namespace marsh_contable.Controllers
                         Monto_compometido = gpOrigen.monto_comprometido,
                         Monto_ejecutado = (decimal)(model.monto_modificado * -1),
                         detalle_presupuesto = $"Traslado hacia {gpDestino.nombre}",
-                        Gestion_Presupuestaria_id = idOrigen,
+                        Gestion_Presupuestaria_id = pidO,
                         Categoria_presupuestaria_id = gpOrigen.Categoria_presupuestaria_id,
                         Gastos_id = null,
                         Ingresos_id = null,
@@ -815,7 +811,7 @@ namespace marsh_contable.Controllers
                         Monto_compometido = gpDestino.monto_comprometido,
                         Monto_ejecutado = (decimal)model.monto_modificado,
                         detalle_presupuesto = $"Traslado desde {gpOrigen.nombre}",
-                        Gestion_Presupuestaria_id = idDestino,
+                        Gestion_Presupuestaria_id = pidD,
                         Categoria_presupuestaria_id = gpDestino.Categoria_presupuestaria_id,
                         Gastos_id = null,
                         Ingresos_id = null,

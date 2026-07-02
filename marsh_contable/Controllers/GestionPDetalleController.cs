@@ -187,13 +187,13 @@ namespace marsh_contable.Controllers
         [Authorize]
         [Route("api/v1/gestion_p_detalle/gestion/{gestionId}")]
         [RequierePermiso(PermisosAplica.UsuarioPresupuestos)]
-        public Reply GetDetallesByGestion(int gestionId)
+        public Reply GetDetallesByGestion(string gestionId)
         {
             Reply oR = new Reply();
             oR.CodeStatus = 0;
             try
             {
-                if (gestionId <= 0)
+                if (String.IsNullOrEmpty(gestionId))
                 {
                     throw new Exception("invalid_value_for_gestion_id");
                 }
@@ -209,7 +209,7 @@ namespace marsh_contable.Controllers
                                  join i in ctx.Ingresos on d.Ingresos_id equals i.id into ingresoGroup
                                  from i in ingresoGroup.DefaultIfEmpty()
 
-                                 where d.Gestion_Presupuestaria_id == gestionId
+                                 where gp.anio_presupuesto == gestionId //se filtra por ano
                                  select new Models.GestionPDetalleViewModel
                                  {
                                      id = d.id,

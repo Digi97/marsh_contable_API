@@ -24,6 +24,7 @@ namespace marsh_contable.Controllers
             General tool = new General();
             try
             {
+                #region "Validaciones"
                 if (model == null)
                     throw new Exception("invalid_model_request_missing");
 
@@ -55,6 +56,7 @@ namespace marsh_contable.Controllers
                 if (model.Tipo_cuentas_id == (int)TipoCuenta.CuentaPorPagar && model.Proveedor_id == null)
                     throw new Exception("proveedor_id_required_for_cxp");
 
+                #endregion
                 using (var ctx = new Models.EntitiesModel())
                 {
                     Models.Cuenta_Encabezado ce = new Models.Cuenta_Encabezado()

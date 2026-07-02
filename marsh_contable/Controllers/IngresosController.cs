@@ -28,6 +28,7 @@ namespace marsh_contable.Controllers
             General tool = new General();
             try
             {
+                #region "validaciones"
                 if (model == null)
                 {
                     throw new Exception("invalid_model_request_missing");
@@ -62,7 +63,7 @@ namespace marsh_contable.Controllers
                 {
                     throw new Exception("currency_is_required");
                 }
-
+                #endregion
                 using (var ctx = new Models.EntitiesModel())
                 {
 
