@@ -298,6 +298,8 @@ namespace Facturacion_C_Sharp.Lib
                     return "NotaDebitoElectronica";
                 case TipoDocumento.Tiquete_Electrónico:
                     return "TiqueteElectronico";
+                case TipoDocumento.Aceptación_del_comprobante_electrónico:
+                    return "MensajeReceptor";
                 default:
                     return "ERROR TIPO DE DOCUMENTO";
             }
@@ -326,6 +328,9 @@ namespace Facturacion_C_Sharp.Lib
                     break;
                 case TipoDocumento.Factura_Electronica_Exportacion:
                     xmlns = "https://cdn.comprobanteselectronicos.go.cr/xml-schemas/v4.4/factura/facturaElectronicaExportacion";
+                    break;
+                case TipoDocumento.Aceptación_del_comprobante_electrónico:
+                    xmlns = "https://cdn.comprobanteselectronicos.go.cr/xml-schemas/v4.4/mensajeReceptor";
                     break;
                 default:
                     xmlns = "ERROR TIPO DE DOCUMENTO";

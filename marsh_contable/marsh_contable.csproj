@@ -497,6 +497,7 @@
     <Compile Include="Modulos\CondicionVenta.cs" />
     <Compile Include="Modulos\EstadoFactura.cs" />
     <Compile Include="Modulos\General.cs" />
+    <Compile Include="Modulos\PdfSimpleWriter.cs" />
     <Compile Include="Modulos\PermisosAplica.cs" />
     <Compile Include="Modulos\RequierePermisoAttribute.cs" />
     <Compile Include="Modulos\SerializeBCCR.cs" />

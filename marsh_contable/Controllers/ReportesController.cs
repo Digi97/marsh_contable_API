@@ -12,7 +12,11 @@ using marsh_contable.Modulos;
 namespace marsh_contable.Controllers
 {
 
-    //TODO: MODIFICAR EL ENDPOINT gestion_presupuestaria/filtro, PARA GENERAR UN REPORTE DE GESTION DE PRESUPUESTO BASADO EN EL TEMPLATE QUE SE ENCUENTRA EN Modulos/Presupuesto Ejemplo.xlsx
+    // NOTA: El endpoint gestion_presupuestaria/filtro ahora también incluye un nodo
+    // "reporte_formato_plantilla" que replica la estructura de Modulos/PRESUPUESTO EJEMPLO.xlsx
+    // (secciones INGRESOS/EGRESOS, desglose mensual Ene-Dic, Ejecutado, Recursos Estimados,
+    // Por Gastar y % de Ejecución), para que el frontend pueda exportarlo a Excel manteniendo
+    // el mismo formato que usa la organización.
     public class ReportesController : ApiController
     {
 
@@ -551,6 +555,8 @@ namespace marsh_contable.Controllers
                             total_ejecutado = grp.Sum(d => (double)d.Monto_ejecutado)
                         }).ToList();
 
+                    var reportePlantilla = ConstruirReportePlantillaPresupuesto(ctx, fechaCreacionDesde, fechaCreacionHasta);
+
                     oR.CodeStatus = HttpStatusCode.OK;
                     oR.Data = new
                     {
@@ -562,7 +568,8 @@ namespace marsh_contable.Controllers
                         total_monto = detalles.Sum(d => d.Monto),
                         resumen_movimiento = resumenMovimiento,
                         resumen_categoria = resumenCategoria,
-                        detalles = detalles
+                        detalles = detalles,
+                        reporte_formato_plantilla = reportePlantilla
                     };
                     return oR;
                 }
@@ -573,6 +580,110 @@ namespace marsh_contable.Controllers
                 oR.Message = ex.Message;
                 return oR;
             }
+        }
+
+
+        // ═══════════════════════════════════════════════════════════
+        // Construye el reporte de presupuesto con el mismo formato que
+        // Modulos/PRESUPUESTO EJEMPLO.xlsx: secciones INGRESOS y EGRESOS, cada una con sus
+        // "cuentas" (categorías) desglosadas mes a mes (Ene-Dic), más Ejecutado, Recursos
+        // Estimados (monto aprobado + modificado del/los presupuesto(s) vigentes en el período),
+        // Por Gastar y % de Ejecución.
+        //
+        // NOTA: la plantilla original desglosa "recursos estimados" por cada cuenta contable
+        // individual; el modelo de datos actual solo registra el monto aprobado/modificado a
+        // nivel de Gestion_Presupuestaria (no por categoría de gasto/ingreso), por lo que esos
+        // tres indicadores (Recursos Estimados, Por Gastar, % Ejecución) se calculan a nivel de
+        // sección (INGRESOS/EGRESOS) en vez de por cuenta individual.
+        // ═══════════════════════════════════════════════════════════
+        private object ConstruirReportePlantillaPresupuesto(Models.EntitiesModel ctx, DateTime? desde, DateTime? hasta)
+        {
+            string[] nombresMeses = { "Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic" };
+
+            // ── EGRESOS: agrupados por Categoria_gasto (equivalente a "cuenta contable" en la plantilla)
+            var detallesGastos = from d in ctx.Gestion_P_detalle
+                                  join g in ctx.Gastos on d.Gastos_id equals g.id
+                                  join cg in ctx.Categoria_gasto on g.Categoria_gasto_id equals cg.id
+                                  where d.Gastos_id != null
+                                  select new { d.Fecha_registro, d.Monto_ejecutado, Cuenta = cg.Nombre };
+
+            if (desde.HasValue && hasta.HasValue)
+                detallesGastos = detallesGastos.Where(x => x.Fecha_registro >= desde.Value && x.Fecha_registro <= hasta.Value);
+
+            var listaGastos = detallesGastos.ToList();
+
+            var cuentasEgresos = listaGastos
+                .GroupBy(x => x.Cuenta)
+                .Select(grp =>
+                {
+                    var meses = new decimal[12];
+                    foreach (var item in grp)
+                    {
+                        meses[item.Fecha_registro.Month - 1] += item.Monto_ejecutado;
+                    }
+                    return new
+                    {
+                        cuenta = grp.Key,
+                        meses = meses,
+                        ejecutado = grp.Sum(x => x.Monto_ejecutado)
+                    };
+                })
+                .OrderBy(x => x.cuenta)
+                .ToList();
+
+            // ── INGRESOS: no existe una tabla de categorías para Ingresos en el esquema actual,
+            // se agrupan bajo una única "cuenta" general (a diferencia de Egresos, que sí tiene
+            // Categoria_gasto). Si a futuro se agrega una categoría de ingresos, se puede agrupar
+            // de la misma forma que Egresos.
+            var detallesIngresos = from d in ctx.Gestion_P_detalle
+                                    where d.Ingresos_id != null
+                                    select new { d.Fecha_registro, d.Monto_ejecutado };
+
+            if (desde.HasValue && hasta.HasValue)
+                detallesIngresos = detallesIngresos.Where(x => x.Fecha_registro >= desde.Value && x.Fecha_registro <= hasta.Value);
+
+            var listaIngresos = detallesIngresos.ToList();
+            var mesesIngresos = new decimal[12];
+            foreach (var item in listaIngresos)
+            {
+                mesesIngresos[item.Fecha_registro.Month - 1] += item.Monto_ejecutado;
+            }
+            var cuentasIngresos = new List<object>
+            {
+                new { cuenta = "INGRESOS GENERALES", meses = mesesIngresos, ejecutado = listaIngresos.Sum(x => x.Monto_ejecutado) }
+            };
+
+            // ── Recursos estimados a nivel de presupuesto(s) vigente(s) en el período (Categoria_presupuestaria: Ingresos=2, Gastos=3)
+            var presupuestos = ctx.Gestion_Presupuestaria.ToList();
+            double recursosEstimadosIngresos = presupuestos
+                .Where(p => p.Categoria_presupuestaria_id == (int)Modulos.Categoria_presupuestaria.Ingresos)
+                .Sum(p => p.monto_aprobado + p.monto_modificado);
+            double recursosEstimadosEgresos = presupuestos
+                .Where(p => p.Categoria_presupuestaria_id == (int)Modulos.Categoria_presupuestaria.Gastos)
+                .Sum(p => p.monto_aprobado + p.monto_modificado);
+
+            decimal ejecutadoIngresos = listaIngresos.Sum(x => x.Monto_ejecutado);
+            decimal ejecutadoEgresos = listaGastos.Sum(x => x.Monto_ejecutado);
+
+            object SeccionResumen(string nombre, object cuentas, decimal ejecutado, double recursosEstimados) => new
+            {
+                nombre,
+                cuentas,
+                ejecutado,
+                recursos_estimados = recursosEstimados,
+                por_gastar = recursosEstimados - (double)ejecutado,
+                ejecucion_pct = recursosEstimados > 0 ? Math.Round((double)ejecutado / recursosEstimados * 100, 2) : 0
+            };
+
+            return new
+            {
+                nombres_meses = nombresMeses,
+                secciones = new object[]
+                {
+                    SeccionResumen("INGRESOS", cuentasIngresos, ejecutadoIngresos, recursosEstimadosIngresos),
+                    SeccionResumen("EGRESOS", cuentasEgresos, ejecutadoEgresos, recursosEstimadosEgresos)
+                }
+            };
         }
 
     }

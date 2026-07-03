@@ -21,6 +21,7 @@ namespace marsh_contable.Controllers
         {
 
             int id = 0;
+            int? idFacturaGenerada = null;
             Models.Gestion_Presupuestaria gpExist;
             Models.Ingresos i;
             Reply oR = new Reply();
@@ -102,7 +103,7 @@ namespace marsh_contable.Controllers
                     {
                         id = i.id;
                         detalle.Ingresos_id = i.id;
-                        var result = ingresosDetalle.CreateIngresoDetalle(detalle, ctx);
+                        var result = ingresosDetalle.CreateIngresoDetalle(detalle);
                         if (result.CodeStatus != HttpStatusCode.OK)
                         {
                             throw new Exception(result.Message);
@@ -112,7 +113,75 @@ namespace marsh_contable.Controllers
 
                     if(model.createElectronicDoc== 1)
                     {
-                        //TODO: crear Factura y documento Electronico XML tipo Factura
+                        // Creamos una Factura Electrónica (tipo FacturaElectronica) ligada a este
+                        // ingreso, reutilizando la misma lógica de firmado/envío a Hacienda que usa
+                        // FacturasController.CreateDocument.
+                        var llaves = new FacturasController().ObtenerClaveYConsecutivo(ctx, TipoDocumentoId.FacturaElectronica);
+
+                        int siguienteConsecutivoFactura = ctx.Facturas
+                            .Where(x => x.Tipo_documento_id == (int)TipoDocumentoId.FacturaElectronica)
+                            .Select(x => x.consecutivo)
+                            .DefaultIfEmpty(0)
+                            .Max() + 1;
+
+                        Models.Facturas facturaIngreso = new Models.Facturas()
+                        {
+                            Clave = llaves.Clave,
+                            Consecutivo_electronico = llaves.Consecutivo,
+                            fecha = DateTime.Now,
+                            consecutivo = siguienteConsecutivoFactura,
+                            Tipo_moneda_id = i.Tipo_moneda_id,
+                            Estado_Factura_id = (int)EstadoFactura.Borrador,
+                            Tipo_documento_id = (int)TipoDocumentoId.FacturaElectronica,
+                            Subtotal = i.Subtotal,
+                            Impuesto = i.Impuesto,
+                            Total = i.Total,
+                            Descuento = i.Descuento,
+                            cambio_venta = i.cambio_venta,
+                            cambio_compra = i.cambio_compra,
+                            Clientes_id = i.Clientes_id,
+                            Condicion_venta_id = (int)i.Condicion_venta_id,
+                            Medio_pago_id = i.Medio_pago_id,
+                            Usuarios_Usuario_id = i.Usuarios_Usuario_id
+                        };
+                        ctx.Facturas.Add(facturaIngreso);
+                        ctx.SaveChanges();
+
+                        // Copiamos las líneas de detalle del ingreso como detalle de la factura
+                        FacturaDetallesController factDetalles = new FacturaDetallesController();
+                        foreach (var lineaIngreso in model.Ingresos_Detalle)
+                        {
+
+                            //TODO VALIDAR CODIGOS CABIS Y COMERCIAL PARA HACER LA ASIGNACION CORRECTA, DEFAULT EN 1?
+                            var detalleFactura = new Models.Factura_Detalles()
+                            {
+                                Facturas_id = facturaIngreso.id,
+                                Subtotal = lineaIngreso.Subtotal,
+                                Impuesto = lineaIngreso.Impuesto,
+                                Total = lineaIngreso.Total,
+                                Cantidad = lineaIngreso.Cantidad,
+                                Detalle = lineaIngreso.Detalle,
+                                //Codigos_cabys_id = lineaIngreso.Codigos_cabys_id,
+                                //Codigos_cabys_codigo = lineaIngreso.Codigos_cabys_codigo,
+                                //Codigos_cabys_Impuesto_id = lineaIngreso.Codigos_cabys_Impuesto_id,
+                                Descuento = lineaIngreso.Descuento,
+                                Unidad_medida_id = lineaIngreso.Unidad_medida_id,
+                                Codigo_comercial_id = 1,//default 1
+                                Fecha = DateTime.Now,
+                                Ultima_fec_actualizacion = DateTime.Now
+                            };
+                            var resultDetalle = factDetalles.CreateFacturaDetalle(detalleFactura);
+                            if (resultDetalle.CodeStatus != HttpStatusCode.OK)
+                            {
+                                throw new Exception(resultDetalle.Message);
+                            }
+                        }
+
+                        // Enlazamos el ingreso con la factura generada
+                        i.Facturas_id = facturaIngreso.id;
+                        ctx.SaveChanges();
+
+                        idFacturaGenerada = facturaIngreso.id;
                     }
 
 
@@ -164,7 +233,7 @@ namespace marsh_contable.Controllers
                         Categoria_presupuestaria_id = (int)Modulos.Categoria_presupuestaria.Ingresos,
                         Gastos_id = null,
                         Ingresos_id = id,
-                        Facturas_id = null,
+                        Facturas_id = idFacturaGenerada,
                         Usuarios_Usuario_id = (int)model.Usuarios_Usuario_id,
                         Fecha_registro = DateTime.Now,
                         Observaciones = $"Id: {i.id} | Subtotal: {i.Subtotal} | Impuesto: {i.Impuesto} | Descuento: {i.Descuento}",
@@ -183,10 +252,15 @@ namespace marsh_contable.Controllers
 
                 }
 
-
+                // Firmamos y enviamos a Hacienda la factura electrónica generada (si aplica),
+                // fuera del using para no mantener el contexto de EF abierto durante la llamada externa.
+                if (idFacturaGenerada.HasValue)
+                {
+                    new FacturasController().CreateDocument(idFacturaGenerada.Value, TipoDocumentoId.FacturaElectronica);
+                }
 
                 oR.CodeStatus = HttpStatusCode.OK;
-                oR.Data = i.id;
+                oR.Data = new { ingreso_id = i.id, factura_id = idFacturaGenerada };
                 return oR;
             }
             catch (System.Data.Entity.Validation.DbEntityValidationException ex2)

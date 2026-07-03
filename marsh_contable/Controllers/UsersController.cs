@@ -12,8 +12,6 @@ using marsh_contable.Modulos;
 
 namespace marsh_contable.Controllers
 {
-    //TODO: funcion CreateUser enviar un correo al usuario recien creado con la contraseña indicando que fue creado en el sistema Marsh Contable de forma satisfactoria
-    //TODO: FUNCION DeleteUserById: NOTIFICAR AL USUARIO EN LA FUNCION QUE HA SIDO ELIMINADO/DESACTIVADO DEL SISTEMA 
     public class UsersController : ApiController
     {
 
@@ -107,7 +105,40 @@ namespace marsh_contable.Controllers
                     ctx.Usuarios.Add(nuevoUsuario);
                     ctx.SaveChanges();
 
-            
+                    // Notificar al usuario recién creado con su contraseña de acceso inicial.
+                    // Nota: se recomienda a futuro migrar a un flujo de "definir contraseña" por
+                    // enlace en lugar de enviar la contraseña en texto plano por correo.
+                    try
+                    {
+                        string asuntoBienvenida = "Cuenta creada en el sistema Marsh Contable";
+                        string cuerpoBienvenida = $@"
+                            <h2>¡Bienvenido(a) a Marsh Contable!</h2>
+                            <p>Hola {model.Nombre} {model.Apellido1},</p>
+                            <p>Su cuenta ha sido creada exitosamente en el sistema. A continuación sus credenciales de acceso:</p>
+                            <table style='border-collapse:collapse; width:100%; max-width:450px;'>
+                                <tr style='background-color:#f8f9fa;'>
+                                    <td style='padding:10px; border:1px solid #dee2e6;'><strong>Usuario (correo)</strong></td>
+                                    <td style='padding:10px; border:1px solid #dee2e6;'>{model.Correo}</td>
+                                </tr>
+                                <tr>
+                                    <td style='padding:10px; border:1px solid #dee2e6;'><strong>Contraseña</strong></td>
+                                    <td style='padding:10px; border:1px solid #dee2e6;'>{model.Contrasena}</td>
+                                </tr>
+                            </table>
+                            <p style='color:#856404; margin-top:15px;'>
+                                Por seguridad, le recomendamos iniciar sesión y cambiar su contraseña lo antes posible.
+                            </p>
+                            <hr/>
+                            <small style='color:#6c757d;'>Notificación automática - Marsh Asprose</small>";
+
+                        tool.Send_Mail(model.Correo, asuntoBienvenida, cuerpoBienvenida);
+                    }
+                    catch
+                    {
+                        // No se interrumpe la creación del usuario si el envío de correo falla
+                        // (ej. SMTP no disponible); el usuario ya quedó registrado correctamente.
+                    }
+
                     oR.CodeStatus = HttpStatusCode.OK;
                     oR.Data = nuevoUsuario.Usuario_id; // retorna el ID generado                 
 
@@ -360,6 +391,7 @@ namespace marsh_contable.Controllers
         {
             Reply oR = new Reply();
             oR.CodeStatus = 0;
+            General tool = new General();
             try
             {
                 if (id <= 0)
@@ -372,6 +404,10 @@ namespace marsh_contable.Controllers
                     if (usuario == null)
                         throw new Exception("user_not_found");
 
+                    // Guardamos estos datos antes de eliminar/desactivar para poder notificar después
+                    string correoUsuario = usuario.Correo;
+                    string nombreUsuario = usuario.Nombre + " " + usuario.Apellido1;
+
                     try
                     {
                         // Intentar eliminar físicamente
@@ -381,6 +417,8 @@ namespace marsh_contable.Controllers
                         oR.CodeStatus = HttpStatusCode.OK;
                         oR.Message = "user_deleted_successfully";
                         oR.Data = id;
+
+                        NotificarUsuarioEliminado(tool, correoUsuario, nombreUsuario, eliminado: true);
                     }
                     catch (System.Data.Entity.Infrastructure.DbUpdateException)
                     {
@@ -397,6 +435,8 @@ namespace marsh_contable.Controllers
                         oR.CodeStatus = HttpStatusCode.OK;
                         oR.Message = "user_deactivated_due_to_dependencies";
                         oR.Data = id;
+
+                        NotificarUsuarioEliminado(tool, correoUsuario, nombreUsuario, eliminado: false);
                     }
                 }
             }
@@ -406,6 +446,35 @@ namespace marsh_contable.Controllers
                 oR.Message = ex.Message;
             }
             return oR;
+        }
+
+        /// <summary>
+        /// Notifica por correo al usuario que su cuenta fue eliminada o desactivada del sistema.
+        /// El fallo del envío de correo no afecta el resultado de la operación de borrado/desactivación.
+        /// </summary>
+        private void NotificarUsuarioEliminado(General tool, string correoUsuario, string nombreUsuario, bool eliminado)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(correoUsuario))
+                    return;
+
+                string accion = eliminado ? "eliminada" : "desactivada";
+                string asunto = $"Su cuenta en Marsh Contable ha sido {accion}";
+                string cuerpo = $@"
+                    <h2>Notificación de cuenta</h2>
+                    <p>Hola {nombreUsuario},</p>
+                    <p>Le informamos que su cuenta en el sistema Marsh Contable ha sido <strong>{accion}</strong>.</p>
+                    <p>Si considera que esto es un error, por favor contacte al administrador del sistema.</p>
+                    <hr/>
+                    <small style='color:#6c757d;'>Notificación automática - Marsh Asprose</small>";
+
+                tool.Send_Mail(correoUsuario, asunto, cuerpo);
+            }
+            catch
+            {
+                // No se interrumpe la operación de borrado/desactivación si el envío de correo falla
+            }
         }
 
 

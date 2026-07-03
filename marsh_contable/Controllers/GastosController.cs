@@ -86,6 +86,7 @@ namespace marsh_contable.Controllers
 
                 validacionPresupuesto(pid, model.Total, cpid, ccid); //validamos el presupuesto
 
+                int? idFacturaCompra = null;
                 using (var ctx = new Models.EntitiesModel())
                 {
 
@@ -125,7 +126,78 @@ namespace marsh_contable.Controllers
 
                     if(model.Tipo_documento_id == (int)TipoDocumentoId.FacturaElectronicaCompra)
                     {
-                        //TODO: CREAR REGISTRO EN FACTURA Y XML 
+                        // Generamos la Factura Electrónica de Compra asociada a este gasto, reutilizando
+                        // la misma lógica de firmado/envío a Hacienda que usa FacturasController.CreateDocument.
+                        //
+                        // NOTA IMPORTANTE: la tabla Facturas exige un Clientes_id válido (FK a Clientes),
+                        // pero un gasto/compra está asociado a un Proveedor, no a un Cliente. Siguiendo la
+                        // misma convención ya usada en AceptaFactura (Clientes_id = 1 como registro
+                        // genérico/por defecto cuando no aplica un cliente específico), se usa aquí el
+                        // mismo Clientes_id = 1. Si se requiere que el receptor real del documento sea el
+                        // Proveedor específico, se recomienda a futuro agregar un Cliente espejo por
+                        // Proveedor o ampliar el esquema de Facturas para permitir Proveedor_id.
+                        var llaves = new FacturasController().ObtenerClaveYConsecutivo(ctx, TipoDocumentoId.FacturaElectronicaCompra);
+
+                        int siguienteConsecutivoCompra = ctx.Facturas
+                            .Where(x => x.Tipo_documento_id == (int)TipoDocumentoId.FacturaElectronicaCompra)
+                            .Select(x => x.consecutivo)
+                            .DefaultIfEmpty(0)
+                            .Max() + 1;
+
+                        Models.Facturas facturaCompra = new Models.Facturas()
+                        {
+                            Clave = llaves.Clave,
+                            Consecutivo_electronico = llaves.Consecutivo,
+                            fecha = DateTime.Now,
+                            consecutivo = siguienteConsecutivoCompra,
+                            Tipo_moneda_id = (int)model.Tipo_moneda_id,
+                            Estado_Factura_id = (int)EstadoFactura.Borrador,
+                            Tipo_documento_id = (int)TipoDocumentoId.FacturaElectronicaCompra,
+                            Subtotal = g.Subtotal,
+                            Impuesto = g.Impuesto,
+                            Total = g.Total,
+                            Descuento = g.Descuento ?? 0,
+                            cambio_venta = 0,
+                            cambio_compra = 0,
+                            Clientes_id = 1, // Ver nota arriba
+                            Condicion_venta_id = model.Condicion_venta_id ?? (int)CondicionVenta.Contado,
+                            Medio_pago_id = g.Medio_pago_id,
+                            Usuarios_Usuario_id = g.Usuarios_Usuario_id
+                        };
+                        ctx.Facturas.Add(facturaCompra);
+                        ctx.SaveChanges();
+
+                        FacturaDetallesController factDetalles = new FacturaDetallesController();
+                        foreach (var lineaGasto in model.Gastos_Detalles)
+                        {
+                            var detalleFactura = new Models.Factura_Detalles()
+                            {
+                                Facturas_id = facturaCompra.id,
+                                Subtotal = lineaGasto.Subtotal,
+                                Impuesto = lineaGasto.Impuesto,
+                                Total = lineaGasto.Total,
+                                Cantidad = lineaGasto.Cantidad,
+                                Detalle = lineaGasto.Detalle,
+                                // Gastos_Detalles no maneja catálogo CABYS/Unidad de medida como Factura_Detalles;
+                                // se usan valores por defecto (id 1) siguiendo la convención de "categoría por
+                                // defecto" ya utilizada en el resto del controlador.
+                                Codigos_cabys_id = 1,
+                                Codigos_cabys_codigo = lineaGasto.codigo_comercial ?? "",
+                                Codigos_cabys_Impuesto_id = 1,
+                                Descuento = lineaGasto.Descuento,
+                                Unidad_medida_id = 1,
+                                Codigo_comercial_id = 1,
+                                Fecha = DateTime.Now,
+                                Ultima_fec_actualizacion = DateTime.Now
+                            };
+                            var resultDetalle = factDetalles.CreateFacturaDetalle(detalleFactura);
+                            if (resultDetalle.CodeStatus != HttpStatusCode.OK)
+                            {
+                                throw new Exception(resultDetalle.Message);
+                            }
+                        }
+
+                        idFacturaCompra = facturaCompra.id;
                     }
                     //actualizamos el monto ejecutado para los reportes
                     id = g.id;
@@ -133,7 +205,7 @@ namespace marsh_contable.Controllers
                     foreach (var detalles in model.Gastos_Detalles)
                     {
                         detalles.Gastos_id = id;
-                        var result = gastosDetalles.CreateGastoDetalle(detalles, ctx);
+                        var result = gastosDetalles.CreateGastoDetalle(detalles);
                         if (result.CodeStatus != HttpStatusCode.OK)
                         {
 
@@ -221,10 +293,15 @@ namespace marsh_contable.Controllers
                 
                 }
 
-
+                // Firmamos y enviamos a Hacienda la Factura Electrónica de Compra (si aplica),
+                // fuera del using para no mantener el contexto de EF abierto durante la llamada externa.
+                if (idFacturaCompra.HasValue)
+                {
+                    new FacturasController().CreateDocument(idFacturaCompra.Value, TipoDocumentoId.FacturaElectronicaCompra);
+                }
 
                 oR.CodeStatus = HttpStatusCode.OK;
-                oR.Data = id;
+                oR.Data = new { gasto_id = id, factura_compra_id = idFacturaCompra };
                 return oR;
 
 

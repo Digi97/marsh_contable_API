@@ -14,26 +14,11 @@ using Facturacion_C_Sharp.Lib.DocumentoItems;
 
 namespace marsh_contable.Controllers
 {
-    //TODO: CREAR UNA FUNCION QUE RECIBA POR HTTPDELETE LA CUAL CREE UNA COPIA EN LA TABLA FACTURA QUE SEA DE TIPO TipoDocumentoId.NotaCreditoElectronica y cree el respectivo documento electronico
-
-
-    //TODO: MODIFICAR LA  FUNCION UpdateFactura LA CUAL DEBERA RECIBIR TRES DETALLES, LOS QUE YA EXISTEN, NUEVOS Y ELIMINADOS, PARA LOS ELIMINADOS DEBERA CREAR
-    // UNA FACTURA DE TIPO TipoDocumentoId.NotaCreditoElectronica y cree el respectivo documento electronico con los respectivos detalles
-    //PARA EL ARRAY DE NUEVOS DEBERA CREAR UNA FACTURA DE TIPO TipoDocumentoId.NotaDebitoElectronica con los respectivos detalles
-
-    //TODO: AL CREAR UNA FACTURA SE DEBE INGRESAR EN REGISTRO DE CUENTAS Y APLICACION A PRESUPUESTO
-
-
-    //TODO: Modificar la funcion aceptafactura PARA CREAR EL REGISTRO DE UNA FACTURA INGRESADA DE TIPO TipoDocumentoId.ConfirmacionAceptacionMensajeReceptor Y SU RESPECTIVO DOCUMENTO ELECTRONICO Y VALIDARLO CON HACIENDA
+    // NOTA: El registro en cuentas por cobrar (Cuenta_Encabezado) y la aplicación al presupuesto
+    // (Gestion_P_detalle) al crear una factura ya se realiza dentro de CreateFactura.
     //
-    //TODO: Incluir una funcion que reciba por GET la CLAVE y consulte con Hacienda la funcion FH.EstadoDocumento(f.Clave) valide con hacienda y la respuesta la guarde con la funcion
-    //  saveXMLFIle(rutaGuardado + f.Clave + ".xml", id, f.Usuarios_Usuario_id, TablasReferencia.Facturas); y almacene la respuesta
-
-    //TODO: Enviar un correo electrónico al crear la factura al cliente los dos archivos XML (XML, XML respuesta de hacienda y un archivo PDF creado con la informacion de la factura y detalles)
-
-
-
-
+    // NOTA: AceptaFactura ya crea el registro de tipo TipoDocumentoId.ConfirmacionAceptacionMensajeReceptor
+    // (Factura + Gasto + CXP) y genera/valida su documento electrónico contra Hacienda mediante CreateDocument.
     public class FacturasController : ApiController
     {
 
@@ -229,6 +214,154 @@ namespace marsh_contable.Controllers
         }
 
 
+        /// <summary>
+        /// "Elimina" una factura electrónica generando su respectiva Nota de Crédito Electrónica
+        /// (anulación), copiando el encabezado y el detalle de la factura original y generando/
+        /// validando el documento electrónico correspondiente contra Hacienda.
+        /// La factura original NO se borra físicamente; queda referenciada por la nota de crédito
+        /// y su estado se marca como anulada.
+        /// </summary>
+        [HttpDelete]
+        [Authorize]
+        [Route("api/v1/facturas/{id}")]
+        [RequierePermiso(PermisosAplica.UsuarioFacturacion)]
+        public Reply DeleteFactura(int id)
+        {
+            Reply oR = new Reply();
+            oR.CodeStatus = 0;
+            General tool = new General();
+            try
+            {
+                if (id <= 0)
+                {
+                    throw new Exception("invalid_value_for_id");
+                }
+
+                Models.Facturas original;
+                Models.Facturas notaCredito;
+                List<Models.Factura_Detalles> detallesOriginal;
+
+                using (var ctx = new Models.EntitiesModel())
+                {
+                    original = ctx.Facturas.FirstOrDefault(u => u.id == id);
+                    if (original == null)
+                    {
+                        throw new Exception("factura_not_found");
+                    }
+                    if (original.Tipo_documento_id != (int)TipoDocumentoId.FacturaElectronica)
+                    {
+                        throw new Exception("solo_se_pueden_anular_facturas_electronicas");
+                    }
+
+                    detallesOriginal = ctx.Factura_Detalles.Where(d => d.Facturas_id == id).ToList();
+                    if (detallesOriginal.Count == 0)
+                    {
+                        throw new Exception("factura_sin_detalle");
+                    }
+
+                    var llaves = ObtenerClaveYConsecutivo(ctx, TipoDocumentoId.NotaCreditoElectronica);
+
+                    int siguienteConsecutivo = ctx.Facturas
+                        .Where(x => x.Tipo_documento_id == (int)TipoDocumentoId.NotaCreditoElectronica)
+                        .Select(x => x.consecutivo)
+                        .DefaultIfEmpty(0)
+                        .Max() + 1;
+
+                    notaCredito = new Models.Facturas()
+                    {
+                        Clave = llaves.Clave,
+                        Consecutivo_electronico = llaves.Consecutivo,
+                        fecha = DateTime.Now,
+                        consecutivo = siguienteConsecutivo,
+                        Tipo_moneda_id = original.Tipo_moneda_id,
+                        Estado_Factura_id = (int)EstadoFactura.Borrador,
+                        Tipo_documento_id = (int)TipoDocumentoId.NotaCreditoElectronica,
+                        Subtotal = original.Subtotal,
+                        Impuesto = original.Impuesto,
+                        Total = original.Total,
+                        Descuento = original.Descuento,
+                        cambio_venta = original.cambio_venta,
+                        cambio_compra = original.cambio_compra,
+                        Clientes_id = original.Clientes_id,
+                        Condicion_venta_id = original.Condicion_venta_id,
+                        Medio_pago_id = original.Medio_pago_id,
+                        Usuarios_Usuario_id = original.Usuarios_Usuario_id
+                    };
+                    ctx.Facturas.Add(notaCredito);
+                    ctx.SaveChanges();
+
+                    FacturaDetallesController factDetalles = new FacturaDetallesController();
+                    foreach (var d in detallesOriginal)
+                    {
+                        var copia = new Models.Factura_Detalles()
+                        {
+                            Facturas_id = notaCredito.id,
+                            Subtotal = d.Subtotal,
+                            Impuesto = d.Impuesto,
+                            Total = d.Total,
+                            Cantidad = d.Cantidad,
+                            Detalle = d.Detalle,
+                            Codigos_cabys_id = d.Codigos_cabys_id,
+                            Codigos_cabys_codigo = d.Codigos_cabys_codigo,
+                            Codigos_cabys_Impuesto_id = d.Codigos_cabys_Impuesto_id,
+                            Descuento = d.Descuento,
+                            Unidad_medida_id = d.Unidad_medida_id,
+                            Codigo_comercial_id = d.Codigo_comercial_id,
+                            Fecha = DateTime.Now,
+                            Ultima_fec_actualizacion = DateTime.Now
+                        };
+                        var result = factDetalles.CreateFacturaDetalle(copia);
+                        if (result.CodeStatus != HttpStatusCode.OK)
+                        {
+                            throw new Exception(result.Message);
+                        }
+                    }
+
+                    // Nota: el estado de Hacienda de la factura original se conserva tal cual;
+                    // la anulación queda representada por la Nota de Crédito que la referencia.
+                    ctx.SaveChanges();
+                }
+
+                var referencias = new[]
+                {
+                    new Facturacion_C_Sharp.Lib.DocumentoItems.Referencia(
+                        Facturacion_C_Sharp.Lib.Documento.TipoDocumento.Factura_Electronica,
+                        original.Clave,
+                        original.fecha,
+                        Facturacion_C_Sharp.Lib.DocumentoItems.Referencia.CodigoReferencia.Anula_Documento_de_referencia,
+                        "Anulación de factura por eliminación")
+                };
+
+                CreateDocument(notaCredito.id, TipoDocumentoId.NotaCreditoElectronica, referencias);
+
+                oR.CodeStatus = HttpStatusCode.OK;
+                oR.Message = "nota_credito_generada";
+                oR.Data = notaCredito.id;
+                return oR;
+            }
+            catch (System.Data.Entity.Validation.DbEntityValidationException ex2)
+            {
+                String errorDB = "";
+                foreach (var eve in ex2.EntityValidationErrors)
+                {
+                    foreach (var ve in eve.ValidationErrors)
+                    {
+                        errorDB += ve.ErrorMessage;
+                    }
+                }
+                oR.CodeStatus = HttpStatusCode.InternalServerError;
+                oR.Message = errorDB;
+                return oR;
+            }
+            catch (Exception ex)
+            {
+                oR.CodeStatus = HttpStatusCode.InternalServerError;
+                oR.Message = ex.Message;
+                return oR;
+            }
+        }
+
+
         [HttpPut]
         [Authorize]
         [Route("api/v1/facturas/{id}")]
@@ -257,7 +390,8 @@ namespace marsh_contable.Controllers
                 }
 
 
-                if (model.Factura_DetalleAgregados.Count  == 0 || model.Factura_DetalleEliminados.Count == 0 )
+                if ((model.Factura_DetalleAgregados == null || model.Factura_DetalleAgregados.Count == 0) &&
+                    (model.Factura_DetalleEliminados == null || model.Factura_DetalleEliminados.Count == 0))
                 {
                     throw new Exception("nothing_changed_on_this_invoice");
                 }
@@ -326,9 +460,27 @@ namespace marsh_contable.Controllers
                     throw new Exception(response.Message);
                 }
 
+                int? notaCreditoId = null;
+                int? notaDebitoId = null;
+
+                // Líneas eliminadas de la factura -> Nota de Crédito Electrónica (rebaja lo facturado de más)
+                if (model.Factura_DetalleEliminados != null && model.Factura_DetalleEliminados.Count > 0)
+                {
+                    notaCreditoId = CrearNotaAjuste(f, model.Factura_DetalleEliminados, TipoDocumentoId.NotaCreditoElectronica,
+                        Facturacion_C_Sharp.Lib.DocumentoItems.Referencia.CodigoReferencia.Corrige_monto,
+                        "Ajuste por líneas eliminadas de la factura", model.Usuarios_Usuario_id);
+                }
+
+                // Líneas nuevas agregadas a la factura -> Nota de Débito Electrónica (cobra lo facturado de menos)
+                if (model.Factura_DetalleAgregados != null && model.Factura_DetalleAgregados.Count > 0)
+                {
+                    notaDebitoId = CrearNotaAjuste(f, model.Factura_DetalleAgregados, TipoDocumentoId.NotaDebitoElectronica,
+                        Facturacion_C_Sharp.Lib.DocumentoItems.Referencia.CodigoReferencia.Corrige_monto,
+                        "Ajuste por líneas agregadas a la factura", model.Usuarios_Usuario_id);
+                }
 
                 oR.CodeStatus = HttpStatusCode.OK;
-                oR.Data = id;
+                oR.Data = new { factura_id = id, nota_credito_id = notaCreditoId, nota_debito_id = notaDebitoId };
                 return oR;
             }
             catch (System.Data.Entity.Validation.DbEntityValidationException ex2)
@@ -351,6 +503,99 @@ namespace marsh_contable.Controllers
                 oR.Message = ex.Message;
                 return oR;
             }
+        }
+
+
+        /// <summary>
+        /// Crea una Nota de Crédito o Nota de Débito Electrónica (según tipoDocumento) a partir de
+        /// un conjunto de líneas de detalle (agregadas o eliminadas al actualizar una factura),
+        /// referenciando la factura original, y genera/valida su documento electrónico con Hacienda.
+        /// Devuelve el id de la nota creada.
+        /// </summary>
+        private int CrearNotaAjuste(Models.Facturas facturaOriginal, List<Models.FacturaDetallesViewModel> lineas,
+            TipoDocumentoId tipoDocumento, Facturacion_C_Sharp.Lib.DocumentoItems.Referencia.CodigoReferencia codigoReferencia,
+            string razonReferencia, int? usuarioId)
+        {
+            Models.Facturas nota;
+            using (var ctx = new Models.EntitiesModel())
+            {
+                var llaves = ObtenerClaveYConsecutivo(ctx, tipoDocumento);
+
+                int siguienteConsecutivo = ctx.Facturas
+                    .Where(x => x.Tipo_documento_id == (int)tipoDocumento)
+                    .Select(x => x.consecutivo)
+                    .DefaultIfEmpty(0)
+                    .Max() + 1;
+
+                double subtotal = lineas.Sum(l => l.Subtotal);
+                double impuesto = lineas.Sum(l => l.Impuesto);
+                double total = lineas.Sum(l => l.Total);
+                double descuento = lineas.Sum(l => l.Descuento);
+
+                nota = new Models.Facturas()
+                {
+                    Clave = llaves.Clave,
+                    Consecutivo_electronico = llaves.Consecutivo,
+                    fecha = DateTime.Now,
+                    consecutivo = siguienteConsecutivo,
+                    Tipo_moneda_id = facturaOriginal.Tipo_moneda_id,
+                    Estado_Factura_id = (int)EstadoFactura.Borrador,
+                    Tipo_documento_id = (int)tipoDocumento,
+                    Subtotal = subtotal,
+                    Impuesto = impuesto,
+                    Total = total,
+                    Descuento = descuento,
+                    cambio_venta = facturaOriginal.cambio_venta,
+                    cambio_compra = facturaOriginal.cambio_compra,
+                    Clientes_id = facturaOriginal.Clientes_id,
+                    Condicion_venta_id = facturaOriginal.Condicion_venta_id,
+                    Medio_pago_id = facturaOriginal.Medio_pago_id,
+                    Usuarios_Usuario_id = usuarioId
+                };
+                ctx.Facturas.Add(nota);
+                ctx.SaveChanges();
+
+                FacturaDetallesController factDetalles = new FacturaDetallesController();
+                foreach (var linea in lineas)
+                {
+                    var copia = new Models.Factura_Detalles()
+                    {
+                        Facturas_id = nota.id,
+                        Subtotal = linea.Subtotal,
+                        Impuesto = linea.Impuesto,
+                        Total = linea.Total,
+                        Cantidad = linea.Cantidad,
+                        Detalle = linea.Detalle,
+                        Codigos_cabys_id = linea.Codigos_cabys_id,
+                        Codigos_cabys_codigo = linea.Codigos_cabys_codigo,
+                        Codigos_cabys_Impuesto_id = linea.Codigos_cabys_Impuesto_id,
+                        Descuento = linea.Descuento,
+                        Unidad_medida_id = linea.Unidad_medida_id,
+                        Codigo_comercial_id = linea.Codigo_comercial_id,
+                        Fecha = DateTime.Now,
+                        Ultima_fec_actualizacion = DateTime.Now
+                    };
+                    var result = factDetalles.CreateFacturaDetalle(copia);
+                    if (result.CodeStatus != HttpStatusCode.OK)
+                    {
+                        throw new Exception(result.Message);
+                    }
+                }
+            }
+
+            var referencias = new[]
+            {
+                new Facturacion_C_Sharp.Lib.DocumentoItems.Referencia(
+                    Facturacion_C_Sharp.Lib.Documento.TipoDocumento.Factura_Electronica,
+                    facturaOriginal.Clave,
+                    facturaOriginal.fecha,
+                    codigoReferencia,
+                    razonReferencia)
+            };
+
+            CreateDocument(nota.id, tipoDocumento, referencias);
+
+            return nota.id;
         }
 
 
@@ -544,7 +789,7 @@ namespace marsh_contable.Controllers
         }
 
         
-        private ClaveViewModel ObtenerClaveYConsecutivo(Models.EntitiesModel ctx, TipoDocumentoId tipoDocumento)
+        internal ClaveViewModel ObtenerClaveYConsecutivo(Models.EntitiesModel ctx, TipoDocumentoId tipoDocumento)
         {
             General tool = new General();
 
@@ -650,7 +895,124 @@ namespace marsh_contable.Controllers
         }
   
     
-        private Boolean CreateDocument(int id, TipoDocumentoId tipoDocumento)
+        /// <summary>
+        /// Consulta directamente contra Hacienda el estado actual de un documento electrónico dada
+        /// su Clave numérica (53 dígitos), guarda la respuesta XML recibida y actualiza el estado
+        /// de la factura/nota en la base de datos.
+        /// </summary>
+        [HttpGet]
+        [Authorize]
+        [Route("api/v1/facturas/estado/{clave}")]
+        public Reply GetEstadoDocumentoHacienda(string clave)
+        {
+            Reply oR = new Reply();
+            oR.CodeStatus = 0;
+            General tool = new General();
+            try
+            {
+                if (!tool.ValidaTexto(clave))
+                {
+                    throw new Exception("invalid_string_form_clave");
+                }
+
+                Models.Facturas f;
+                Models.EmpresaViewModel empresaEmi;
+                using (var ctx = new Models.EntitiesModel())
+                {
+                    f = ctx.Facturas.FirstOrDefault(x => x.Clave == clave);
+                    if (f == null)
+                    {
+                        throw new Exception("factura_not_found_for_clave");
+                    }
+
+                    empresaEmi = ctx.Empresa
+                        .Where(u => u.Emp_id == 1)
+                        .Select(u => new Models.EmpresaViewModel
+                        {
+                            Nombre_empresa = u.Nombre_empresa,
+                            Ruta_nas = u.Ruta_nas,
+                            Ruta_llave_factura = u.Ruta_llave_factura,
+                            pin_llave = u.pin_llave,
+                            Usuario_hacienda = u.Usuario_hacienda,
+                            Contrasena_hacienda = u.Contrasena_hacienda
+                        }).FirstOrDefault();
+
+                    if (empresaEmi == null)
+                    {
+                        throw new Exception("empresa_not_found");
+                    }
+                }
+
+                var usuarioH = empresaEmi.Usuario_hacienda;
+                var contraH = tool.Desencriptar(empresaEmi.Contrasena_hacienda);
+                var config = new Configuracion(usuarioH, contraH, empresaEmi.Ruta_llave_factura, tool.Desencriptar(empresaEmi.pin_llave));
+                var FH = new FacturacionHacienda(config);
+
+                var estado = FH.EstadoDocumento(clave);
+
+                // Guardamos la respuesta XML de Hacienda (cuando exista) y la registramos como adjunto
+                if (estado.RepuestaXML != null)
+                {
+                    string rutaEstados = empresaEmi.Ruta_nas + "/Documentos_Electronicos/Estados/";
+                    FH.GuardarXMLEstado(estado, rutaEstados);
+                    string rutaArchivo = rutaEstados + clave + ".xml";
+                    if (System.IO.File.Exists(rutaArchivo))
+                    {
+                        saveXMLFIle(rutaArchivo, f.id, f.Usuarios_Usuario_id ?? 0, TablasReferencia.Facturas);
+                    }
+                }
+
+                int newStatus;
+                switch (estado.EstadoEnHacienda)
+                {
+                    case Facturacion_C_Sharp.Lib.EstadoDocumento.ACEPTADO:
+                        newStatus = (int)EstadoFactura.AceptadoPorHacienda;
+                        break;
+                    case Facturacion_C_Sharp.Lib.EstadoDocumento.PROCESANDO:
+                        newStatus = (int)EstadoFactura.PendienteProcesarHacienda;
+                        break;
+                    case Facturacion_C_Sharp.Lib.EstadoDocumento.RECHAZADO:
+                        newStatus = (int)EstadoFactura.RechazadoPorHacienda;
+                        break;
+                    case Facturacion_C_Sharp.Lib.EstadoDocumento.RECIBIDO:
+                        newStatus = (int)EstadoFactura.RecibidoHacienda;
+                        break;
+                    default:
+                        newStatus = (int)EstadoFactura.Error;
+                        break;
+                }
+
+                using (var ctx = new Models.EntitiesModel())
+                {
+                    Models.Facturas fupdate = ctx.Facturas.FirstOrDefault(x => x.Clave == clave);
+                    if (fupdate != null)
+                    {
+                        fupdate.Estado_Factura_id = newStatus;
+                        ctx.SaveChanges();
+                    }
+                }
+
+                oR.CodeStatus = HttpStatusCode.OK;
+                oR.Data = new
+                {
+                    clave = estado.ClaveNumerica,
+                    estado_hacienda = estado.EstadoEnHacienda,
+                    mensaje_hacienda = estado.MensajeHacienda,
+                    fecha = estado.Fecha,
+                    estado_factura_id = newStatus
+                };
+                return oR;
+            }
+            catch (Exception ex)
+            {
+                oR.CodeStatus = HttpStatusCode.InternalServerError;
+                oR.Message = ex.Message;
+                return oR;
+            }
+        }
+
+
+        internal Boolean CreateDocument(int id, TipoDocumentoId tipoDocumento, Facturacion_C_Sharp.Lib.DocumentoItems.Referencia[] referencias = null)
         {
             try
             {
@@ -706,7 +1068,8 @@ namespace marsh_contable.Controllers
                                  Cliente_Canton = canton.codigo,
                                  Cliente_distrito = dist.codigo_distrito,
                                  Cliente_OtrasSenas = c.OtrasSenas,
-                                 Cliente_Correo = c.correo
+                                 Cliente_Correo = c.correo,
+                                 Usuarios_Usuario_id = (int)x.Usuarios_Usuario_id
 
                              }).FirstOrDefault();
 
@@ -881,9 +1244,11 @@ namespace marsh_contable.Controllers
                                             Documento.SituacionDocumento.Normal,
                                             f.Clave,
                                             f.Consecutivo_electronico,
-                                            receptor);
+                                            receptor,
+                                            referencias: referencias);
 
 
+                
 
 
                 factura.FirmarDocumento(config);//firmamos documento para guardarlo
@@ -901,6 +1266,19 @@ namespace marsh_contable.Controllers
                 //Optener el estado de la factura
                 var estado = FH.EstadoDocumento(f.Clave);
 
+                // Guardamos el XML de respuesta de Hacienda (si vino) como adjunto también
+                string rutaXmlRespuesta = null;
+                if (estado.RepuestaXML != null)
+                {
+                    string rutaEstados = rutaGuardado + "Respuestas/";
+                    FH.GuardarXMLEstado(estado, rutaEstados);
+                    rutaXmlRespuesta = rutaEstados + estado.ClaveNumerica + ".xml";
+                    if (System.IO.File.Exists(rutaXmlRespuesta))
+                    {
+                        saveXMLFIle(rutaXmlRespuesta, id, f.Usuarios_Usuario_id, TablasReferencia.Facturas);
+                    }
+                }
+
                 using (var ctx = new Models.EntitiesModel())
                 {
 
@@ -910,18 +1288,20 @@ namespace marsh_contable.Controllers
                         throw new Exception("factura_not_found");
                     }
                     int newStatus = 0;
+                    // NOTA: EstadoDocumento.EstadoEnHacienda siempre viene en MAYÚSCULAS (ToUpper() en su constructor),
+                    // por lo que la comparación debe hacerse contra las constantes en mayúsculas.
                     switch(estado.EstadoEnHacienda)
                     {
-                        case "aceptado":
+                        case Facturacion_C_Sharp.Lib.EstadoDocumento.ACEPTADO:
                             newStatus = (int)EstadoFactura.AceptadoPorHacienda;
                         break;
-                        case "procesando":
+                        case Facturacion_C_Sharp.Lib.EstadoDocumento.PROCESANDO:
                             newStatus = (int)EstadoFactura.PendienteProcesarHacienda;
                             break;
-                        case "rechazado":
+                        case Facturacion_C_Sharp.Lib.EstadoDocumento.RECHAZADO:
                             newStatus = (int)EstadoFactura.RechazadoPorHacienda;
                             break;
-                        case "recibido":
+                        case Facturacion_C_Sharp.Lib.EstadoDocumento.RECIBIDO:
                             newStatus = (int)EstadoFactura.RecibidoHacienda;
                             break;
                         default:
@@ -933,6 +1313,63 @@ namespace marsh_contable.Controllers
 
                     ctx.SaveChanges();
                 }
+
+                // Generamos el PDF del comprobante y enviamos el correo al cliente con los XML
+                // (enviado + respuesta de Hacienda) y el PDF adjuntos. Solo aplica a los documentos
+                // que el cliente recibe directamente: Factura, Nota de Crédito y Nota de Débito.
+                if (tipoDocumento == TipoDocumentoId.FacturaElectronica ||
+                    tipoDocumento == TipoDocumentoId.NotaCreditoElectronica ||
+                    tipoDocumento == TipoDocumentoId.NotaDebitoElectronica)
+                {
+                    try
+                    {
+                        if (!string.IsNullOrEmpty(f.Cliente_Correo))
+                        {
+                            string rutaPdf = rutaGuardado + f.Clave + ".pdf";
+                            GenerarPdfFactura(f, detalle, rutaPdf);
+
+                            var adjuntos = new List<string> { rutaGuardado + f.Clave + ".xml", rutaPdf };
+                            if (!string.IsNullOrEmpty(rutaXmlRespuesta))
+                            {
+                                adjuntos.Add(rutaXmlRespuesta);
+                            }
+
+                            string tituloDoc = tipoDocumento == TipoDocumentoId.FacturaElectronica ? "Factura Electrónica"
+                                              : tipoDocumento == TipoDocumentoId.NotaCreditoElectronica ? "Nota de Crédito Electrónica"
+                                              : "Nota de Débito Electrónica";
+
+                            string asunto = $"{tituloDoc} {f.Consecutivo_electronico} - {empresaEmi.Nombre_empresa}";
+                            string cuerpo = $@"
+                                <h2>{tituloDoc}</h2>
+                                <p>Estimado(a) {f.Cliente},</p>
+                                <p>Adjunto encontrará el comprobante electrónico generado por <strong>{empresaEmi.Nombre_empresa}</strong>, junto con el XML enviado a Hacienda{(string.IsNullOrEmpty(rutaXmlRespuesta) ? "" : ", la respuesta de Hacienda")} y el PDF del documento.</p>
+                                <table style='border-collapse:collapse; width:100%; max-width:450px;'>
+                                    <tr style='background-color:#f8f9fa;'>
+                                        <td style='padding:10px; border:1px solid #dee2e6;'><strong>Clave</strong></td>
+                                        <td style='padding:10px; border:1px solid #dee2e6;'>{f.Clave}</td>
+                                    </tr>
+                                    <tr>
+                                        <td style='padding:10px; border:1px solid #dee2e6;'><strong>Consecutivo</strong></td>
+                                        <td style='padding:10px; border:1px solid #dee2e6;'>{f.Consecutivo_electronico}</td>
+                                    </tr>
+                                    <tr style='background-color:#f8f9fa;'>
+                                        <td style='padding:10px; border:1px solid #dee2e6;'><strong>Total</strong></td>
+                                        <td style='padding:10px; border:1px solid #dee2e6;'>{f.Tipo_moneda} {f.Total:N2}</td>
+                                    </tr>
+                                </table>
+                                <hr/>
+                                <small style='color:#6c757d;'>Notificación automática - Marsh Asprose</small>";
+
+                            tool.Send_Mail(f.Cliente_Correo, asunto, cuerpo, adjuntos);
+                        }
+                    }
+                    catch
+                    {
+                        // El envío de correo/generación de PDF no debe revertir la creación
+                        // del documento electrónico ya aceptado/enviado a Hacienda.
+                    }
+                }
+
                 return true;
 
             }catch(Exception ex)
@@ -942,8 +1379,38 @@ namespace marsh_contable.Controllers
         }
 
 
+        /// <summary>
+        /// Genera un PDF simple y autocontenido (sin dependencias externas de terceros) con el
+        /// resumen de la factura/nota electrónica, para adjuntarlo en el correo enviado al cliente.
+        /// </summary>
+        private void GenerarPdfFactura(FacturasViewModel f, List<FacturaDetallesViewModel> detalle, string rutaSalida)
+        {
+            var lineas = new List<string>();
+            lineas.Add("Comprobante Electronico");
+            lineas.Add("Clave: " + f.Clave);
+            lineas.Add("Consecutivo: " + f.Consecutivo_electronico);
+            lineas.Add("Fecha: " + f.fecha.ToString("dd/MM/yyyy HH:mm"));
+            lineas.Add("Cliente: " + f.Cliente);
+            lineas.Add("Cedula: " + f.Cliente_cedula);
+            lineas.Add(" ");
+            lineas.Add("Detalle:");
+            foreach (var d in detalle)
+            {
+                lineas.Add(string.Format("  {0} x {1}  Subtotal: {2:N2}  Imp: {3:N2}  Total: {4:N2}",
+                    d.Cantidad, d.Detalle, d.Subtotal, d.Impuesto, d.Total));
+            }
+            lineas.Add(" ");
+            lineas.Add(string.Format("Subtotal: {0:N2}", f.Subtotal));
+            lineas.Add(string.Format("Descuento: {0:N2}", f.Descuento));
+            lineas.Add(string.Format("Impuesto: {0:N2}", f.Impuesto));
+            lineas.Add(string.Format("Total: {0} {1:N2}", f.Tipo_moneda, f.Total));
 
-        private bool saveXMLFIle(string rutaArchivo, int  id = 0, int uid = 0, TablasReferencia tabla = TablasReferencia.Facturas)
+            Modulos.PdfSimpleWriter.Generar(lineas, rutaSalida);
+        }
+
+
+
+        private bool saveXMLFIle(string rutaArchivo, int  id = 0, int uid = 1, TablasReferencia tabla = TablasReferencia.Facturas)
         {
             try
             {
@@ -1127,6 +1594,8 @@ namespace marsh_contable.Controllers
                     var proveedor = ctx.Proveedor
                         .FirstOrDefault(p => p.identificacion == model.emisor.numeroIdentificacion);
 
+                    
+
                     if (proveedor != null)
                     {
                         proveedorId = proveedor.id;
@@ -1141,6 +1610,9 @@ namespace marsh_contable.Controllers
                         int.TryParse(model.emisor.provincia, out provinciaEmisor);
                         if (provinciaEmisor == 0) provinciaEmisor = 1;
 
+                        int codigo_actividad_id = ctx.codigo_actividad
+    .Select(x => x.id)
+    .Min();
                         var nuevoProveedor = new Models.Proveedor()
                         {
                             identificacion = model.emisor.numeroIdentificacion,
@@ -1152,7 +1624,7 @@ namespace marsh_contable.Controllers
                             Distrito_id = 1,
                             Canton_id = 1,
                             Provincia_id = provinciaEmisor,
-                            codigo_actividad_id = 1,
+                            codigo_actividad_id = codigo_actividad_id,
                             estado = 1,
                             fecha_creacion = DateTime.Now,
                             fecha_actualizacion = DateTime.Now,
@@ -1225,6 +1697,9 @@ namespace marsh_contable.Controllers
                     FacturaDetallesController factDetalles = new FacturaDetallesController();
                     foreach (var linea in model.lineas)
                     {
+
+                        var cabys_info = ctx.Codigos_cabys.FirstOrDefault(x => x.codigo == linea.codigoCabys);
+
                         Models.Factura_Detalles detalle = new Models.Factura_Detalles()
                         {
                             Facturas_id = facturaId,
@@ -1235,7 +1710,12 @@ namespace marsh_contable.Controllers
                             Detalle = linea.detalle ?? "",
                             Descuento = 0,
                             Fecha = DateTime.Now,
-                            Ultima_fec_actualizacion = DateTime.Now
+                            Ultima_fec_actualizacion = DateTime.Now,
+                            Codigos_cabys_id = cabys_info.id,
+                            Codigos_cabys_codigo = cabys_info.codigo,
+                            Codigos_cabys_Impuesto_id = cabys_info.Impuesto_id,
+                            Unidad_medida_id = 1, //default de UNIDAD
+                            Codigo_comercial_id = 1 //default de Código del producto del vendedor
                         };
 
                         var result = factDetalles.CreateFacturaDetalle(detalle);
@@ -1287,13 +1767,13 @@ namespace marsh_contable.Controllers
                                 Gastos_id = gastoId
                             };
 
-                            var resultGD = gastosDetalles.CreateGastoDetalle(gd, ctx);
+                            var resultGD = gastosDetalles.CreateGastoDetalle(gd);
                             if (resultGD.CodeStatus != HttpStatusCode.OK)
                                 throw new Exception(resultGD.Message);
                         }
 
                         BancoController banco = new BancoController();
-                        var bmovimiento = banco.RegistrarMovimientoPorGasto(cpid, (int)model.Tipo_moneda_id, ccid, gastoId, g.Total, g.Usuarios_Usuario_id, "Registro de Gasto");
+                        var bmovimiento = banco.RegistrarMovimientoPorGasto(cpid, tipoMonedaId, ccid, gastoId, g.Total, g.Usuarios_Usuario_id, "Registro de Gasto");
 
                         if (bmovimiento.CodeStatus != HttpStatusCode.OK)
                         {

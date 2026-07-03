@@ -18,7 +18,7 @@ namespace marsh_contable.Controllers
         [HttpPost]
         [Authorize]
         [Route("api/v1/gastos_detalles")]
-        public Reply CreateGastoDetalle([FromBody] Models.Gastos_Detalles model, Models.EntitiesModel ctx)
+        public Reply CreateGastoDetalle([FromBody] Models.Gastos_Detalles model)
         {
             Reply oR = new Reply();
             oR.CodeStatus = 0;
@@ -42,7 +42,7 @@ namespace marsh_contable.Controllers
                     throw new Exception("invalid_value_form_Cantidad");
                 }
 
-                using ( ctx )
+                using (var ctx = new Models.EntitiesModel())
                 {
 
                     

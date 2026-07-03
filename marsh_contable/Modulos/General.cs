@@ -14,8 +14,10 @@ namespace marsh_contable.Modulos
     public class General
     {
 
-        //TODO: INCLUIR EN TODAS LAS FUNCIONES QUE LLAMAN A SEND_MAIL EL LOGO DE LA EMPRESA LOCALIZADO EN Modulos/LogoOficial.jpg
-        
+        // El logo de la empresa (Empresa.ruta_logo) se incluye automáticamente como imagen
+        // incrustada (inline/cid) en el cuerpo HTML de todos los correos enviados con Send_Mail,
+        // ver implementación más abajo.
+
          String input = ConfigurationManager.AppSettings["Input"];
 
         public string GenerarClave()
@@ -391,6 +393,16 @@ namespace marsh_contable.Modulos
 
         public void Send_Mail(string destinatario, string Subject, string Html)
         {
+            Send_Mail(destinatario, Subject, Html, null);
+        }
+
+        /// <summary>
+        /// Envía un correo HTML incluyendo, cuando esté disponible, el logo de la empresa
+        /// (Empresa.ruta_logo) incrustado en el cuerpo del mensaje (referenciado como cid:logoEmpresa),
+        /// y opcionalmente una lista de rutas de archivos a adjuntar (ej. XML de Hacienda, PDF de factura).
+        /// </summary>
+        public void Send_Mail(string destinatario, string Subject, string Html, List<string> rutasAdjuntos)
+        {
             // Leer configuración desde Web.config
             string smtpHost = System.Configuration.ConfigurationManager.AppSettings["SmtpHost"];
             int smtpPort = int.Parse(System.Configuration.ConfigurationManager.AppSettings["SmtpPort"]);
@@ -400,16 +412,61 @@ namespace marsh_contable.Modulos
             string smtpFrom = System.Configuration.ConfigurationManager.AppSettings["SmtpFrom"];
             string smtpFromName = System.Configuration.ConfigurationManager.AppSettings["SmtpFromName"];
 
-            // Construir el cuerpo HTML del correo
-          
+            // Intentar obtener la ruta del logo de la empresa configurada
+            string rutaLogo = null;
+            try
+            {
+                using (var ctx = new Models.EntitiesModel())
+                {
+                    rutaLogo = ctx.Empresa.Where(u => u.Emp_id == 1).Select(u => u.ruta_logo).FirstOrDefault();
+                }
+            }
+            catch
+            {
+                rutaLogo = null; // Si falla la consulta, se envía el correo sin logo
+            }
+
+            bool incluyeLogo = !string.IsNullOrEmpty(rutaLogo) && System.IO.File.Exists(rutaLogo);
 
             using (var mensaje = new System.Net.Mail.MailMessage())
             {
                 mensaje.From = new System.Net.Mail.MailAddress(smtpFrom, smtpFromName);
                 mensaje.To.Add(new System.Net.Mail.MailAddress(destinatario));
                 mensaje.Subject = Subject;
-                mensaje.Body = Html;
                 mensaje.IsBodyHtml = true;
+
+                if (incluyeLogo)
+                {
+                    // Encabezado con el logo incrustado (cid) + el cuerpo original del correo
+                    string htmlConLogo = $@"<div style='text-align:center; margin-bottom:15px;'>
+                        <img src='cid:logoEmpresa' alt='Logo' style='max-height:80px;' />
+                    </div>" + Html;
+
+                    var vistaHtml = System.Net.Mail.AlternateView.CreateAlternateViewFromString(htmlConLogo, null, "text/html");
+                    var logoResource = new System.Net.Mail.LinkedResource(rutaLogo)
+                    {
+                        ContentId = "logoEmpresa",
+                        TransferEncoding = System.Net.Mime.TransferEncoding.Base64
+                    };
+                    vistaHtml.LinkedResources.Add(logoResource);
+                    mensaje.AlternateViews.Add(vistaHtml);
+                }
+                else
+                {
+                    mensaje.Body = Html;
+                }
+
+                // Adjuntar archivos (XML de Hacienda, PDF de factura, etc.) si existen en disco
+                if (rutasAdjuntos != null)
+                {
+                    foreach (var ruta in rutasAdjuntos)
+                    {
+                        if (!string.IsNullOrEmpty(ruta) && System.IO.File.Exists(ruta))
+                        {
+                            mensaje.Attachments.Add(new System.Net.Mail.Attachment(ruta));
+                        }
+                    }
+                }
 
                 using (var smtp = new System.Net.Mail.SmtpClient(smtpHost, smtpPort))
                 {
