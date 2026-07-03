@@ -13,6 +13,9 @@ namespace marsh_contable.Modulos
 {
     public class General
     {
+
+        //TODO: INCLUIR EN TODAS LAS FUNCIONES QUE LLAMAN A SEND_MAIL EL LOGO DE LA EMPRESA LOCALIZADO EN Modulos/LogoOficial.jpg
+        
          String input = ConfigurationManager.AppSettings["Input"];
 
         public string GenerarClave()
@@ -54,7 +57,6 @@ namespace marsh_contable.Modulos
 
 
         public string DesencriptarArchivo(string pArchivoBase64)
-
         {
 
             try

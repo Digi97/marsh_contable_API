@@ -12,7 +12,8 @@ using marsh_contable.Modulos;
 
 namespace marsh_contable.Controllers
 {
-
+    //TODO: funcion CreateUser enviar un correo al usuario recien creado con la contraseña indicando que fue creado en el sistema Marsh Contable de forma satisfactoria
+    //TODO: FUNCION DeleteUserById: NOTIFICAR AL USUARIO EN LA FUNCION QUE HA SIDO ELIMINADO/DESACTIVADO DEL SISTEMA 
     public class UsersController : ApiController
     {
 

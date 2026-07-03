@@ -536,6 +536,7 @@
       <DependentUpon>EntitiesModel.edmx</DependentUpon>
       <LastGenOutput>EntitiesModel.cs</LastGenOutput>
     </Content>
+    <Content Include="Modulos\LogoOficial.jpg" />
     <Content Include="Scripts\bootstrap.js" />
     <Content Include="Scripts\bootstrap.min.js" />
     <Content Include="Areas\HelpPage\Views\Web.config" />
@@ -606,6 +607,7 @@
     <None Include="DocElectronic\XSD\4.4\TiqueteElectronico_V4.4.xsd">
       <SubType>Designer</SubType>
     </None>
+    <Content Include="Modulos\PRESUPUESTO EJEMPLO.xlsx" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>

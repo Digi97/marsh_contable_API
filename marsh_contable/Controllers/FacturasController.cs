@@ -26,7 +26,13 @@ namespace marsh_contable.Controllers
 
     //TODO: Modificar la funcion aceptafactura PARA CREAR EL REGISTRO DE UNA FACTURA INGRESADA DE TIPO TipoDocumentoId.ConfirmacionAceptacionMensajeReceptor Y SU RESPECTIVO DOCUMENTO ELECTRONICO Y VALIDARLO CON HACIENDA
     //
-    //TODO_Manually: CONLCUIR VALIDACION CON HACIENDA
+    //TODO: Incluir una funcion que reciba por GET la CLAVE y consulte con Hacienda la funcion FH.EstadoDocumento(f.Clave) valide con hacienda y la respuesta la guarde con la funcion
+    //  saveXMLFIle(rutaGuardado + f.Clave + ".xml", id, f.Usuarios_Usuario_id, TablasReferencia.Facturas); y almacene la respuesta
+
+    //TODO: Enviar un correo electrónico al crear la factura al cliente los dos archivos XML (XML, XML respuesta de hacienda y un archivo PDF creado con la informacion de la factura y detalles)
+
+
+
 
     public class FacturasController : ApiController
     {
