@@ -362,7 +362,10 @@ namespace Facturacion_C_Sharp.Lib
         {
             var root = RootDocumento( );
 
-            root.Add( new XElement( "Clave", ClaveNumerica( ) ),
+            root.Add(
+                new XElement("Clave", ClaveNumerica()),
+                new XElement("ProveedorSistemas", "702560214"),
+                new XElement("CodigoActividadEmisor", "6201.0"), 
                      new XElement( "NumeroConsecutivo", NumeroConsecutivo( ) ),
                      new XElement( "FechaEmision", fechaEmision.ToRfc3339String( ) ) );
 

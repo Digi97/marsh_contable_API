@@ -83,16 +83,13 @@ namespace Facturacion_C_Sharp
 
                 string responseContent = httpResponse.Content.ReadAsStringAsync().Result;
 
-                System.Diagnostics.Debug.WriteLine($"=== AUTH STATUS: {httpResponse.StatusCode}");
-                System.Diagnostics.Debug.WriteLine($"=== AUTH CONTENT: {responseContent}");
-
+          
                 if (httpResponse.StatusCode != System.Net.HttpStatusCode.OK)
                     throw new ExecpcionFacturacionHacienda($"Error autenticacion: {responseContent}");
 
                 JObject json = JObject.Parse(responseContent);
                 token = json["access_token"].ToString();
 
-                System.Diagnostics.Debug.WriteLine($"=== TOKEN OBTENIDO OK, LENGTH: {token.Length}");
             }
         }
 
@@ -205,7 +202,7 @@ namespace Facturacion_C_Sharp
         public EstadoDocumento EstadoDocumento ( String claveNumerica )
         {
             Autenticar( );
-            var request = new RestRequest( configuracion.Documents_endpoint + "/recepcion/" + claveNumerica, Method.Get );
+            var request = new RestRequest( configuracion.Documents_endpoint + claveNumerica, Method.Get );
             request.AddHeader( "Authorization", "bearer " + token );
             request.AddHeader( "content_type", "json" );
             // execute the request

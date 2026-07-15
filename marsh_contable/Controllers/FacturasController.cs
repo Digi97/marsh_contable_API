@@ -1124,7 +1124,7 @@ namespace marsh_contable.Controllers
                                        Impuesto_id = u.Impuesto_id,
                                        Tipo_Identificacion = ti.codigo_tipo_identificacion,
                                        Provincia_emisor = u.Provincia_id.ToString(),
-                                       Canton_emisor = canton.codigo.ToString().Substring(0, 1),
+                                       Canton_emisor = canton.codigo.ToString().Substring(canton.codigo.Length -2),
                                        Distrito_emisor = dist.codigo_distrito,
                                        OtrasSenas_Emisor = u.OtrasSenas,
                                        Telefono = u.Telefono,
@@ -1156,7 +1156,7 @@ namespace marsh_contable.Controllers
                 //Informacion de cliente/receptor
                 var cedula = new DocumentoIdentificacion(f.Tipo_identificacion, f.Cliente_cedula);
                 var telefono = new TelefonoBase(f.Telefono_codigo_pais, f.Telefono_numero);
-                var ubicacion = new Ubicacion(f.Cliente_Provincia, f.Cliente_Canton.ToString().Substring(0, 1), f.Cliente_distrito, f.Cliente_OtrasSenas);
+                var ubicacion = new Ubicacion(f.Cliente_Provincia, f.Cliente_Canton.ToString().Substring(f.Cliente_Canton.Length -2), f.Cliente_distrito, f.Cliente_OtrasSenas);
                 var receptor = new Receptor(f.Cliente, cedula, "", f.Cliente, ubicacion, telefono, null, f.Cliente_Correo);
 
                 var items = new List<Item>();
@@ -1206,32 +1206,32 @@ namespace marsh_contable.Controllers
                 switch (tipoDocumento)
                 {
                     case TipoDocumentoId.FacturaElectronica:
-                        rutaGuardado = rutaGuardado + "/Documentos_Electronicos/Facturas/";
+                        rutaGuardado = rutaGuardado + @"\Documentos_Electronicos\Facturas\";
                         tipoDoc = Documento.TipoDocumento.Factura_Electronica;
                      
                      break;
                     case TipoDocumentoId.NotaCreditoElectronica:
 
-                        rutaGuardado = rutaGuardado + "/Documentos_Electronicos/Nota_Credito/";
+                        rutaGuardado = rutaGuardado + @"\Documentos_Electronicos\Nota_Credito\";
                         tipoDoc = Documento.TipoDocumento.Nota_de_crédito;
                         break;
                     case TipoDocumentoId.NotaDebitoElectronica:
-                        rutaGuardado = rutaGuardado + "/Documentos_Electronicos/Nota_Debito/";
+                        rutaGuardado = rutaGuardado + @"\Documentos_Electronicos\Nota_Debito\";
                         tipoDoc = Documento.TipoDocumento.Nota_de_débito;
                         break;
 
                     case TipoDocumentoId.FacturaElectronicaCompra:
-                        rutaGuardado = rutaGuardado + "/Documentos_Electronicos/FECompra/";
+                        rutaGuardado = rutaGuardado + @"\Documentos_Electronicos\FECompra\";
                         tipoDoc = Documento.TipoDocumento.Factura_Electronica_Compra;
                         break;
 
                     case TipoDocumentoId.ConfirmacionAceptacionMensajeReceptor:
-                        rutaGuardado = rutaGuardado + "/Documentos_Electronicos/Aceptacion/";
+                        rutaGuardado = rutaGuardado + @"\Documentos_Electronicos\Aceptacion\";
                         tipoDoc = Documento.TipoDocumento.Aceptación_del_comprobante_electrónico;
 
                         break;
                     default:
-                        rutaGuardado = rutaGuardado + "/Documentos_Electronicos/Facturas/";
+                        rutaGuardado = rutaGuardado + @"\Documentos_Electronicos\Facturas\";
                         tipoDoc = Documento.TipoDocumento.Factura_Electronica;
                         break;
                 }    
@@ -1253,93 +1253,93 @@ namespace marsh_contable.Controllers
 
                 factura.FirmarDocumento(config);//firmamos documento para guardarlo
 
-                //var xmlFirmado = FirmadorXML.Firmar(factura, empresaEmi.Ruta_llave_factura, tool.Desencriptar(empresaEmi.pin_llave));
-                FH.GuardarXMLEnviado(factura, rutaGuardado);
-                saveXMLFIle(rutaGuardado + f.Clave + ".xml", id, f.Usuarios_Usuario_id, TablasReferencia.Facturas);
+                FH.GuardarXMLEnviado(factura, rutaGuardado); //guardamos en ruta fisica
+                saveXMLFIle(rutaGuardado + f.Clave + ".xml", id, f.Usuarios_Usuario_id, TablasReferencia.Facturas); //guardamos en base de datos
 
                 //Enviar a Hacienda
                 var esEnviado = FH.EnviarDocumento(factura);
 
-                //Espera a Hacienda
-                System.Threading.Thread.Sleep(2500);
-
-                //Optener el estado de la factura
-                var estado = FH.EstadoDocumento(f.Clave);
-
-                // Guardamos el XML de respuesta de Hacienda (si vino) como adjunto también
-                string rutaXmlRespuesta = null;
-                if (estado.RepuestaXML != null)
+                if(esEnviado)
                 {
-                    string rutaEstados = rutaGuardado + "Respuestas/";
-                    FH.GuardarXMLEstado(estado, rutaEstados);
-                    rutaXmlRespuesta = rutaEstados + estado.ClaveNumerica + ".xml";
-                    if (System.IO.File.Exists(rutaXmlRespuesta))
-                    {
-                        saveXMLFIle(rutaXmlRespuesta, id, f.Usuarios_Usuario_id, TablasReferencia.Facturas);
-                    }
-                }
+                    //Espera a Hacienda
+                    System.Threading.Thread.Sleep(2500);
 
-                using (var ctx = new Models.EntitiesModel())
-                {
-
-                    Models.Facturas fupdate = ctx.Facturas.FirstOrDefault(u => u.id == id);
-                    if (f == null)
+                    //Optener el estado de la factura
+                    var estado = FH.EstadoDocumento(f.Clave);
+                    // Guardamos el XML de respuesta de Hacienda (si vino) como adjunto también
+                    string rutaXmlRespuesta = null;
+                    if (estado.RepuestaXML != null)
                     {
-                        throw new Exception("factura_not_found");
-                    }
-                    int newStatus = 0;
-                    // NOTA: EstadoDocumento.EstadoEnHacienda siempre viene en MAYÚSCULAS (ToUpper() en su constructor),
-                    // por lo que la comparación debe hacerse contra las constantes en mayúsculas.
-                    switch(estado.EstadoEnHacienda)
-                    {
-                        case Facturacion_C_Sharp.Lib.EstadoDocumento.ACEPTADO:
-                            newStatus = (int)EstadoFactura.AceptadoPorHacienda;
-                        break;
-                        case Facturacion_C_Sharp.Lib.EstadoDocumento.PROCESANDO:
-                            newStatus = (int)EstadoFactura.PendienteProcesarHacienda;
-                            break;
-                        case Facturacion_C_Sharp.Lib.EstadoDocumento.RECHAZADO:
-                            newStatus = (int)EstadoFactura.RechazadoPorHacienda;
-                            break;
-                        case Facturacion_C_Sharp.Lib.EstadoDocumento.RECIBIDO:
-                            newStatus = (int)EstadoFactura.RecibidoHacienda;
-                            break;
-                        default:
-                            newStatus = (int)EstadoFactura.Error;
-                         break;
-                    
-                    }
-                    fupdate.Estado_Factura_id = newStatus;
-
-                    ctx.SaveChanges();
-                }
-
-                // Generamos el PDF del comprobante y enviamos el correo al cliente con los XML
-                // (enviado + respuesta de Hacienda) y el PDF adjuntos. Solo aplica a los documentos
-                // que el cliente recibe directamente: Factura, Nota de Crédito y Nota de Débito.
-                if (tipoDocumento == TipoDocumentoId.FacturaElectronica ||
-                    tipoDocumento == TipoDocumentoId.NotaCreditoElectronica ||
-                    tipoDocumento == TipoDocumentoId.NotaDebitoElectronica)
-                {
-                    try
-                    {
-                        if (!string.IsNullOrEmpty(f.Cliente_Correo))
+                        string rutaEstados = rutaGuardado + "Respuestas/";
+                        FH.GuardarXMLEstado(estado, rutaEstados);
+                        rutaXmlRespuesta = rutaEstados + estado.ClaveNumerica + ".xml";
+                        if (System.IO.File.Exists(rutaXmlRespuesta))
                         {
-                            string rutaPdf = rutaGuardado + f.Clave + ".pdf";
-                            GenerarPdfFactura(f, detalle, rutaPdf);
+                            saveXMLFIle(rutaXmlRespuesta, id, f.Usuarios_Usuario_id, TablasReferencia.Facturas);
+                        }
+                    }
 
-                            var adjuntos = new List<string> { rutaGuardado + f.Clave + ".xml", rutaPdf };
-                            if (!string.IsNullOrEmpty(rutaXmlRespuesta))
+                    using (var ctx = new Models.EntitiesModel())
+                    {
+
+                        Models.Facturas fupdate = ctx.Facturas.FirstOrDefault(u => u.id == id);
+                        if (f == null)
+                        {
+                            throw new Exception("factura_not_found");
+                        }
+                        int newStatus = 0;
+                        // NOTA: EstadoDocumento.EstadoEnHacienda siempre viene en MAYÚSCULAS (ToUpper() en su constructor),
+                        // por lo que la comparación debe hacerse contra las constantes en mayúsculas.
+                        switch (estado.EstadoEnHacienda)
+                        {
+                            case Facturacion_C_Sharp.Lib.EstadoDocumento.ACEPTADO:
+                                newStatus = (int)EstadoFactura.AceptadoPorHacienda;
+                                break;
+                            case Facturacion_C_Sharp.Lib.EstadoDocumento.PROCESANDO:
+                                newStatus = (int)EstadoFactura.PendienteProcesarHacienda;
+                                break;
+                            case Facturacion_C_Sharp.Lib.EstadoDocumento.RECHAZADO:
+                                newStatus = (int)EstadoFactura.RechazadoPorHacienda;
+                                break;
+                            case Facturacion_C_Sharp.Lib.EstadoDocumento.RECIBIDO:
+                                newStatus = (int)EstadoFactura.RecibidoHacienda;
+                                break;
+                            default:
+                                newStatus = (int)EstadoFactura.Error;
+                                break;
+
+                        }
+                        fupdate.Estado_Factura_id = newStatus;
+
+                        ctx.SaveChanges();
+                    }
+
+                    // Generamos el PDF del comprobante y enviamos el correo al cliente con los XML
+                    // (enviado + respuesta de Hacienda) y el PDF adjuntos. Solo aplica a los documentos
+                    // que el cliente recibe directamente: Factura, Nota de Crédito y Nota de Débito.
+                    if (tipoDocumento == TipoDocumentoId.FacturaElectronica ||
+                        tipoDocumento == TipoDocumentoId.NotaCreditoElectronica ||
+                        tipoDocumento == TipoDocumentoId.NotaDebitoElectronica)
+                    {
+                        try
+                        {
+                            if (!string.IsNullOrEmpty(f.Cliente_Correo))
                             {
-                                adjuntos.Add(rutaXmlRespuesta);
-                            }
+                                string rutaPdf = rutaGuardado + f.Clave + ".pdf";
+                                GenerarPdfFactura(f, detalle, rutaPdf);
 
-                            string tituloDoc = tipoDocumento == TipoDocumentoId.FacturaElectronica ? "Factura Electrónica"
-                                              : tipoDocumento == TipoDocumentoId.NotaCreditoElectronica ? "Nota de Crédito Electrónica"
-                                              : "Nota de Débito Electrónica";
+                                var adjuntos = new List<string> { rutaGuardado + f.Clave + ".xml", rutaPdf };
+                                if (!string.IsNullOrEmpty(rutaXmlRespuesta))
+                                {
+                                    adjuntos.Add(rutaXmlRespuesta);
+                                }
 
-                            string asunto = $"{tituloDoc} {f.Consecutivo_electronico} - {empresaEmi.Nombre_empresa}";
-                            string cuerpo = $@"
+                                string tituloDoc = tipoDocumento == TipoDocumentoId.FacturaElectronica ? "Factura Electrónica"
+                                                  : tipoDocumento == TipoDocumentoId.NotaCreditoElectronica ? "Nota de Crédito Electrónica"
+                                                  : "Nota de Débito Electrónica";
+
+                                string asunto = $"{tituloDoc} {f.Consecutivo_electronico} - {empresaEmi.Nombre_empresa}";
+                                string cuerpo = $@"
                                 <h2>{tituloDoc}</h2>
                                 <p>Estimado(a) {f.Cliente},</p>
                                 <p>Adjunto encontrará el comprobante electrónico generado por <strong>{empresaEmi.Nombre_empresa}</strong>, junto con el XML enviado a Hacienda{(string.IsNullOrEmpty(rutaXmlRespuesta) ? "" : ", la respuesta de Hacienda")} y el PDF del documento.</p>
@@ -1360,17 +1360,21 @@ namespace marsh_contable.Controllers
                                 <hr/>
                                 <small style='color:#6c757d;'>Notificación automática - Marsh Asprose</small>";
 
-                            tool.Send_Mail(f.Cliente_Correo, asunto, cuerpo, adjuntos);
+                                tool.Send_Mail(f.Cliente_Correo, asunto, cuerpo, adjuntos);
+                            }
+                        }
+                        catch
+                        {
+                            // El envío de correo/generación de PDF no debe revertir la creación
+                            // del documento electrónico ya aceptado/enviado a Hacienda.
                         }
                     }
-                    catch
-                    {
-                        // El envío de correo/generación de PDF no debe revertir la creación
-                        // del documento electrónico ya aceptado/enviado a Hacienda.
-                    }
+
+                    return true;
                 }
 
-                return true;
+
+                return false;
 
             }catch(Exception ex)
             {
