@@ -226,7 +226,9 @@ namespace marsh_contable.Controllers
                                      Monto_ejecutado = d.Monto_ejecutado,
                                      Fecha_registro = d.Fecha_registro,
                                      categoria_presupuestaria = cp.nombre,
-                                     Observaciones = d.Observaciones
+                                     Observaciones = d.Observaciones,
+                                     Centro_Costos_id = gp.Centro_Costos_id,
+                                     Categoria_presupuestaria_id = gp.Categoria_presupuestaria_id
 
                                  }).OrderByDescending(x => x.id).ToList();
 

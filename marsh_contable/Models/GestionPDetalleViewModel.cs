@@ -24,5 +24,9 @@ namespace marsh_contable.Models
         public string Observaciones { get; set; }
         public short activo { get; set; }
         public string categoria_presupuestaria { get; set; }
+
+        public int Centro_Costos_id { get; set; }
+        public int Categoria_presupuestaria_id { get; set; }
+
     }
 }
