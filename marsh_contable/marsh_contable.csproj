@@ -566,24 +566,6 @@
     <Content Include="Models\EntitiesModel.edmx.diagram">
       <DependentUpon>EntitiesModel.edmx</DependentUpon>
     </Content>
-    <None Include="DocElectronic\XSD\4.2\FacturaElectronica_V.4.2.xsd">
-      <SubType>Designer</SubType>
-    </None>
-    <None Include="DocElectronic\XSD\4.2\MensajeHacienda_V4.2.xsd">
-      <SubType>Designer</SubType>
-    </None>
-    <None Include="DocElectronic\XSD\4.2\MensajeReceptor_4.2.xsd">
-      <SubType>Designer</SubType>
-    </None>
-    <None Include="DocElectronic\XSD\4.2\NotaCreditoElectronica_V4.2.xsd">
-      <SubType>Designer</SubType>
-    </None>
-    <None Include="DocElectronic\XSD\4.2\NotaDebitoElectronica.xsd">
-      <SubType>Designer</SubType>
-    </None>
-    <None Include="DocElectronic\XSD\4.2\TiqueteElectronico_V4.2.xsd">
-      <SubType>Designer</SubType>
-    </None>
     <None Include="DocElectronic\XSD\4.4\FacturaElectronicaCompra_V4.4.xsd">
       <SubType>Designer</SubType>
     </None>
