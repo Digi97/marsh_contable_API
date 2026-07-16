@@ -660,6 +660,128 @@ namespace marsh_contable.Controllers
         }
 
 
+
+        [HttpGet]
+        [Authorize]
+        [Route("api/v1/notacredito")]
+        public Reply GetNotaCredito()
+        {
+            Reply oR = new Reply();
+            oR.CodeStatus = 0;
+            try
+            {
+                using (var ctx = new Models.EntitiesModel())
+                {
+                    var lista = (from f in ctx.Facturas
+                                 join c in ctx.Clientes on f.Clientes_id equals c.id
+                                 join tm in ctx.Tipo_moneda on f.Tipo_moneda_id equals tm.id
+                                 join ef in ctx.Estado_Factura on f.Estado_Factura_id equals ef.id
+                                 join td in ctx.Tipo_documento on f.Tipo_documento_id equals td.id
+                                 join cv in ctx.Condicion_venta on f.Condicion_venta_id equals cv.id
+                                 join mp in ctx.Medio_pago on f.Medio_pago_id equals mp.id
+                                 where f.Tipo_documento_id == (int)TipoDocumentoId.NotaCreditoElectronica //filtramos solo las facturas
+                                 select new Models.FacturasViewModel
+                                 {
+                                     id = f.id,
+                                     Clave = f.Clave,
+                                     Consecutivo_electronico = f.Consecutivo_electronico,
+                                     fecha = f.fecha,
+                                     consecutivo = f.consecutivo,
+                                     Tipo_moneda_id = f.Tipo_moneda_id,
+                                     Estado_Factura_id = f.Estado_Factura_id,
+                                     Tipo_documento_id = f.Tipo_documento_id,
+                                     Subtotal = f.Subtotal,
+                                     Impuesto = f.Impuesto,
+                                     Total = f.Total,
+                                     Descuento = f.Descuento,
+
+                                     cambio_venta = f.cambio_venta,
+                                     cambio_compra = f.cambio_compra,
+                                     Clientes_id = f.Clientes_id,
+                                     Condicion_venta_id = f.Condicion_venta_id,
+                                     Medio_pago_id = f.Medio_pago_id,
+                                     Cliente = c.Nombre + " " + c.Apellido1,
+                                     Tipo_moneda = tm.Nombre,
+                                     Estado_factura = ef.Nombre,
+                                     Tipo_documento = td.Nombre,
+                                     Condicion_venta = cv.Descripcion,
+                                     Medio_pago = mp.descripcion
+                                 }).ToList();
+
+                    oR.CodeStatus = HttpStatusCode.OK;
+                    oR.Data = lista;
+                    return oR;
+                }
+            }
+            catch (Exception ex)
+            {
+                oR.CodeStatus = HttpStatusCode.InternalServerError;
+                oR.Message = ex.Message;
+                return oR;
+            }
+        }
+
+        [HttpGet]
+        [Authorize]
+        [Route("api/v1/notadebito")]
+        public Reply GetNotaDebito()
+        {
+            Reply oR = new Reply();
+            oR.CodeStatus = 0;
+            try
+            {
+                using (var ctx = new Models.EntitiesModel())
+                {
+                    var lista = (from f in ctx.Facturas
+                                 join c in ctx.Clientes on f.Clientes_id equals c.id
+                                 join tm in ctx.Tipo_moneda on f.Tipo_moneda_id equals tm.id
+                                 join ef in ctx.Estado_Factura on f.Estado_Factura_id equals ef.id
+                                 join td in ctx.Tipo_documento on f.Tipo_documento_id equals td.id
+                                 join cv in ctx.Condicion_venta on f.Condicion_venta_id equals cv.id
+                                 join mp in ctx.Medio_pago on f.Medio_pago_id equals mp.id
+                                 where f.Tipo_documento_id == (int)TipoDocumentoId.NotaDebitoElectronica //filtramos solo las facturas
+                                 select new Models.FacturasViewModel
+                                 {
+                                     id = f.id,
+                                     Clave = f.Clave,
+                                     Consecutivo_electronico = f.Consecutivo_electronico,
+                                     fecha = f.fecha,
+                                     consecutivo = f.consecutivo,
+                                     Tipo_moneda_id = f.Tipo_moneda_id,
+                                     Estado_Factura_id = f.Estado_Factura_id,
+                                     Tipo_documento_id = f.Tipo_documento_id,
+                                     Subtotal = f.Subtotal,
+                                     Impuesto = f.Impuesto,
+                                     Total = f.Total,
+                                     Descuento = f.Descuento,
+
+                                     cambio_venta = f.cambio_venta,
+                                     cambio_compra = f.cambio_compra,
+                                     Clientes_id = f.Clientes_id,
+                                     Condicion_venta_id = f.Condicion_venta_id,
+                                     Medio_pago_id = f.Medio_pago_id,
+                                     Cliente = c.Nombre + " " + c.Apellido1,
+                                     Tipo_moneda = tm.Nombre,
+                                     Estado_factura = ef.Nombre,
+                                     Tipo_documento = td.Nombre,
+                                     Condicion_venta = cv.Descripcion,
+                                     Medio_pago = mp.descripcion
+                                 }).ToList();
+
+                    oR.CodeStatus = HttpStatusCode.OK;
+                    oR.Data = lista;
+                    return oR;
+                }
+            }
+            catch (Exception ex)
+            {
+                oR.CodeStatus = HttpStatusCode.InternalServerError;
+                oR.Message = ex.Message;
+                return oR;
+            }
+        }
+
+
         [HttpGet]
         [Authorize]
         [Route("api/v1/facturas/{id}")]
