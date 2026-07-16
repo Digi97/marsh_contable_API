@@ -123,7 +123,7 @@ namespace Facturacion_C_Sharp.Lib
         private CondicionVenta condicionVenta;
         private String plazoCredito;
         private MedioPago medioPago;
-        private Normativa normativa = new Normativa( );
+       // private Normativa normativa = new Normativa( );
         private String numero;
         private TipoDocumento tipoDocumento;
         private String codigoSeguridad;
@@ -158,14 +158,15 @@ namespace Facturacion_C_Sharp.Lib
                          Normativa normativa = null,
                          Referencia[] referencias = null,
                          string plazoCredito = ""
+
                   
                        
             )
         {
-            if( normativa == null )
-            {
-                normativa = new Normativa( );
-            }
+            //if( normativa == null )
+            //{
+            //    normativa = new Normativa( );
+            //}
             this.fechaEmision = fechaEmision;
             this.emisor = emisor;
             this.receptor = receptor;
@@ -210,10 +211,10 @@ namespace Facturacion_C_Sharp.Lib
         {
             get => medioPago; set => medioPago = value;
         }
-        public Normativa Normativa
-        {
-            get => normativa; set => normativa = value;
-        }
+        //public Normativa Normativa
+        //{
+        //    get => normativa; set => normativa = value;
+        //}
         public String Numero
         {
             get => numero; set => numero = value;
@@ -300,6 +301,10 @@ namespace Facturacion_C_Sharp.Lib
                     return "TiqueteElectronico";
                 case TipoDocumento.Aceptación_del_comprobante_electrónico:
                     return "MensajeReceptor";
+                case TipoDocumento.Factura_Electronica_Compra: 
+                    return "FacturaElectronicaCompra";
+                case TipoDocumento.Factura_Electronica_Exportacion: 
+                    return "FacturaElectronicaExportacion";
                 default:
                     return "ERROR TIPO DE DOCUMENTO";
             }
@@ -383,7 +388,7 @@ namespace Facturacion_C_Sharp.Lib
                 root.Add( new XElement( "PlazoCredito", plazoCredito ) );
             }
 
-            root.Add( new XElement( "MedioPago", medioPago.ToDescriptionString( ) ) );
+           // root.Add( new XElement( "MedioPago", medioPago.ToDescriptionString( ) ) );
 
             var detalleServicio = new XElement( "DetalleServicio" );
             foreach( var item in items )
@@ -402,7 +407,7 @@ namespace Facturacion_C_Sharp.Lib
                 }
             }
 
-            root.Add( normativa.GenerarXML( ) );
+           // root.Add( normativa.GenerarXML( ) ); //NORMATIVA NO ES NECESARIO
 
             XDocument doc = new XDocument(
                 new XDeclaration( "1.0", "UTF-8", null ),

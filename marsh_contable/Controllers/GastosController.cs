@@ -37,10 +37,7 @@ namespace marsh_contable.Controllers
                 {
                     throw new Exception("invalid_string_form_Descripcion");
                 }
-                if (!tool.validaNumeros(model.Categoria_gasto_id.ToString()))
-                {
-                    throw new Exception("invalid_value_form_Categoria_gasto_id");
-                }
+    
                 if (!tool.validaNumeros(model.Tipo_documento_id.ToString()))
                 {
                     throw new Exception("invalid_value_form_Tipo_documento_id");
@@ -75,6 +72,12 @@ namespace marsh_contable.Controllers
                     throw new Exception("presupuesto_not defined");
                 }
 
+
+                if (model.Banco_id == 0)
+                {
+                    throw new Exception("banco_is_required");
+                }
+
                 #endregion
                 BancoController banco = new BancoController();
 
@@ -102,7 +105,7 @@ namespace marsh_contable.Controllers
                     g = new Models.Gastos()
                     {
                         Descripcion = model.Descripcion,
-                        Categoria_gasto_id = model.Categoria_gasto_id,
+                        Categoria_gasto_id = 9, //defetcto en otros, esto se maneja por el presupuesto//model.Categoria_gasto_id,
                         Subtotal = model.Subtotal,
                         Impuesto = model.Impuesto,
                         Total = model.Total,
@@ -114,7 +117,8 @@ namespace marsh_contable.Controllers
                         Medio_pago_id = model.Medio_pago_id,
                         Proveedor_id = model.Proveedor_id,
                         Descuento = model.Descuento,
-                        Tipo_moneda_id = (int)model.Tipo_moneda_id
+                        Tipo_moneda_id = (int)model.Tipo_moneda_id,
+                        Condicion_venta_id =(int) model.Condicion_venta_id
                     };
                     ctx.Gastos.Add(g);
                     ctx.SaveChanges();
@@ -124,81 +128,81 @@ namespace marsh_contable.Controllers
                     ctx.SaveChanges();
 
 
-                    if(model.Tipo_documento_id == (int)TipoDocumentoId.FacturaElectronicaCompra)
-                    {
-                        // Generamos la Factura Electrónica de Compra asociada a este gasto, reutilizando
-                        // la misma lógica de firmado/envío a Hacienda que usa FacturasController.CreateDocument.
-                        //
-                        // NOTA IMPORTANTE: la tabla Facturas exige un Clientes_id válido (FK a Clientes),
-                        // pero un gasto/compra está asociado a un Proveedor, no a un Cliente. Siguiendo la
-                        // misma convención ya usada en AceptaFactura (Clientes_id = 1 como registro
-                        // genérico/por defecto cuando no aplica un cliente específico), se usa aquí el
-                        // mismo Clientes_id = 1. Si se requiere que el receptor real del documento sea el
-                        // Proveedor específico, se recomienda a futuro agregar un Cliente espejo por
-                        // Proveedor o ampliar el esquema de Facturas para permitir Proveedor_id.
-                        var llaves = new FacturasController().ObtenerClaveYConsecutivo(ctx, TipoDocumentoId.FacturaElectronicaCompra);
+                    //if(model.Tipo_documento_id == (int)TipoDocumentoId.FacturaElectronicaCompra)
+                    //{
+                    //    // Generamos la Factura Electrónica de Compra asociada a este gasto, reutilizando
+                    //    // la misma lógica de firmado/envío a Hacienda que usa FacturasController.CreateDocument.
+                    //    //
+                    //    // NOTA IMPORTANTE: la tabla Facturas exige un Clientes_id válido (FK a Clientes),
+                    //    // pero un gasto/compra está asociado a un Proveedor, no a un Cliente. Siguiendo la
+                    //    // misma convención ya usada en AceptaFactura (Clientes_id = 1 como registro
+                    //    // genérico/por defecto cuando no aplica un cliente específico), se usa aquí el
+                    //    // mismo Clientes_id = 1. Si se requiere que el receptor real del documento sea el
+                    //    // Proveedor específico, se recomienda a futuro agregar un Cliente espejo por
+                    //    // Proveedor o ampliar el esquema de Facturas para permitir Proveedor_id.
+                    //    var llaves = new FacturasController().ObtenerClaveYConsecutivo(ctx, TipoDocumentoId.FacturaElectronicaCompra);
 
-                        int siguienteConsecutivoCompra = ctx.Facturas
-                            .Where(x => x.Tipo_documento_id == (int)TipoDocumentoId.FacturaElectronicaCompra)
-                            .Select(x => x.consecutivo)
-                            .DefaultIfEmpty(0)
-                            .Max() + 1;
+                    //    int siguienteConsecutivoCompra = ctx.Facturas
+                    //        .Where(x => x.Tipo_documento_id == (int)TipoDocumentoId.FacturaElectronicaCompra)
+                    //        .Select(x => x.consecutivo)
+                    //        .DefaultIfEmpty(0)
+                    //        .Max() + 1;
 
-                        Models.Facturas facturaCompra = new Models.Facturas()
-                        {
-                            Clave = llaves.Clave,
-                            Consecutivo_electronico = llaves.Consecutivo,
-                            fecha = DateTime.Now,
-                            consecutivo = siguienteConsecutivoCompra,
-                            Tipo_moneda_id = (int)model.Tipo_moneda_id,
-                            Estado_Factura_id = (int)EstadoFactura.Borrador,
-                            Tipo_documento_id = (int)TipoDocumentoId.FacturaElectronicaCompra,
-                            Subtotal = g.Subtotal,
-                            Impuesto = g.Impuesto,
-                            Total = g.Total,
-                            Descuento = g.Descuento ?? 0,
-                            cambio_venta = 0,
-                            cambio_compra = 0,
-                            Clientes_id = 1, // Ver nota arriba
-                            Condicion_venta_id = model.Condicion_venta_id ?? (int)CondicionVenta.Contado,
-                            Medio_pago_id = g.Medio_pago_id,
-                            Usuarios_Usuario_id = g.Usuarios_Usuario_id
-                        };
-                        ctx.Facturas.Add(facturaCompra);
-                        ctx.SaveChanges();
+                    //    Models.Facturas facturaCompra = new Models.Facturas()
+                    //    {
+                    //        Clave = llaves.Clave,
+                    //        Consecutivo_electronico = llaves.Consecutivo,
+                    //        fecha = DateTime.Now,
+                    //        consecutivo = siguienteConsecutivoCompra,
+                    //        Tipo_moneda_id = (int)model.Tipo_moneda_id,
+                    //        Estado_Factura_id = (int)EstadoFactura.Borrador,
+                    //        Tipo_documento_id = (int)TipoDocumentoId.FacturaElectronicaCompra,
+                    //        Subtotal = g.Subtotal,
+                    //        Impuesto = g.Impuesto,
+                    //        Total = g.Total,
+                    //        Descuento = g.Descuento ?? 0,
+                    //        cambio_venta = 0,
+                    //        cambio_compra = 0,
+                    //        Clientes_id = 1, // Ver nota arriba
+                    //        Condicion_venta_id = model.Condicion_venta_id ?? (int)CondicionVenta.Contado,
+                    //        Medio_pago_id = g.Medio_pago_id,
+                    //        Usuarios_Usuario_id = g.Usuarios_Usuario_id
+                    //    };
+                    //    ctx.Facturas.Add(facturaCompra);
+                    //    ctx.SaveChanges();
 
-                        FacturaDetallesController factDetalles = new FacturaDetallesController();
-                        foreach (var lineaGasto in model.Gastos_Detalles)
-                        {
-                            var detalleFactura = new Models.Factura_Detalles()
-                            {
-                                Facturas_id = facturaCompra.id,
-                                Subtotal = lineaGasto.Subtotal,
-                                Impuesto = lineaGasto.Impuesto,
-                                Total = lineaGasto.Total,
-                                Cantidad = lineaGasto.Cantidad,
-                                Detalle = lineaGasto.Detalle,
-                                // Gastos_Detalles no maneja catálogo CABYS/Unidad de medida como Factura_Detalles;
-                                // se usan valores por defecto (id 1) siguiendo la convención de "categoría por
-                                // defecto" ya utilizada en el resto del controlador.
-                                Codigos_cabys_id = 1,
-                                Codigos_cabys_codigo = lineaGasto.codigo_comercial ?? "",
-                                Codigos_cabys_Impuesto_id = 1,
-                                Descuento = lineaGasto.Descuento,
-                                Unidad_medida_id = 1,
-                                Codigo_comercial_id = 1,
-                                Fecha = DateTime.Now,
-                                Ultima_fec_actualizacion = DateTime.Now
-                            };
-                            var resultDetalle = factDetalles.CreateFacturaDetalle(detalleFactura);
-                            if (resultDetalle.CodeStatus != HttpStatusCode.OK)
-                            {
-                                throw new Exception(resultDetalle.Message);
-                            }
-                        }
+                    //    FacturaDetallesController factDetalles = new FacturaDetallesController();
+                    //    foreach (var lineaGasto in model.Gastos_Detalles)
+                    //    {
+                    //        var detalleFactura = new Models.Factura_Detalles()
+                    //        {
+                    //            Facturas_id = facturaCompra.id,
+                    //            Subtotal = lineaGasto.Subtotal,
+                    //            Impuesto = lineaGasto.Impuesto,
+                    //            Total = lineaGasto.Total,
+                    //            Cantidad = lineaGasto.Cantidad,
+                    //            Detalle = lineaGasto.Detalle,
+                    //            // Gastos_Detalles no maneja catálogo CABYS/Unidad de medida como Factura_Detalles;
+                    //            // se usan valores por defecto (id 1) siguiendo la convención de "categoría por
+                    //            // defecto" ya utilizada en el resto del controlador.
+                    //            Codigos_cabys_id = 1,
+                    //            Codigos_cabys_codigo = lineaGasto.codigo_comercial ?? "",
+                    //            Codigos_cabys_Impuesto_id = 1,
+                    //            Descuento = lineaGasto.Descuento,
+                    //            Unidad_medida_id = 1,
+                    //            Codigo_comercial_id = 1,
+                    //            Fecha = DateTime.Now,
+                    //            Ultima_fec_actualizacion = DateTime.Now
+                    //        };
+                    //        var resultDetalle = factDetalles.CreateFacturaDetalle(detalleFactura);
+                    //        if (resultDetalle.CodeStatus != HttpStatusCode.OK)
+                    //        {
+                    //            throw new Exception(resultDetalle.Message);
+                    //        }
+                    //    }
 
-                        idFacturaCompra = facturaCompra.id;
-                    }
+                    //    idFacturaCompra = facturaCompra.id;
+                    //}
                     //actualizamos el monto ejecutado para los reportes
                     id = g.id;
                     GastosDetallesController gastosDetalles = new GastosDetallesController();
@@ -240,7 +244,7 @@ namespace marsh_contable.Controllers
 
 
            
-                var bmovimiento = banco.RegistrarMovimientoPorGasto(cpid, (int) model.Tipo_moneda_id, ccid, id, g.Total, g.Usuarios_Usuario_id, "Registro de Gasto");
+                var bmovimiento = banco.RegistrarMovimientoPorGasto(cpid, (int) model.Tipo_moneda_id, ccid, id, g.Total, g.Usuarios_Usuario_id, "Registro de Gasto", banco_id:model.Banco_id);
 
                 if (bmovimiento.CodeStatus != HttpStatusCode.OK)
                 {
@@ -328,7 +332,6 @@ namespace marsh_contable.Controllers
             }
         }
 
-
         [HttpPut]
         [Authorize]
         [Route("api/v1/gastos/{id}")]
@@ -342,49 +345,58 @@ namespace marsh_contable.Controllers
             General tool = new General();
             try
             {
+                #region "validaciones"
                 if (model == null)
-                {
                     throw new Exception("invalid_model_request_missing");
-                }
+
                 if (!tool.ValidaTexto(model.Descripcion))
-                {
                     throw new Exception("invalid_string_form_Descripcion");
-                }
+
                 if (model.Tipo_moneda_id == 0)
-                {
                     throw new Exception("currency_is_required");
-                }
 
-                if (String.IsNullOrEmpty(model.presupuesto_id))
-                {
-                    throw new Exception("presupuesto_not defined");
-                }
+                if (string.IsNullOrEmpty(model.presupuesto_id))
+                    throw new Exception("presupuesto_not_defined");
 
+                if (model.Gastos_Detalles == null || model.Gastos_Detalles.Count == 0)
+                    throw new Exception("detail_is_required");
 
-                string[] partes = model.presupuesto_id.Split('_'); // id = gp.id+"_"+gp.Categoria_presupuestaria_id+"_"+ gp.Centro_Costos_id,
+                if (model.Banco_id == 0)
+                    throw new Exception("banco_is_required");
+                #endregion
 
+                string[] partes = model.presupuesto_id.Split('_');
                 int pid = int.Parse(partes[0]);
                 int cpid = int.Parse(partes[1]);
                 int ccid = int.Parse(partes[2]);
-                validacionPresupuesto(pid, model.Total, cpid, ccid); //validamos el presupuesto
 
+                validacionPresupuesto(pid, model.Total, cpid, ccid);
 
                 using (var ctx = new Models.EntitiesModel())
                 {
-
+                    ctx.Configuration.LazyLoadingEnabled = false;
+                    ctx.Configuration.ProxyCreationEnabled = false;
 
                     DateTime currentDate = DateTime.Now;
-                    gpExist = ctx.Gestion_Presupuestaria.FirstOrDefault(u => currentDate >= u.periodo_inicio && currentDate <= u.periodo_fin);
-                    if (gpExist == null)
-                    {
-                        throw new Exception("gestion_presupuestaria_for_current_period_dont_exist");
-                    }
 
-                     g = ctx.Gastos.FirstOrDefault(u => u.id == id);
+                    // ── Buscar presupuesto vigente
+                    gpExist = ctx.Gestion_Presupuestaria
+                        .FirstOrDefault(u => currentDate >= u.periodo_inicio &&
+                                             currentDate <= u.periodo_fin &&
+                                             u.id == pid);
+
+                    if (gpExist == null)
+                        throw new Exception("gestion_presupuestaria_for_current_period_dont_exist");
+
+                    // ── Buscar gasto existente
+                    g = ctx.Gastos.FirstOrDefault(u => u.id == id);
                     if (g == null)
-                    {
                         throw new Exception("gasto_not_found");
-                    }
+
+                    // Guardar total anterior para ajustar presupuesto
+                    double totalAnterior = g.Total;
+
+                    // ── Actualizar encabezado del gasto
                     g.Descripcion = model.Descripcion;
                     g.Categoria_gasto_id = model.Categoria_gasto_id;
                     g.Subtotal = model.Subtotal;
@@ -398,13 +410,121 @@ namespace marsh_contable.Controllers
                     g.Descuento = model.Descuento;
                     g.Tipo_moneda_id = model.Tipo_moneda_id;
                     g.Condicion_venta_id = model.Condicion_venta_id;
-                    
                     ctx.SaveChanges();
+
+                    // ══════════════════════════════════════════════
+                    // ELIMINAR Y RECREAR DETALLES DEL GASTO
+                    // ══════════════════════════════════════════════
+
+                    var detallesExistentes = ctx.Gastos_Detalles
+                        .Where(d => d.Gastos_id == id)
+                        .ToList();
+
+                    foreach (var det in detallesExistentes)
+                    {
+                        ctx.Gastos_Detalles.Remove(det);
+                    }
+                    ctx.SaveChanges();
+
+                    // Crear nuevos detalles
+                    GastosDetallesController gastosDetalles = new GastosDetallesController();
+                    foreach (var detalle in model.Gastos_Detalles)
+                    {
+                        detalle.Gastos_id = id;
+                        var result = gastosDetalles.CreateGastoDetalle(detalle);
+                        if (result.CodeStatus != HttpStatusCode.OK)
+                            throw new Exception(result.Message);
+                    }
+
+                    // ══════════════════════════════════════════════
+                    // AJUSTAR MONTO EJECUTADO EN PRESUPUESTO
+                    // ══════════════════════════════════════════════
+
+                    double diferencia = model.Total - totalAnterior;
+                    gpExist.monto_ejecutado = gpExist.monto_ejecutado + diferencia;
+                    ctx.SaveChanges();
+
+                    // ══════════════════════════════════════════════
+                    // ELIMINAR CXP ANTERIOR Y RECREAR SI APLICA
+                    // ══════════════════════════════════════════════
+
+                    var cxpExistente = ctx.Cuenta_Encabezado
+                        .FirstOrDefault(c => c.Gastos_id == id &&
+                                             c.Tipo_cuentas_id == (int)TipoCuenta.CuentaPorPagar &&
+                                             c.Estado == 1);
+
+                    if (cxpExistente != null)
+                    {
+                        // Eliminar detalles de la CXP
+                        var cxpDetalles = ctx.Cuenta_Detalle
+                            .Where(d => d.Cuenta_Encabezado_id == cxpExistente.id)
+                            .ToList();
+
+                        foreach (var cd in cxpDetalles)
+                        {
+                            ctx.Cuenta_Detalle.Remove(cd);
+                        }
+
+                        // Desactivar CXP anterior
+                        cxpExistente.Estado = 0;
+                        cxpExistente.Ultima_Fecha_actualizacion = DateTime.Now;
+                        ctx.SaveChanges();
+                    }
+
+                    // Crear nueva CXP si condición es crédito
+                    if (model.Condicion_venta_id == (int)CondicionVenta.Credito)
+                    {
+                        int diasCredito = model.dias_credito > 0 ? model.dias_credito : 30;
+
+                        Models.Cuenta_Encabezado cxp = new Models.Cuenta_Encabezado()
+                        {
+                            Vigencia_inicial = DateTime.Now,
+                            Vigencia_final = DateTime.Now.AddDays(diasCredito),
+                            Tipo_moneda_id = (int)g.Tipo_moneda_id,
+                            Medio_pago_id = g.Medio_pago_id,
+                            Total = (decimal)g.Total,
+                            Monto_Proyeccion = (decimal)g.Total,
+                            subtotal = (decimal)g.Subtotal,
+                            impuesto = (decimal)g.Impuesto,
+                            Descuento = (decimal)g.Descuento,
+                            Referencia = g.Doc_Referencia,
+                            Fecha_creacion = DateTime.Now,
+                            Ultima_Fecha_actualizacion = DateTime.Now,
+                            Usuarios_Usuario_id = g.Usuarios_Usuario_id,
+                            Clientes_id = null,
+                            Facturas_id = null,
+                            Proveedor_id = g.Proveedor_id,
+                            Gastos_id = g.id,
+                            Ingresos_id = null,
+                            Estado = 1,
+                            Tipo_cuentas_id = (int)TipoCuenta.CuentaPorPagar,
+                            Categoria_presupuestaria_id = gpExist.Categoria_presupuestaria_id,
+                            Centro_Costos_id = gpExist.Centro_Costos_id
+                        };
+                        ctx.Cuenta_Encabezado.Add(cxp);
+                        ctx.SaveChanges();
+                    }
                 }
 
+                // ══════════════════════════════════════════════
+                // ACTUALIZAR MOVIMIENTO DE BANCO
+                // ══════════════════════════════════════════════
 
+                BancoController banco = new BancoController();
+                var bmovimiento = banco.EditarMovimientoPorGasto(
+                    cpid, (int)model.Tipo_moneda_id, ccid,
+                    id, g.Total, g.Usuarios_Usuario_id,
+                    "Actualización de Gasto",
+                    banco_id: model.Banco_id);
 
-                Models.Gestion_P_detalle detalle = new Models.Gestion_P_detalle()
+                if (bmovimiento.CodeStatus != HttpStatusCode.OK)
+                    throw new Exception(bmovimiento.Message);
+
+                // ══════════════════════════════════════════════
+                // ACTUALIZAR GESTIÓN PRESUPUESTARIA DETALLE
+                // ══════════════════════════════════════════════
+
+                Models.Gestion_P_detalle detGP = new Models.Gestion_P_detalle()
                 {
                     Monto = g.Total,
                     Monto_aprobado = gpExist.monto_aprobado,
@@ -412,53 +532,34 @@ namespace marsh_contable.Controllers
                     Monto_compometido = gpExist.monto_comprometido,
                     Monto_ejecutado = (decimal)g.Total,
                     detalle_presupuesto = $"Gastos #{id}",
-                    Gestion_Presupuestaria_id = gpExist.id, // ID del presupuesto activo
+                    Gestion_Presupuestaria_id = gpExist.id,
                     Categoria_presupuestaria_id = (int)Modulos.Categoria_presupuestaria.Gastos,
                     Gastos_id = id,
                     Ingresos_id = null,
                     Facturas_id = null,
                     Usuarios_Usuario_id = (int)model.Usuarios_Usuario_id,
                     Fecha_registro = DateTime.Now,
-                    Observaciones = $"Id: {g.id} | Subtotal: {g.Subtotal} | Impuesto: {g.Impuesto} | Descuento: {g.Descuento}",
+                    Observaciones = $"Actualización | Id: {g.id} | Subtotal: {g.Subtotal} | Impuesto: {g.Impuesto} | Descuento: {g.Descuento}",
                     activo = 1
                 };
 
-                BancoController banco = new BancoController();
-                var bmovimiento = banco.EditarMovimientoPorGasto(model.Categoria_gasto_id, (int)model.Tipo_moneda_id, gpExist.Centro_Costos_id, id, g.Total, g.Usuarios_Usuario_id, "Registro de Gasto");
-
-                if (bmovimiento.CodeStatus != HttpStatusCode.OK)
-                {
-                    throw new Exception(bmovimiento.Message);
-                }
-
-
                 GestionPDetalleController detalleGestion = new GestionPDetalleController();
-                var response = detalleGestion.UpdateGestionPDetalle(id,detalle, 0);
+                var response = detalleGestion.UpdateGestionPDetalle(id, detGP, 0);
 
                 if (response.CodeStatus != HttpStatusCode.OK)
-                {
                     throw new Exception(response.Message);
-                }
-
-
 
                 oR.CodeStatus = HttpStatusCode.OK;
                 oR.Data = id;
                 return oR;
-
-
-
             }
             catch (System.Data.Entity.Validation.DbEntityValidationException ex2)
             {
-                String errorDB = "";
+                string errorDB = "";
                 foreach (var eve in ex2.EntityValidationErrors)
-                {
                     foreach (var ve in eve.ValidationErrors)
-                    {
                         errorDB += ve.ErrorMessage;
-                    }
-                }
+
                 oR.CodeStatus = HttpStatusCode.InternalServerError;
                 oR.Message = errorDB;
                 return oR;
@@ -470,8 +571,6 @@ namespace marsh_contable.Controllers
                 return oR;
             }
         }
-
-
         [HttpGet]
         [Authorize]
         [Route("api/v1/gastos")]
@@ -666,7 +765,7 @@ namespace marsh_contable.Controllers
                                  Proveedor = p.Nombre + " " + p.Apellido1,
                                  Usuario = u.Nombre + " " + u.Apellido1,
                                  Tipo_moneda_id = (int)x.Tipo_moneda_id,
-                                 condicion_venta_id = (int)x.Condicion_venta_id
+                                 condicion_venta_id = x.Condicion_venta_id == null ? 0 :  (int)x.Condicion_venta_id
 
                                  
                              }).FirstOrDefault();

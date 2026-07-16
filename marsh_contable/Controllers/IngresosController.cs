@@ -64,6 +64,11 @@ namespace marsh_contable.Controllers
                 {
                     throw new Exception("currency_is_required");
                 }
+
+                if (model.banco_id == 0)
+                {
+                    throw new Exception("banco_is_required");
+                }
                 #endregion
                 using (var ctx = new Models.EntitiesModel())
                 {
@@ -249,7 +254,14 @@ namespace marsh_contable.Controllers
                         throw new Exception(response.Message);
                     }
 
+                    BancoController banco = new BancoController();
 
+                    var bmovimiento = banco.RegistrarMovimientoPorIngreso(0, (int)model.Tipo_moneda_id, 0, id, i.Total, i.Usuarios_Usuario_id, "Registro de Ingreso", banco_id: model.banco_id);
+
+                    if (bmovimiento.CodeStatus != HttpStatusCode.OK)
+                    {
+                        throw new Exception(bmovimiento.Message);
+                    }
                 }
 
                 // Firmamos y enviamos a Hacienda la factura electrónica generada (si aplica),
@@ -258,6 +270,8 @@ namespace marsh_contable.Controllers
                 {
                     new FacturasController().CreateDocument(idFacturaGenerada.Value, TipoDocumentoId.FacturaElectronica);
                 }
+
+
 
                 oR.CodeStatus = HttpStatusCode.OK;
                 oR.Data = new { ingreso_id = i.id, factura_id = idFacturaGenerada };

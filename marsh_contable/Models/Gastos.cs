@@ -59,5 +59,7 @@ namespace marsh_contable.Models
         { get; set; }
         public int dias_credito { get; set; }
         public int createElectronicDoc { get; set; }
+
+        public int Banco_id { get; set; }
     }
 }

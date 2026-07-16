@@ -432,7 +432,9 @@ namespace marsh_contable.Controllers
             double montoGasto,
             int usuarioId,
             string descripcionGasto,
-            string referencia = "")
+            string referencia = "", 
+            int banco_id = 0
+            )
         {
             Reply oR = new Reply();
             oR.CodeStatus = 0;
@@ -442,11 +444,23 @@ namespace marsh_contable.Controllers
                 {
                     ctx.Configuration.LazyLoadingEnabled = false;
                     ctx.Configuration.ProxyCreationEnabled = false;
+                    Bancos banco;
+
+                    if(banco_id > 0)
+                    {
+                         banco = ctx.Bancos.FirstOrDefault(b =>
+                       b.id == banco_id);
+                    }
+                    else
+                    {
+                        banco = ctx.Bancos.FirstOrDefault(b =>
+            b.Tipo_moneda_id == tipoMonedaId &&
+             b.estado == 1);
+                    }
+
 
                     // ── Buscar banco activo por categoría, tipo moneda y centro de costo
-                    var banco = ctx.Bancos.FirstOrDefault(b =>
-                       b.Tipo_moneda_id == tipoMonedaId && 
-                        b.estado == 1);
+                    
 
                     if (banco == null)
                         throw new Exception("banco_not_found_for_tipo_moneda");
@@ -528,7 +542,8 @@ namespace marsh_contable.Controllers
             double montoIngreso,
             int usuarioId,
             string descripcionIngreso,
-            string referencia = "")
+            string referencia = "",
+             int banco_id = 0)
         {
             Reply oR = new Reply();
             oR.CodeStatus = 0;
@@ -539,9 +554,20 @@ namespace marsh_contable.Controllers
                     ctx.Configuration.LazyLoadingEnabled = false;
                     ctx.Configuration.ProxyCreationEnabled = false;
 
-                    var banco = ctx.Bancos.FirstOrDefault(b =>
-                        b.Tipo_moneda_id == tipoMonedaId &&
-                        b.estado == 1);
+                    Bancos banco;
+
+                    if (banco_id > 0)
+                    {
+                        banco = ctx.Bancos.FirstOrDefault(b =>
+                      b.id == banco_id);
+                    }
+                    else
+                    {
+                        banco = ctx.Bancos.FirstOrDefault(b =>
+            b.Tipo_moneda_id == tipoMonedaId &&
+             b.estado == 1);
+                    }
+
 
                     if (banco == null)
                         throw new Exception("banco_not_found_for_categoria_moneda_centro_costo");
@@ -567,8 +593,8 @@ namespace marsh_contable.Controllers
                         anio = DateTime.Now.Year.ToString(),
                         fecha_movimiento = DateTime.Now,
                         referencia = referencia,
-                        Centro_Costos_id = centroCostosId,
-                        Categoria_presupuestaria_id = categoriaPresupuestariaId,
+                        Centro_Costos_id = null, //centroCostosId,
+                        Categoria_presupuestaria_id = null,// categoriaPresupuestariaId,
                         Tipo_moneda_id = tipoMonedaId,
                         Gastos_id = null,
                         Ingresos_id = ingresoId,
@@ -594,6 +620,208 @@ namespace marsh_contable.Controllers
                         saldo_anterior = saldoAnterior,
                         saldo_posterior = saldoPosterior,
                         monto_ingreso = montoIngreso
+                    };
+                    return oR;
+                }
+            }
+            catch (Exception ex)
+            {
+                oR.CodeStatus = HttpStatusCode.InternalServerError;
+                oR.Message = ex.Message;
+                return oR;
+            }
+        }
+
+
+        public Reply EditarMovimientoPorGasto(
+    int categoriaPresupuestariaId,
+    int tipoMonedaId,
+    int centroCostosId,
+    int gastoId,
+    double montoGastoNuevo,
+    int usuarioId,
+    string descripcionGasto,
+    string referencia = "",
+    int banco_id = 0)
+        {
+            Reply oR = new Reply();
+            oR.CodeStatus = 0;
+            try
+            {
+                using (var ctx = new Models.EntitiesModel())
+                {
+                    ctx.Configuration.LazyLoadingEnabled = false;
+                    ctx.Configuration.ProxyCreationEnabled = false;
+
+                    // ── Buscar movimiento existente por Gastos_id
+                    var movimientoExistente = ctx.Bancos_Movimientos
+                        .FirstOrDefault(m => m.Gastos_id == gastoId && m.activo == 1);
+
+                    if (movimientoExistente == null)
+                    {
+                        //throw new Exception("movimiento_banco_not_found_for_gasto_id");
+                        //SI NO EXISTE LO CREAMOS 
+                        var bmovimiento = RegistrarMovimientoPorGasto(categoriaPresupuestariaId, tipoMonedaId, centroCostosId, gastoId, montoGastoNuevo, usuarioId, "Registro de Gasto", banco_id: banco_id);
+
+                        if (bmovimiento.CodeStatus != HttpStatusCode.OK)
+                        {
+                            throw new Exception(bmovimiento.Message);
+                        }
+                        return bmovimiento;
+
+                    }
+
+                    // ── Buscar banco
+                    var banco = ctx.Bancos.FirstOrDefault(b => b.id == movimientoExistente.Bancos_id);
+                    if (banco == null)
+                        throw new Exception("banco_not_found");
+
+                    // ── Revertir el movimiento anterior (devolver saldo)
+                    decimal montoAnterior = movimientoExistente.monto;
+                    banco.saldo_actual = banco.saldo_actual + montoAnterior; // Revertir egreso
+
+                    // ── Calcular nuevo movimiento
+                    decimal montoNuevo = (decimal)montoGastoNuevo;
+
+                    if (banco.saldo_actual < montoNuevo)
+                        throw new Exception($"saldo_insuficiente_disponible_{banco.saldo_actual}_requerido_{montoNuevo}");
+
+                    decimal saldoAnterior = banco.saldo_actual;
+                    decimal saldoPosterior = saldoAnterior - montoNuevo;
+
+                    string simbolo = ctx.Tipo_moneda
+                        .Where(t => t.id == tipoMonedaId)
+                        .Select(t => t.Simbolo)
+                        .FirstOrDefault() ?? "";
+
+                    // ── Actualizar movimiento existente
+                    movimientoExistente.monto = montoNuevo;
+                    movimientoExistente.saldo_anterior = saldoAnterior;
+                    movimientoExistente.saldo_posterior = saldoPosterior;
+                    movimientoExistente.descripcion = $"Gasto #{gastoId} - {descripcionGasto} (Editado)";
+                    movimientoExistente.fecha_movimiento = DateTime.Now;
+                    movimientoExistente.referencia = referencia;
+                    movimientoExistente.Centro_Costos_id = centroCostosId;
+                    movimientoExistente.Categoria_presupuestaria_id = categoriaPresupuestariaId;
+                    movimientoExistente.Tipo_moneda_id = tipoMonedaId;
+                    movimientoExistente.Usuarios_Usuario_id = usuarioId;
+                    movimientoExistente.Observaciones = $"Egreso editado | Anterior: {simbolo} {montoAnterior:N2} → Nuevo: {simbolo} {montoNuevo:N2}";
+
+                    // ── Actualizar saldo del banco
+                    banco.saldo_actual = saldoPosterior;
+                    banco.fecha_actualizacion = DateTime.Now;
+
+                    ctx.SaveChanges();
+
+                    oR.CodeStatus = HttpStatusCode.OK;
+                    oR.Data = new
+                    {
+                        movimiento_id = movimientoExistente.id,
+                        banco_id = banco.id,
+                        banco_nombre = banco.nombre_banco,
+                        monto_anterior = montoAnterior,
+                        monto_nuevo = montoNuevo,
+                        saldo_anterior = saldoAnterior,
+                        saldo_posterior = saldoPosterior
+                    };
+                    return oR;
+                }
+            }
+            catch (Exception ex)
+            {
+                oR.CodeStatus = HttpStatusCode.InternalServerError;
+                oR.Message = ex.Message;
+                return oR;
+            }
+        }
+
+
+        public Reply EditarMovimientoPorIngreso(
+            int categoriaPresupuestariaId,
+            int tipoMonedaId,
+            int centroCostosId,
+            int ingresoId,
+            double montoIngresoNuevo,
+            int usuarioId,
+            string descripcionIngreso,
+            string referencia = "",
+            int banco_id = 0)
+        {
+            Reply oR = new Reply();
+            oR.CodeStatus = 0;
+            try
+            {
+                using (var ctx = new Models.EntitiesModel())
+                {
+                    ctx.Configuration.LazyLoadingEnabled = false;
+                    ctx.Configuration.ProxyCreationEnabled = false;
+
+                    // ── Buscar movimiento existente por Ingresos_id
+                    var movimientoExistente = ctx.Bancos_Movimientos
+                        .FirstOrDefault(m => m.Ingresos_id == ingresoId && m.activo == 1);
+
+                    if (movimientoExistente == null)
+                    {
+                        //throw new Exception("movimiento_banco_not_found_for_ingreso_id");
+                        //SI NO EXISTE LO CREAMOS 
+                        var bmovimiento = RegistrarMovimientoPorGasto(categoriaPresupuestariaId, tipoMonedaId, centroCostosId, ingresoId, montoIngresoNuevo, usuarioId, "Registro de Ingreso", banco_id: banco_id);
+
+                        if (bmovimiento.CodeStatus != HttpStatusCode.OK)
+                        {
+                            throw new Exception(bmovimiento.Message);
+                        }
+                        return bmovimiento;
+                    }
+                        
+
+                    // ── Buscar banco
+                    var banco = ctx.Bancos.FirstOrDefault(b => b.id == movimientoExistente.Bancos_id);
+                    if (banco == null)
+                        throw new Exception("banco_not_found");
+
+                    // ── Revertir el movimiento anterior (quitar ingreso)
+                    decimal montoAnterior = movimientoExistente.monto;
+                    banco.saldo_actual = banco.saldo_actual - montoAnterior; // Revertir ingreso
+
+                    // ── Calcular nuevo movimiento
+                    decimal montoNuevo = (decimal)montoIngresoNuevo;
+                    decimal saldoAnterior = banco.saldo_actual;
+                    decimal saldoPosterior = saldoAnterior + montoNuevo; // Ingreso suma
+
+                    string simbolo = ctx.Tipo_moneda
+                        .Where(t => t.id == tipoMonedaId)
+                        .Select(t => t.Simbolo)
+                        .FirstOrDefault() ?? "";
+
+                    // ── Actualizar movimiento existente
+                    movimientoExistente.monto = montoNuevo;
+                    movimientoExistente.saldo_anterior = saldoAnterior;
+                    movimientoExistente.saldo_posterior = saldoPosterior;
+                    movimientoExistente.descripcion = $"Ingreso #{ingresoId} - {descripcionIngreso} (Editado)";
+                    movimientoExistente.fecha_movimiento = DateTime.Now;
+                    movimientoExistente.referencia = referencia;
+                    movimientoExistente.Centro_Costos_id = centroCostosId;
+                    movimientoExistente.Categoria_presupuestaria_id = categoriaPresupuestariaId;
+                    movimientoExistente.Tipo_moneda_id = tipoMonedaId;
+                    movimientoExistente.Usuarios_Usuario_id = usuarioId;
+                    movimientoExistente.Observaciones = $"Ingreso editado | Anterior: {simbolo} {montoAnterior:N2} → Nuevo: {simbolo} {montoNuevo:N2}";
+
+                    // ── Actualizar saldo del banco
+                    banco.saldo_actual = saldoPosterior;
+                    banco.fecha_actualizacion = DateTime.Now;
+
+                    ctx.SaveChanges();
+
+                    oR.CodeStatus = HttpStatusCode.OK;
+                    oR.Data = new
+                    {
+                        movimiento_id = movimientoExistente.id,
+                        banco_id = banco.id,
+                        banco_nombre = banco.nombre_banco,
+                        monto_anterior = montoAnterior,
+                        monto_nuevo = montoNuevo,
+                        saldo_anterior = saldoAnterior,
+                        saldo_posterior = saldoPosterior
                     };
                     return oR;
                 }

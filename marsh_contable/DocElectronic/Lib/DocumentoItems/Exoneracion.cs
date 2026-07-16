@@ -43,6 +43,8 @@ namespace Facturacion_C_Sharp.Lib.DocumentoItems
         private DateTime fechaEmision;
         private decimal montoImpuesto;
         private decimal totalNeto;
+        private decimal montoExoneracion;
+
 
         //Dispensable
         private decimal porcentajeCompra;
@@ -55,7 +57,10 @@ namespace Facturacion_C_Sharp.Lib.DocumentoItems
         public decimal TotalNeto { get => totalNeto; set => totalNeto = value; }
         public decimal PorcentajeCompra { get => porcentajeCompra; set => porcentajeCompra = value; }
 
-        public Exoneracion(TipoDocumento tipoDocumento, int numeroDocumento, string nombreInstitucion, DateTime fechaEmision, decimal montoImpuesto, decimal totalNeto)
+        public decimal MontoExoneracion { get => montoExoneracion; set => montoExoneracion = value; }
+
+
+        public Exoneracion(TipoDocumento tipoDocumento, int numeroDocumento, string nombreInstitucion, DateTime fechaEmision, decimal montoImpuesto, decimal totalNeto, decimal montoExoneracion = 0)
         {
             this.tipoDocumento = tipoDocumento;
             this.numeroDocumento = numeroDocumento;
@@ -63,6 +68,7 @@ namespace Facturacion_C_Sharp.Lib.DocumentoItems
             this.fechaEmision = fechaEmision;
             this.montoImpuesto = montoImpuesto;
             this.totalNeto = totalNeto;
+            this.montoExoneracion = montoExoneracion;
 
             this.porcentajeCompra = (montoImpuesto / totalNeto) * 100;
         }

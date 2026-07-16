@@ -1578,7 +1578,16 @@ namespace marsh_contable.Controllers
         [HttpGet]
         [Authorize]
         [Route("api/v1/catalogos/categoria_presupuestaria")]
-        public Reply GetAllCategoriaPresupuestaria() { Reply oR = new Reply(); oR.CodeStatus = 0; try { using (var ctx = new Models.EntitiesModel()) { oR.CodeStatus = HttpStatusCode.OK; oR.Data = ctx.Categoria_presupuestaria.Select(x => new { x.id, x.nombre, x.tipo_categoria, x.Monto_presupuestado, x.Tipo_moneda_id }).ToList(); return oR; } } catch (Exception ex) { oR.CodeStatus = HttpStatusCode.InternalServerError; oR.Message = ex.Message; return oR; } }
+        public Reply GetAllCategoriaPresupuestaria() { Reply oR = new Reply(); oR.CodeStatus = 0; try { using (var ctx = new Models.EntitiesModel()) { oR.CodeStatus = HttpStatusCode.OK;
+                    //oR.Data = ctx.Categoria_presupuestaria.Select(x => new { x.id, x.nombre, x.tipo_categoria, x.Monto_presupuestado, x.Tipo_moneda_id }).ToList(); 
+                    var data = ctx.Categoria_presupuestaria.Select(x => new { x.id, x.nombre, x.tipo_categoria, x.Monto_presupuestado, x.Tipo_moneda_id }).ToList();
+
+
+                    oR.Data = data;
+
+                    return oR; 
+                
+                } } catch (Exception ex) { oR.CodeStatus = HttpStatusCode.InternalServerError; oR.Message = ex.Message; return oR; } }
 
         [HttpGet]
         [Authorize]
