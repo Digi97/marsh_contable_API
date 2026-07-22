@@ -43,15 +43,18 @@ namespace marsh_contable.Controllers
                 {
                     throw new Exception("invalid_string_form_Nombre");
                 }
-                if (!tool.ValidaTexto(model.Apellido1))
+                if (model.tipo_identificacion_id != 2)//si no es juridico
                 {
-                    throw new Exception("invalid_string_form_Apellido1");
+                    if (!tool.ValidaTexto(model.Apellido1))
+                    {
+                        throw new Exception("invalid_string_form_Apellido1");
+                    }
+                    if (!tool.ValidaTexto(model.Apellido2))
+                    {
+                        throw new Exception("invalid_string_form_Apellido2");
+                    }
                 }
-                if (!tool.ValidaTexto(model.Apellido2))
-                {
-                    throw new Exception("invalid_string_form_Apellido2");
-                }
-                if (!tool.ValidaCorreo(model.correo))
+                    if (!tool.ValidaCorreo(model.correo))
                 {
                     throw new Exception("invalid_string_form_correo");
                 }
@@ -167,14 +170,19 @@ namespace marsh_contable.Controllers
                 {
                     throw new Exception("invalid_string_form_Nombre");
                 }
-                if (!tool.ValidaTexto(model.Apellido1))
+                if (model.tipo_identificacion_id != 2)//si no es juridico
                 {
-                    throw new Exception("invalid_string_form_Apellido1");
+                    if (!tool.ValidaTexto(model.Apellido1))
+                    {
+                        throw new Exception("invalid_string_form_Apellido1");
+                    }
+                    if (!tool.ValidaTexto(model.Apellido2))
+                    {
+                        throw new Exception("invalid_string_form_Apellido2");
+                    }
+
                 }
-                if (!tool.ValidaTexto(model.Apellido2))
-                {
-                    throw new Exception("invalid_string_form_Apellido2");
-                }
+
                 if (!tool.ValidaCorreo(model.correo))
                 {
                     throw new Exception("invalid_string_form_correo");

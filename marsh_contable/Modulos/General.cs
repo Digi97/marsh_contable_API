@@ -291,12 +291,10 @@ namespace marsh_contable.Modulos
 
         public bool ValidaIBAN(string text)
         {
-            const String regexfotNames = @"^CR[0-9]{2}[A-Za-z0-9]{18}$";
-            if (!string.IsNullOrWhiteSpace(text) && Regex.IsMatch(text, regexfotNames))
-            {
-                return true;
-            }
-            return false;
+
+
+            return text.StartsWith("CR") && text.Length == 20;
+
 
         }
 
