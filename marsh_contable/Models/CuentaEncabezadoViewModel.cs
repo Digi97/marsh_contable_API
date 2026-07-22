@@ -47,5 +47,8 @@ namespace marsh_contable.Models
 
         // Detalle
         public List<CuentaDetalleViewModel> Detalles { get; set; }
+
+        // Presupuesto relacionado
+        public Gestion_Presupuestaria gestion { get; set; }
     }
 }

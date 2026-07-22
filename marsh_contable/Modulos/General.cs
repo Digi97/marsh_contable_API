@@ -280,7 +280,7 @@ namespace marsh_contable.Modulos
 
         public bool ValidaRuta(string text)
         {
-            const String regexfotNames = @"^(https?:\/\/|[a-zA-Z]:\\)([\w\-]+\.)*[\w\-]+([\\/][\w\-._~:/?#\[\]@!$&'()*+,;=%]*)?$";
+            const String regexfotNames = @"^(https?:\/\/|[a-zA-Z]:\\)([\w\-]+\.)*[\w\-]+([\\/][\w\-._~:/?#\[\]@!$&'()*+,;=%\\ ]*)?$";
             if (!string.IsNullOrWhiteSpace(text) && Regex.IsMatch(text, regexfotNames))
             {
                 return true;

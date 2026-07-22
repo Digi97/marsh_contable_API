@@ -95,7 +95,7 @@ namespace marsh_contable.Controllers
                             fecha_actualizacion = DateTime.Now,
                             Usuarios_Usuario_id = model.Usuarios_Usuario_id,
                             Centro_Costos_id = detalle.centro_Costos_id,
-                            Tipo_moneda_id = model.Tipo_moneda_id
+                            Tipo_moneda_id = tipo_moneda_id //LA MONEDA SE HEREDA DE LA CATEGORIA PRESUPUESTARIA
                         };
                         ctx.Gestion_Presupuestaria.Add(gp);
                         ctx.SaveChanges();
@@ -235,7 +235,8 @@ namespace marsh_contable.Controllers
                                          gp.anio_presupuesto,
                                          gp.periodo_inicio,
                                          gp.periodo_fin,
-                                         tm.Simbolo
+                                         tm.Simbolo,
+                                         gp.estado
                                      } into g
                                      select new
                                      {
@@ -245,7 +246,8 @@ namespace marsh_contable.Controllers
                                          periodo_inicio = g.Key.periodo_inicio,
                                          periodo_fin = g.Key.periodo_fin,
                                          monto = g.Sum(x => x.gp.monto_aprobado),
-                                         simbolo = g.Key.Simbolo
+                                         simbolo = g.Key.Simbolo,
+                                         estado = g.Key.estado
                                      }).ToList();
 
                     oR.CodeStatus = HttpStatusCode.OK;
@@ -329,32 +331,78 @@ namespace marsh_contable.Controllers
 
         [HttpDelete]
         [Authorize]
-        [Route("api/v1/gestion_presupuestaria/{id}")]
+        [Route("api/v1/gestion_presupuestaria/{anio_presupuesto}")]
         [RequierePermiso(PermisosAplica.UsuarioPresupuestos)]
-        public Reply DeleteGestionPresupuestaria(int id)
+        public Reply DeleteGestionPresupuestaria(string anio_presupuesto)
         {
             Reply oR = new Reply();
             oR.CodeStatus = 0;
             try
             {
-                if (id <= 0)
+                if (String.IsNullOrEmpty(anio_presupuesto))
                 {
                     throw new Exception("invalid_value_for_id");
                 }
+
                 using (var ctx = new Models.EntitiesModel())
                 {
-                    Models.Gestion_Presupuestaria gp = ctx.Gestion_Presupuestaria.FirstOrDefault(u => u.id == id);
-                    if (gp == null)
-                    {
-                        throw new Exception("gestion_presupuestaria_not_found");
-                    }
-                    gp.estado = 0;
-                    gp.fecha_actualizacion = DateTime.Now;
-                    ctx.SaveChanges();
+                    ctx.Configuration.LazyLoadingEnabled = false;
+                    ctx.Configuration.ProxyCreationEnabled = false;
 
-                    oR.CodeStatus = HttpStatusCode.OK;
-                    oR.Data = id;
-                    return oR;
+                    using (var tx = ctx.Database.BeginTransaction())
+                    {
+                        try
+                        {
+                            var lstGp = ctx.Gestion_Presupuestaria
+                                           .Where(u => u.anio_presupuesto == anio_presupuesto)
+                                           .ToList();
+
+                            if (lstGp.Count == 0)
+                            {
+                                throw new Exception("gestion_presupuestaria_not_found");
+                            }
+
+                            var lstIds = lstGp.Select(x => x.id).ToList();
+
+                            // ¿Existe movimiento asociado?
+                            bool tieneDetalle = ctx.Gestion_P_detalle
+                                                   .Any(d => lstIds.Contains(d.Gestion_Presupuestaria_id));
+
+                            bool tieneAnio = ctx.Gestion_P_Anio
+                                                .Any(a => lstIds.Contains(a.Gestion_Presupuestaria_id));
+
+                            if (tieneDetalle || tieneAnio)
+                            {
+                                // Borrado lógico: se conserva la información histórica
+                                foreach (var gp in lstGp)
+                                {
+                                    gp.estado = 0;
+                                    gp.fecha_actualizacion = DateTime.Now;
+                                }
+
+                                ctx.SaveChanges();
+                                oR.Message = "gestion_presupuestaria_inactivada";
+                            }
+                            else
+                            {
+                                // Sin movimiento: borrado físico
+                                ctx.Gestion_Presupuestaria.RemoveRange(lstGp);
+                                ctx.SaveChanges();
+                                oR.Message = "gestion_presupuestaria_eliminada";
+                            }
+
+                            tx.Commit();
+
+                            oR.CodeStatus = HttpStatusCode.OK;
+                            oR.Data = anio_presupuesto;
+                            return oR;
+                        }
+                        catch
+                        {
+                            tx.Rollback();
+                            throw;
+                        }
+                    }
                 }
             }
             catch (Exception ex)

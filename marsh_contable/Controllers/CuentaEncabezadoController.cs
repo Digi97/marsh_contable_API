@@ -357,6 +357,8 @@ namespace marsh_contable.Controllers
                                   
                               }).FirstOrDefault();
 
+
+
                     if (ce == null)
                         throw new Exception("cuenta_encabezado_not_found");
 
@@ -388,6 +390,17 @@ namespace marsh_contable.Controllers
                                                              : d.Tipo_movimiento == 4 ? "Nota Crédito"
                                                              : "Otro"
                                    }).ToList();
+
+
+                    if(ce.Gastos_id != null)
+                    {
+                        //OBTENEMOS LA GESTION del gasto
+                        ce.gestion = (from gp in ctx.Gestion_Presupuestaria
+                                         join gpd in ctx.Gestion_P_detalle
+                                             on gp.id equals gpd.Gestion_Presupuestaria_id
+                                         where gpd.Gastos_id == ce.Gastos_id
+                                         select gp).FirstOrDefault();
+                    }
 
                     // Calcular saldo pendiente
                     decimal totalAbonos = ce.Detalles.Sum(d => d.monto);
