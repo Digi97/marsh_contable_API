@@ -643,7 +643,8 @@ namespace marsh_contable.Controllers
                                      Estado_factura = ef.Nombre,
                                      Tipo_documento = td.Nombre,
                                      Condicion_venta = cv.Descripcion,
-                                     Medio_pago = mp.descripcion
+                                     Medio_pago = mp.descripcion,
+                                     Simbolo = tm.Simbolo
                                  }).ToList();
 
                     oR.CodeStatus = HttpStatusCode.OK;
@@ -1291,7 +1292,7 @@ namespace marsh_contable.Controllers
 
                     // Impuesto con CodigoTarifaIVA (v4.4)
                     var tax = new Facturacion_C_Sharp.Lib.DocumentoItems.Impuesto(
-                        taxLine.TarifaIVACodigo,
+                        taxLine.codigo,                      
                         (decimal)taxLine.Porcentaje,
                         montoImpuesto,
                         codigoTarifaIVA: Facturacion_C_Sharp.Lib.DocumentoItems.Impuesto.TarifaToCodigoTarifaIVA((decimal)taxLine.Porcentaje)
@@ -1326,27 +1327,56 @@ namespace marsh_contable.Controllers
                     ));
                     index++;
                 }
-
-                // ── ResumenFactura con estructura v4.4
-                decimal totalVenta = (decimal)f.Subtotal;
-                decimal totalDescuentos = (decimal)f.Descuento;
+                // ── ResumenFactura con estructura v4.4 ──────────────────────────────
+                decimal totalVenta = (decimal)(f.Subtotal);
+                decimal totalDescuentos = (decimal)(f.Descuento );
                 decimal totalVentaNeta = totalVenta - totalDescuentos;
-                decimal totalImpuesto = (decimal)f.Impuesto;
-                decimal totalComprobante = totalVentaNeta + totalImpuesto;
+                decimal totalImpuesto = (decimal)(f.Impuesto );
+                decimal totalOtrosCargos = 0m;
+                decimal totalIVADevuelto = 0m;
+
+                // TotalComprobante = TotalVentaNeta + TotalImpuesto + TotalOtrosCargos - TotalIVADevuelto
+                decimal totalComprobante = totalVentaNeta + totalImpuesto + totalOtrosCargos - totalIVADevuelto;
+
+                // Moneda: CodigoTipoMoneda es obligatorio, nunca debe quedar vacío
+                string moneda = string.IsNullOrWhiteSpace(f.Tipo_moneda) ? "CRC" : f.Tipo_moneda.Trim().ToUpper();
+                decimal tipoCambio = moneda == "CRC"
+                    ? 1m
+                    : (f.cambio_compra > 0 ? (decimal)f.cambio_compra : 1m);
+
+                // Desglose de impuestos (obligatorio de facto cuando TotalImpuesto > 0).
+                // Codigo "01" = IVA; CodigoTarifaIVA "08" = tarifa general 13%.
+                var desglose = new List<DesgloseImpuestoResumen>();
+                if (totalImpuesto > 0)
+                {
+                    desglose.Add(new DesgloseImpuestoResumen(
+                        codigo: "01",
+                        totalMontoImpuesto: totalImpuesto,
+                        codigoTarifaIVA: "08"));
+                }
+
+                // Medios de pago: máx 4; si son varios, TotalMedioPago es obligatorio
+                var medios = new List<MedioPagoResumen>();
+                if (!string.IsNullOrWhiteSpace(f.Medio_pago))
+                    medios.Add(new MedioPagoResumen(f.Medio_pago.Trim().PadLeft(2, '0')));
+                else
+                    medios.Add(new MedioPagoResumen("01")); // Efectivo por defecto
 
                 var resumenFac = new ResumenFactura(
-                    codigoMoneda: f.Tipo_moneda,
-                    tipoCambio: f.Tipo_moneda == "CRC" ? 1 : (decimal)f.cambio_compra,
+                    codigoMoneda: moneda,
+                    tipoCambio: tipoCambio,
                     totalMercanciasGravadas: totalVenta,
                     totalGravado: totalVenta,
                     totalVenta: totalVenta,
                     totalDescuentos: totalDescuentos,
                     totalVentaNeta: totalVentaNeta,
                     totalImpuesto: totalImpuesto,
+                    totalOtrosCargos: totalOtrosCargos,
+                    totalIVADevuelto: totalIVADevuelto,
                     totalComprobante: totalComprobante,
-                    mediosPago: new string[] { f.Medio_pago }
+                    desgloseImpuestos: desglose,
+                    mediosPago: medios
                 );
-
                 // ── Tipo de documento y ruta
                 String rutaGuardado = empresaEmi.Ruta_nas;
                 Documento.TipoDocumento tipoDoc;

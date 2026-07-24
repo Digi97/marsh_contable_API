@@ -207,9 +207,9 @@ namespace marsh_contable.Controllers
                     empresaExistente.tipo_identificacion_id = model.tipo_identificacion_id;
                     empresaExistente.Impuesto_id = model.Impuesto_id;
                     empresaExistente.Provincia_id = model.Provincia_id;
-                    empresaExistente.Canton_id = model.Provincia_id;
+                    empresaExistente.Canton_id = model.Canton_id;
 
-                    empresaExistente.Distrito_id = model.Canton_id;
+                    empresaExistente.Distrito_id = model.Distrito_id;
 
                     empresaExistente.OtrasSenas = model.OtrasSenas_Emisor;
 

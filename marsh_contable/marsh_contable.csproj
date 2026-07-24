@@ -279,6 +279,7 @@
     <Compile Include="DocElectronic\FacturacionHacienda.cs" />
     <Compile Include="DocElectronic\Lib\Configuracion.cs" />
     <Compile Include="DocElectronic\Lib\Documento.cs" />
+    <Compile Include="DocElectronic\Lib\DocumentoItems\DesgloseImpuestoResumen.cs" />
     <Compile Include="DocElectronic\Lib\DocumentoItems\DocumentoIdentificacion.cs" />
     <Compile Include="DocElectronic\Lib\DocumentoItems\Emisor.cs" />
     <Compile Include="DocElectronic\Lib\DocumentoItems\Exoneracion.cs" />

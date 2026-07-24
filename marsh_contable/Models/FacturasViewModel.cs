@@ -48,7 +48,7 @@ namespace marsh_contable.Models
 
         public List<FacturaDetallesViewModel> Factura_DetalleAgregados { get; set; }
 
-
+        public string Simbolo { get; set; }
     }
 }
 // FECHA DE ENTEGA NOTAS: SIGUIENTE SEMANA SEMANA 5

@@ -1,13 +1,47 @@
 using System;
-using System.ComponentModel;
+using System.Collections.Generic;
+using System.Linq;
+using System.Xml;
 using System.Xml.Linq;
 using Facturacion_C_Sharp.Utils;
 
 namespace Facturacion_C_Sharp.Lib.DocumentoItems
 {
+    /// <summary>
+    /// MedioPago del resumen (v4.4). Máximo 4 repeticiones.
+    /// Orden XSD: TipoMedioPago, MedioPagoOtros, TotalMedioPago.
+    /// </summary>
+    public class MedioPagoResumen
+    {
+        /// <summary>01 Efectivo, 02 Tarjeta, 03 Cheque, 04 Transferencia, 05 Recaudado por terceros,
+        /// 06 SINPE Móvil, 07 Plataforma Digital, 99 Otros.</summary>
+        public string TipoMedioPago { get; set; }
+
+        /// <summary>Obligatorio si TipoMedioPago = "99". Entre 3 y 100 caracteres.</summary>
+        public string MedioPagoOtros { get; set; }
+
+        /// <summary>Obligatorio cuando se declara más de un medio de pago.</summary>
+        public decimal? TotalMedioPago { get; set; }
+
+        public MedioPagoResumen() { }
+
+        public MedioPagoResumen(string tipoMedioPago, decimal? totalMedioPago = null, string medioPagoOtros = null)
+        {
+            TipoMedioPago = tipoMedioPago;
+            TotalMedioPago = totalMedioPago;
+            MedioPagoOtros = medioPagoOtros;
+        }
+    }
+
     public class ResumenFactura : IXMLGenerador
     {
-        // Moneda (estructura compleja v4.4)
+        /// <summary>Máximo de repeticiones de MedioPago según el XSD v4.4.</summary>
+        private const int MAX_MEDIOS_PAGO = 4;
+
+        /// <summary>fractionDigits de DecimalDineroType.</summary>
+        private const int DECIMALES_XSD = 5;
+
+        // Moneda (CodigoMonedaType: CodigoMoneda + TipoCambio, ambos obligatorios)
         private string codigoMoneda;
         private decimal tipoCambio;
 
@@ -37,12 +71,15 @@ namespace Facturacion_C_Sharp.Lib.DocumentoItems
         private decimal totalOtrosCargos;
         private decimal totalComprobante;
 
-        // MedioPago dentro del resumen (v4.4, max 4)
-        private string[] mediosPago;
+        // Desglose de impuestos (v4.4, hasta 1000)
+        private List<DesgloseImpuestoResumen> desgloseImpuestos;
+
+        // MedioPago dentro del resumen (v4.4, máx 4)
+        private List<MedioPagoResumen> mediosPago;
 
         public ResumenFactura(
-            string codigoMoneda = "",
-            decimal tipoCambio = 0,
+            string codigoMoneda = "CRC",
+            decimal tipoCambio = 1,
             decimal totalServGravados = 0,
             decimal totalServExentos = 0,
             decimal totalServExonerado = 0,
@@ -63,7 +100,8 @@ namespace Facturacion_C_Sharp.Lib.DocumentoItems
             decimal totalIVADevuelto = 0,
             decimal totalOtrosCargos = 0,
             decimal totalComprobante = 0,
-            string[] mediosPago = null)
+            List<DesgloseImpuestoResumen> desgloseImpuestos = null,
+            List<MedioPagoResumen> mediosPago = null)
         {
             this.codigoMoneda = codigoMoneda;
             this.tipoCambio = tipoCambio;
@@ -87,7 +125,8 @@ namespace Facturacion_C_Sharp.Lib.DocumentoItems
             this.totalIVADevuelto = totalIVADevuelto;
             this.totalOtrosCargos = totalOtrosCargos;
             this.totalComprobante = totalComprobante;
-            this.mediosPago = mediosPago;
+            this.desgloseImpuestos = desgloseImpuestos ?? new List<DesgloseImpuestoResumen>();
+            this.mediosPago = mediosPago ?? new List<MedioPagoResumen>();
         }
 
         // Propiedades
@@ -113,88 +152,134 @@ namespace Facturacion_C_Sharp.Lib.DocumentoItems
         public decimal TotalIVADevuelto { get => totalIVADevuelto; set => totalIVADevuelto = value; }
         public decimal TotalOtrosCargos { get => totalOtrosCargos; set => totalOtrosCargos = value; }
         public decimal TotalComprobante { get => totalComprobante; set => totalComprobante = value; }
-        public string[] MediosPago { get => mediosPago; set => mediosPago = value; }
+        public List<DesgloseImpuestoResumen> DesgloseImpuestos { get => desgloseImpuestos; set => desgloseImpuestos = value; }
+        public List<MedioPagoResumen> MediosPago { get => mediosPago; set => mediosPago = value; }
+
+        /// <summary>
+        /// Redondea a la escala permitida por DecimalDineroType (5 decimales)
+        /// y serializa con formato invariante, evitando que la cultura del servidor
+        /// introduzca coma decimal.
+        /// </summary>
+        private static string Dinero(decimal valor)
+        {
+            return XmlConvert.ToString(Math.Round(valor, DECIMALES_XSD, MidpointRounding.AwayFromZero));
+        }
+
+        private static XElement Monto(string nombre, decimal valor)
+        {
+            return new XElement(nombre, Dinero(valor));
+        }
+
+        /// <summary>Agrega el elemento únicamente si el monto redondeado es mayor a cero.</summary>
+        private static void AgregarSiPositivo(XElement padre, string nombre, decimal valor)
+        {
+            if (Math.Round(valor, DECIMALES_XSD, MidpointRounding.AwayFromZero) > 0)
+                padre.Add(Monto(nombre, valor));
+        }
 
         public XElement GenerarXML()
         {
             var baseXML = new XElement("ResumenFactura");
 
-            // 1. CodigoTipoMoneda (estructura compleja v4.4)
-            if (!string.IsNullOrEmpty(codigoMoneda))
-            {
-                baseXML.Add(new XElement("CodigoTipoMoneda",
-                    new XElement("CodigoMoneda", codigoMoneda),
-                    new XElement("TipoCambio", tipoCambio > 0 ? tipoCambio : 1)));
-            }
+            // 1. CodigoTipoMoneda — OBLIGATORIO en el XSD (sin minOccurs=0).
+            //    Sus dos hijos también son obligatorios, por eso se aplican valores por defecto.
+            var moneda = string.IsNullOrWhiteSpace(codigoMoneda) ? "CRC" : codigoMoneda.Trim().ToUpperInvariant();
+            var cambio = tipoCambio > 0 ? tipoCambio : 1m;
+            baseXML.Add(new XElement("CodigoTipoMoneda",
+                new XElement("CodigoMoneda", moneda),
+                new XElement("TipoCambio", Dinero(cambio))));
 
-            // 2-5. Totales de servicios (solo si > 0, son minOccurs=0)
-            if (totalServGravados > 0)
-                baseXML.Add(new XElement("TotalServGravados", totalServGravados));
-            if (totalServExentos > 0)
-                baseXML.Add(new XElement("TotalServExentos", totalServExentos));
-            if (totalServExonerado > 0)
-                baseXML.Add(new XElement("TotalServExonerado", totalServExonerado));
-            if (totalServNoSujeto > 0)
-                baseXML.Add(new XElement("TotalServNoSujeto", totalServNoSujeto));
+            // 2-5. Totales de servicios
+            AgregarSiPositivo(baseXML, "TotalServGravados", totalServGravados);
+            AgregarSiPositivo(baseXML, "TotalServExentos", totalServExentos);
+            AgregarSiPositivo(baseXML, "TotalServExonerado", totalServExonerado);
+            AgregarSiPositivo(baseXML, "TotalServNoSujeto", totalServNoSujeto);
 
             // 6-9. Totales de mercancías
-            if (totalMercanciasGravadas > 0)
-                baseXML.Add(new XElement("TotalMercanciasGravadas", totalMercanciasGravadas));
-            if (totalMercanciasExentas > 0)
-                baseXML.Add(new XElement("TotalMercanciasExentas", totalMercanciasExentas));
-            if (totalMercExonerada > 0)
-                baseXML.Add(new XElement("TotalMercExonerada", totalMercExonerada));
-            if (totalMercNoSujeta > 0)
-                baseXML.Add(new XElement("TotalMercNoSujeta", totalMercNoSujeta));
+            AgregarSiPositivo(baseXML, "TotalMercanciasGravadas", totalMercanciasGravadas);
+            AgregarSiPositivo(baseXML, "TotalMercanciasExentas", totalMercanciasExentas);
+            AgregarSiPositivo(baseXML, "TotalMercExonerada", totalMercExonerada);
+            AgregarSiPositivo(baseXML, "TotalMercNoSujeta", totalMercNoSujeta);
 
             // 10-13. Totales consolidados
-            if (totalGravado > 0)
-                baseXML.Add(new XElement("TotalGravado", totalGravado));
-            if (totalExento > 0)
-                baseXML.Add(new XElement("TotalExento", totalExento));
-            if (totalExonerado > 0)
-                baseXML.Add(new XElement("TotalExonerado", totalExonerado));
-            if (totalNoSujeto > 0)
-                baseXML.Add(new XElement("TotalNoSujeto", totalNoSujeto));
+            AgregarSiPositivo(baseXML, "TotalGravado", totalGravado);
+            AgregarSiPositivo(baseXML, "TotalExento", totalExento);
+            AgregarSiPositivo(baseXML, "TotalExonerado", totalExonerado);
+            AgregarSiPositivo(baseXML, "TotalNoSujeto", totalNoSujeto);
 
             // 14. TotalVenta (obligatorio)
-            baseXML.Add(new XElement("TotalVenta", totalVenta));
+            baseXML.Add(Monto("TotalVenta", totalVenta));
 
             // 15. TotalDescuentos
-            if (totalDescuentos > 0)
-                baseXML.Add(new XElement("TotalDescuentos", totalDescuentos));
+            AgregarSiPositivo(baseXML, "TotalDescuentos", totalDescuentos);
 
             // 16. TotalVentaNeta (obligatorio)
-            baseXML.Add(new XElement("TotalVentaNeta", totalVentaNeta));
+            baseXML.Add(Monto("TotalVentaNeta", totalVentaNeta));
 
-            // 17. TotalImpuesto
-            if (totalImpuesto > 0)
-                baseXML.Add(new XElement("TotalImpuesto", totalImpuesto));
-
-            // 18. TotalImpAsumEmisorFabrica
-            if (totalImpAsumEmisorFabrica > 0)
-                baseXML.Add(new XElement("TotalImpAsumEmisorFabrica", totalImpAsumEmisorFabrica));
-
-            // 19. TotalIVADevuelto
-            if (totalIVADevuelto > 0)
-                baseXML.Add(new XElement("TotalIVADevuelto", totalIVADevuelto));
-
-            // 20. TotalOtrosCargos
-            if (totalOtrosCargos > 0)
-                baseXML.Add(new XElement("TotalOtrosCargos", totalOtrosCargos));
-
-            // 21. MedioPago (v4.4, max 4 repeticiones)
-            if (mediosPago != null)
+            // 17. TotalDesgloseImpuesto (v4.4, hasta 1000) — va ANTES de TotalImpuesto.
+            if (desgloseImpuestos != null)
             {
-                foreach (var mp in mediosPago)
+                foreach (var d in DesgloseImpuestoResumen.Consolidar(desgloseImpuestos))
                 {
-                    baseXML.Add(new XElement("MedioPago",
-                        new XElement("TipoMedioPago", mp)));
+                    baseXML.Add(d.GenerarXML());
                 }
             }
 
-            // 22. TotalComprobante (obligatorio)
-            baseXML.Add(new XElement("TotalComprobante", totalComprobante));
+            // 18. TotalImpuesto
+            AgregarSiPositivo(baseXML, "TotalImpuesto", totalImpuesto);
+
+            // 19. TotalImpAsumEmisorFabrica
+            AgregarSiPositivo(baseXML, "TotalImpAsumEmisorFabrica", totalImpAsumEmisorFabrica);
+
+            // 20. TotalIVADevuelto
+            AgregarSiPositivo(baseXML, "TotalIVADevuelto", totalIVADevuelto);
+
+            // 21. TotalOtrosCargos
+            AgregarSiPositivo(baseXML, "TotalOtrosCargos", totalOtrosCargos);
+
+            // 22. MedioPago (máx 4). TotalMedioPago se vuelve obligatorio con más de un medio.
+            if (mediosPago != null)
+            {
+                var lista = mediosPago
+                                .Where(m => m != null && !string.IsNullOrWhiteSpace(m.TipoMedioPago))
+                                .Take(MAX_MEDIOS_PAGO)
+                                .ToList();
+
+                bool requiereMonto = lista.Count > 1;
+
+                foreach (var mp in lista)
+                {
+                    var nodo = new XElement("MedioPago",
+                        new XElement("TipoMedioPago", mp.TipoMedioPago.Trim()));
+
+                    // MedioPagoOtros es obligatorio cuando el tipo es 99 (Otros).
+                    if (mp.TipoMedioPago.Trim() == "99")
+                    {
+                        var otros = string.IsNullOrWhiteSpace(mp.MedioPagoOtros)
+                            ? "Otro medio de pago"
+                            : mp.MedioPagoOtros.Trim();
+
+                        if (otros.Length > 100) otros = otros.Substring(0, 100);
+                        if (otros.Length < 3) otros = otros.PadRight(3, '.');
+
+                        nodo.Add(new XElement("MedioPagoOtros", otros));
+                    }
+                    else if (!string.IsNullOrWhiteSpace(mp.MedioPagoOtros))
+                    {
+                        nodo.Add(new XElement("MedioPagoOtros", mp.MedioPagoOtros.Trim()));
+                    }
+
+                    if (mp.TotalMedioPago.HasValue)
+                        nodo.Add(Monto("TotalMedioPago", mp.TotalMedioPago.Value));
+                    else if (requiereMonto)
+                        nodo.Add(Monto("TotalMedioPago", 0));
+
+                    baseXML.Add(nodo);
+                }
+            }
+
+            // 23. TotalComprobante (obligatorio)
+            baseXML.Add(Monto("TotalComprobante", totalComprobante));
 
             return baseXML;
         }
