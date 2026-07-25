@@ -285,7 +285,8 @@ namespace marsh_contable.Controllers
                         Clientes_id = original.Clientes_id,
                         Condicion_venta_id = original.Condicion_venta_id,
                         Medio_pago_id = original.Medio_pago_id,
-                        Usuarios_Usuario_id = original.Usuarios_Usuario_id
+                        Usuarios_Usuario_id = original.Usuarios_Usuario_id,
+                        Referencia = original.Clave //guardamos clave de referencia
                     };
                     ctx.Facturas.Add(notaCredito);
                     ctx.SaveChanges();
@@ -411,23 +412,24 @@ namespace marsh_contable.Controllers
                     {
                         throw new Exception("factura_not_found");
                     }
-                    f.Clave = model.Clave;
-                    f.Consecutivo_electronico = model.Consecutivo_electronico;
-                    f.consecutivo = model.consecutivo;
-                    f.Tipo_moneda_id = model.Tipo_moneda_id;
-                    f.Estado_Factura_id = model.Estado_Factura_id == 0 ? 1 : model.Estado_Factura_id;
-                    f.Tipo_documento_id = model.Tipo_documento_id;
-                    f.Subtotal = model.Subtotal;
-                    f.Impuesto = model.Impuesto;
-                    f.Total = model.Total;
-                    f.Descuento = model.Descuento;
+                    //LA EDICION NO MODIFICA NADA EN LA FACTURA YA EXISTENTE. SOLO CREA NC O ND 
+                    //f.Clave = model.Clave;
+                    //f.Consecutivo_electronico = model.Consecutivo_electronico;
+                    //f.consecutivo = model.consecutivo;
+                    //f.Tipo_moneda_id = model.Tipo_moneda_id;
+                    //f.Estado_Factura_id = model.Estado_Factura_id == 0 ? 1 : model.Estado_Factura_id;
+                    //f.Tipo_documento_id = model.Tipo_documento_id;
+                    //f.Subtotal = model.Subtotal;
+                    //f.Impuesto = model.Impuesto;
+                    //f.Total = model.Total;
+                    //f.Descuento = model.Descuento;
                  
-                    f.cambio_venta = model.cambio_venta;
-                    f.cambio_compra = model.cambio_compra;
-                    f.Clientes_id = model.Clientes_id;
-                    f.Condicion_venta_id = model.Condicion_venta_id;
-                    f.Medio_pago_id = model.Medio_pago_id;
-                    ctx.SaveChanges();
+                    //f.cambio_venta = model.cambio_venta;
+                    //f.cambio_compra = model.cambio_compra;
+                    //f.Clientes_id = model.Clientes_id;
+                    //f.Condicion_venta_id = model.Condicion_venta_id;
+                    //f.Medio_pago_id = model.Medio_pago_id;
+                    //ctx.SaveChanges();
                 }
 
 
@@ -550,7 +552,8 @@ namespace marsh_contable.Controllers
                     Clientes_id = facturaOriginal.Clientes_id,
                     Condicion_venta_id = facturaOriginal.Condicion_venta_id,
                     Medio_pago_id = facturaOriginal.Medio_pago_id,
-                    Usuarios_Usuario_id = usuarioId
+                    Usuarios_Usuario_id = usuarioId,
+                    Referencia = facturaOriginal.Referencia
                 };
                 ctx.Facturas.Add(nota);
                 ctx.SaveChanges();
@@ -573,7 +576,8 @@ namespace marsh_contable.Controllers
                         Unidad_medida_id = linea.Unidad_medida_id,
                         Codigo_comercial_id = linea.Codigo_comercial_id,
                         Fecha = DateTime.Now,
-                        Ultima_fec_actualizacion = DateTime.Now
+                        Ultima_fec_actualizacion = DateTime.Now,
+                        Impuesto_id = linea.Impuesto_id
                     };
                     var result = factDetalles.CreateFacturaDetalle(copia);
                     if (result.CodeStatus != HttpStatusCode.OK)
@@ -644,8 +648,9 @@ namespace marsh_contable.Controllers
                                      Tipo_documento = td.Nombre,
                                      Condicion_venta = cv.Descripcion,
                                      Medio_pago = mp.descripcion,
-                                     Simbolo = tm.Simbolo
-                                 }).ToList();
+                                     Simbolo = tm.Simbolo,
+                                     Referencia = f.Referencia
+                                 }).OrderByDescending(f => f.id).ToList();
 
                     oR.CodeStatus = HttpStatusCode.OK;
                     oR.Data = lista;

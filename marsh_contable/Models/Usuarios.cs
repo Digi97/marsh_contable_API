@@ -23,12 +23,12 @@ namespace marsh_contable.Models
             this.Tipo_cambio = new HashSet<Tipo_cambio>();
             this.Ingresos = new HashSet<Ingresos>();
             this.Gestion_P_detalle = new HashSet<Gestion_P_detalle>();
-            this.Facturas = new HashSet<Facturas>();
             this.MultiFactor = new HashSet<MultiFactor>();
             this.Bancos_Movimientos = new HashSet<Bancos_Movimientos>();
             this.Cuenta_Detalle = new HashSet<Cuenta_Detalle>();
             this.Cuenta_Encabezado = new HashSet<Cuenta_Encabezado>();
             this.Bancos = new HashSet<Bancos>();
+            this.Facturas = new HashSet<Facturas>();
         }
     
         public int Usuario_id { get; set; }
@@ -63,8 +63,6 @@ namespace marsh_contable.Models
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Gestion_P_detalle> Gestion_P_detalle { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<Facturas> Facturas { get; set; }
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<MultiFactor> MultiFactor { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Bancos_Movimientos> Bancos_Movimientos { get; set; }
@@ -74,5 +72,7 @@ namespace marsh_contable.Models
         public virtual ICollection<Cuenta_Encabezado> Cuenta_Encabezado { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Bancos> Bancos { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<Facturas> Facturas { get; set; }
     }
 }

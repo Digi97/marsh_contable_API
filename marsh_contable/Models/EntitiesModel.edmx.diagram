@@ -4,7 +4,7 @@
   <edmx:Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
     <!-- Diagram content (shape and connector positions) -->
     <edmx:Diagrams>
-      <Diagram DiagramId="b80ba748a87741d78beb642572f682e2" Name="Diagram1" ZoomLevel="72">
+      <Diagram DiagramId="b80ba748a87741d78beb642572f682e2" Name="Diagram1" ZoomLevel="49">
         <EntityTypeShape EntityType="marsh_contableModel.Adjuntos" Width="1.5" PointX="3.75" PointY="53.875" IsExpanded="true" />
         <EntityTypeShape EntityType="marsh_contableModel.Canton" Width="1.5" PointX="1.5" PointY="35.625" IsExpanded="true" />
         <EntityTypeShape EntityType="marsh_contableModel.Categoria_gasto" Width="1.5" PointX="6.75" PointY="3.5" IsExpanded="true" />
@@ -95,17 +95,6 @@
         <AssociationConnector Association="marsh_contableModel.FK_GP_Detalle_Gastos" />
         <AssociationConnector Association="marsh_contableModel.FK_GP_Detalle_Ingresos" />
         <AssociationConnector Association="marsh_contableModel.FK_GP_Detalle_Usuarios" />
-        <EntityTypeShape EntityType="marsh_contableModel.Facturas" Width="1.5" PointX="9" PointY="28.625" />
-        <AssociationConnector Association="marsh_contableModel.fk_Facturas_Clientes1" />
-        <AssociationConnector Association="marsh_contableModel.fk_Facturas_Condicion_venta1" />
-        <AssociationConnector Association="marsh_contableModel.fk_Factura_Estado_Factura1" />
-        <AssociationConnector Association="marsh_contableModel.fk_Factura_Detalles_Facturas1" />
-        <AssociationConnector Association="marsh_contableModel.fk_Factura_Tipo_documento1" />
-        <AssociationConnector Association="marsh_contableModel.fk_Factura_Tipo_moneda1" />
-        <AssociationConnector Association="marsh_contableModel.fk_Facturas_Medio_pago1" />
-        <AssociationConnector Association="marsh_contableModel.FK_GP_Detalle_Facturas" />
-        <AssociationConnector Association="marsh_contableModel.fk_Ingresos_Facturas1" />
-        <AssociationConnector Association="marsh_contableModel.FK_Usuarios_Factura" />
         <AssociationConnector Association="marsh_contableModel.fk_tipo_moneda_cp" />
         <AssociationConnector Association="marsh_contableModel.fk_tipo_moneda_cc" />
         <EntityTypeShape EntityType="marsh_contableModel.Gestion_P_Anio" Width="1.5" PointX="6" PointY="32.125" />
@@ -117,7 +106,6 @@
         <EntityTypeShape EntityType="marsh_contableModel.Bancos_Movimientos" Width="1.5" PointX="19.125" PointY="30.375" />
         <AssociationConnector Association="marsh_contableModel.FK_BM_Categoria_presupuestaria" />
         <AssociationConnector Association="marsh_contableModel.FK_BM_Centro_Costos" />
-        <AssociationConnector Association="marsh_contableModel.FK_BM_Facturas" />
         <AssociationConnector Association="marsh_contableModel.FK_BM_Gastos" />
         <AssociationConnector Association="marsh_contableModel.FK_BM_Ingresos" />
         <AssociationConnector Association="marsh_contableModel.FK_BM_Tipo_moneda" />
@@ -132,7 +120,6 @@
         <AssociationConnector Association="marsh_contableModel.FK_condicion_venta_gasto" />
         <AssociationConnector Association="marsh_contableModel.FK_condicion_venta_ingreso" />
         <AssociationConnector Association="marsh_contableModel.FK_CD_Cuenta_Encabezado" />
-        <AssociationConnector Association="marsh_contableModel.FK_CE_Facturas" />
         <AssociationConnector Association="marsh_contableModel.FK_CE_Gastos" />
         <AssociationConnector Association="marsh_contableModel.FK_CE_Ingresos" />
         <AssociationConnector Association="marsh_contableModel.FK_CE_Medio_pago" />
@@ -145,6 +132,19 @@
         <AssociationConnector Association="marsh_contableModel.FK_Bancos_Tipo_moneda" />
         <AssociationConnector Association="marsh_contableModel.FK_Bancos_Usuarios" />
         <AssociationConnector Association="marsh_contableModel.FK_BM_Bancos" />
+        <EntityTypeShape EntityType="marsh_contableModel.Facturas" Width="1.5" PointX="9" PointY="28.75" />
+        <AssociationConnector Association="marsh_contableModel.FK_BM_Facturas" />
+        <AssociationConnector Association="marsh_contableModel.fk_Facturas_Clientes1" />
+        <AssociationConnector Association="marsh_contableModel.fk_Facturas_Condicion_venta1" />
+        <AssociationConnector Association="marsh_contableModel.FK_CE_Facturas" />
+        <AssociationConnector Association="marsh_contableModel.fk_Factura_Estado_Factura1" />
+        <AssociationConnector Association="marsh_contableModel.fk_Factura_Detalles_Facturas1" />
+        <AssociationConnector Association="marsh_contableModel.fk_Factura_Tipo_documento1" />
+        <AssociationConnector Association="marsh_contableModel.fk_Factura_Tipo_moneda1" />
+        <AssociationConnector Association="marsh_contableModel.fk_Facturas_Medio_pago1" />
+        <AssociationConnector Association="marsh_contableModel.FK_GP_Detalle_Facturas" />
+        <AssociationConnector Association="marsh_contableModel.fk_Ingresos_Facturas1" />
+        <AssociationConnector Association="marsh_contableModel.FK_Usuarios_Factura" />
         </Diagram>
     </edmx:Diagrams>
   </edmx:Designer>

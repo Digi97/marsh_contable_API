@@ -37,11 +37,11 @@ namespace marsh_contable.Models
     
         public virtual Categoria_presupuestaria Categoria_presupuestaria { get; set; }
         public virtual Centro_Costos Centro_Costos { get; set; }
-        public virtual Facturas Facturas { get; set; }
         public virtual Gastos Gastos { get; set; }
         public virtual Ingresos Ingresos { get; set; }
         public virtual Tipo_moneda Tipo_moneda { get; set; }
         public virtual Usuarios Usuarios { get; set; }
         public virtual Bancos Bancos { get; set; }
+        public virtual Facturas Facturas { get; set; }
     }
 }

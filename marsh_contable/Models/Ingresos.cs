@@ -11,7 +11,7 @@ namespace marsh_contable.Models
 {
     using System;
     using System.Collections.Generic;
-
+    
     public partial class Ingresos
     {
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors")]
@@ -23,7 +23,7 @@ namespace marsh_contable.Models
             this.Bancos_Movimientos = new HashSet<Bancos_Movimientos>();
             this.Cuenta_Encabezado = new HashSet<Cuenta_Encabezado>();
         }
-
+    
         public int id { get; set; }
         public string Codigo { get; set; }
         public System.DateTime fecha { get; set; }
@@ -40,7 +40,7 @@ namespace marsh_contable.Models
         public int Medio_pago_id { get; set; }
         public Nullable<int> Facturas_id { get; set; }
         public Nullable<int> Condicion_venta_id { get; set; }
-
+    
         public virtual Clientes Clientes { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Devoluciones> Devoluciones { get; set; }
@@ -52,17 +52,17 @@ namespace marsh_contable.Models
         public virtual Usuarios Usuarios { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Gestion_P_detalle> Gestion_P_detalle { get; set; }
-        public virtual Facturas Facturas { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Bancos_Movimientos> Bancos_Movimientos { get; set; }
         public virtual Condicion_venta Condicion_venta { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Cuenta_Encabezado> Cuenta_Encabezado { get; set; }
+        public virtual Facturas Facturas { get; set; }
+
         public string presupuesto_id { get; set; }
-        public int dias_credito { get; set; }
-
-        public int createElectronicDoc{get;set;}
-
         public int banco_id { get; set; }
+
+        public int dias_credito { get; set; }
+        public int createElectronicDoc { get; set; }
     }
 }

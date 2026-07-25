@@ -25,5 +25,6 @@ namespace marsh_contable.Models
         public string Codigo_comercial { get; set; }
         public string Codigo_cabys_descripcion { get; set; }
         public Impuesto Impuesto_detalle { get; set; }
+        public int Impuesto_id {get;set;}
     }
 }
