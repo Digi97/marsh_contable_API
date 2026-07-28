@@ -309,7 +309,8 @@ namespace marsh_contable.Controllers
                             Unidad_medida_id = d.Unidad_medida_id,
                             Codigo_comercial_id = d.Codigo_comercial_id,
                             Fecha = DateTime.Now,
-                            Ultima_fec_actualizacion = DateTime.Now
+                            Ultima_fec_actualizacion = DateTime.Now,
+                            Impuesto_id = d.Impuesto_id //sin el impuesto revienta, redondea, martillea y nos envia a dialogar con la arena
                         };
                         var result = factDetalles.CreateFacturaDetalle(copia);
                         if (result.CodeStatus != HttpStatusCode.OK)
@@ -329,7 +330,7 @@ namespace marsh_contable.Controllers
                         Facturacion_C_Sharp.Lib.Documento.TipoDocumento.Factura_Electronica,
                         original.Clave,
                         original.fecha,
-                        Facturacion_C_Sharp.Lib.DocumentoItems.Referencia.CodigoReferencia.Anula_Documento_de_referencia,
+                        Facturacion_C_Sharp.Lib.DocumentoItems.Referencia.CodigoReferencia.Anula_Documento_de_Referencia,
                         "Anulación de factura por eliminación")
                 };
 
@@ -469,7 +470,7 @@ namespace marsh_contable.Controllers
                 if (model.Factura_DetalleEliminados != null && model.Factura_DetalleEliminados.Count > 0)
                 {
                     notaCreditoId = CrearNotaAjuste(f, model.Factura_DetalleEliminados, TipoDocumentoId.NotaCreditoElectronica,
-                        Facturacion_C_Sharp.Lib.DocumentoItems.Referencia.CodigoReferencia.Corrige_monto,
+                        Facturacion_C_Sharp.Lib.DocumentoItems.Referencia.CodigoReferencia.Nota_de_Credito_Financiera,
                         "Ajuste por líneas eliminadas de la factura", model.Usuarios_Usuario_id);
                 }
 
@@ -477,7 +478,7 @@ namespace marsh_contable.Controllers
                 if (model.Factura_DetalleAgregados != null && model.Factura_DetalleAgregados.Count > 0)
                 {
                     notaDebitoId = CrearNotaAjuste(f, model.Factura_DetalleAgregados, TipoDocumentoId.NotaDebitoElectronica,
-                        Facturacion_C_Sharp.Lib.DocumentoItems.Referencia.CodigoReferencia.Corrige_monto,
+                        Facturacion_C_Sharp.Lib.DocumentoItems.Referencia.CodigoReferencia.Nota_de_Debito_Financiera,
                         "Ajuste por líneas agregadas a la factura", model.Usuarios_Usuario_id);
                 }
 
@@ -553,7 +554,7 @@ namespace marsh_contable.Controllers
                     Condicion_venta_id = facturaOriginal.Condicion_venta_id,
                     Medio_pago_id = facturaOriginal.Medio_pago_id,
                     Usuarios_Usuario_id = usuarioId,
-                    Referencia = facturaOriginal.Referencia
+                    Referencia = facturaOriginal.Clave
                 };
                 ctx.Facturas.Add(nota);
                 ctx.SaveChanges();

@@ -9,33 +9,79 @@ namespace Facturacion_C_Sharp.Lib.DocumentoItems
     {
         public enum CodigoReferencia
         {
-            [Description( "01" )]
-            Anula_Documento_de_referencia = 01,
-            [Description( "02" )]
-            Corrige_texto_documento_de_referencia = 02,
-            [Description( "03" )]
-            Corrige_monto = 03,
-            [Description( "04" )]
-            Referencia_a_otro_documento = 04,
-            [Description( "05" )]
-            Sustituye_comprobante_provisional_por_contingencia = 05,
-            [Description( "99" )]
+            [Description("01")]
+            Anula_Documento_de_Referencia = 01,
+            [Description("02")]
+            Corrige_Monto = 02,
+            [Description("04")]
+            Referencia_a_Otro_Documento = 04,
+            [Description("05")]
+            Sustituye_Comprobante_Provisional_por_Contingencia = 05,
+            [Description("06")]
+            Devolucion_de_Mercancia = 06,
+            [Description("07")]
+            Sustituye_Comprobante_Electronico = 07,
+            [Description("08")]
+            Factura_Endosada = 08,
+            [Description("09")]
+            Nota_de_Credito_Financiera = 09,
+            [Description("10")]
+            Nota_de_Debito_Financiera = 10,
+            [Description("11")]
+            Proveedor_No_Domiciliado = 11,
+            [Description("12")]
+            Nota_de_Credito_Financiera_por_Exoneracion_Posterior_a_la_Facturacion = 12,
+            [Description("13")]
+            Anula_Documento_de_Referencia_por_Error_Material = 13,
+            [Description("14")]
+            Corrige_Monto_por_Error_Material = 14,
+            [Description("15")]
+            Sustituye_Comprobante_Electronico_por_Error_Material = 15,
+            [Description("16")]
+            Sustituye_Comprobante_Electronico_Rechazado = 16,
+            [Description("17")]
+            Pago_a_Comprobante_Electronico = 17,
+            [Description("99")]
             Otros = 99
         }
 
-        public static CodigoReferencia StringToCodigoReferencia ( String codigo )
+        public static CodigoReferencia StringToCodigoReferencia(String codigo)
         {
-            switch( codigo )
+            switch (codigo)
             {
                 case "01":
-                    return CodigoReferencia.Anula_Documento_de_referencia;
+                    return CodigoReferencia.Anula_Documento_de_Referencia;
                 case "02":
-                    return CodigoReferencia.Corrige_texto_documento_de_referencia;
-                case "03":
-                    return CodigoReferencia.Corrige_monto;
+                    return CodigoReferencia.Corrige_Monto;
                 case "04":
-                    return CodigoReferencia.Referencia_a_otro_documento;
+                    return CodigoReferencia.Referencia_a_Otro_Documento;
                 case "05":
+                    return CodigoReferencia.Sustituye_Comprobante_Provisional_por_Contingencia;
+                case "06":
+                    return CodigoReferencia.Devolucion_de_Mercancia;
+                case "07":
+                    return CodigoReferencia.Sustituye_Comprobante_Electronico;
+                case "08":
+                    return CodigoReferencia.Factura_Endosada;
+                case "09":
+                    return CodigoReferencia.Nota_de_Credito_Financiera;
+                case "10":
+                    return CodigoReferencia.Nota_de_Debito_Financiera;
+                case "11":
+                    return CodigoReferencia.Proveedor_No_Domiciliado;
+                case "12":
+                    return CodigoReferencia.Nota_de_Credito_Financiera_por_Exoneracion_Posterior_a_la_Facturacion;
+                case "13":
+                    return CodigoReferencia.Anula_Documento_de_Referencia_por_Error_Material;
+                case "14":
+                    return CodigoReferencia.Corrige_Monto_por_Error_Material;
+                case "15":
+                    return CodigoReferencia.Sustituye_Comprobante_Electronico_por_Error_Material;
+                case "16":
+                    return CodigoReferencia.Sustituye_Comprobante_Electronico_Rechazado;
+                case "17":
+                    return CodigoReferencia.Pago_a_Comprobante_Electronico;
+                case "99":
                 default:
                     return CodigoReferencia.Otros;
             }
@@ -88,9 +134,9 @@ namespace Facturacion_C_Sharp.Lib.DocumentoItems
         public XElement GenerarXML ( )
         {
             return new XElement( "InformacionReferencia",
-                                       new XElement( "TipoDoc", tipoDoc.ToDescriptionString( ) ),
+                                       new XElement("TipoDocIR", tipoDoc.ToDescriptionString( ) ),
                                        new XElement( "Numero", numero ),
-                                       new XElement( "FechaEmision", fechaEmision.ToRfc3339String( ) ),
+                                       new XElement( "FechaEmisionIR", fechaEmision.ToRfc3339String( ) ),
                                        new XElement( "Codigo", codigo.ToDescriptionString( ) ),
                                        new XElement( "Razon", razon ) );
         }
