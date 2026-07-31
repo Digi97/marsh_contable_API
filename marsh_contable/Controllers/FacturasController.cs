@@ -29,7 +29,7 @@ namespace marsh_contable.Controllers
         public Reply CreateFactura([FromBody] Models.Facturas model)
         {
 
-            
+
             int id = 0;
             Models.Gestion_Presupuestaria gpExist;
             Models.Facturas f;
@@ -70,14 +70,14 @@ namespace marsh_contable.Controllers
                 using (var ctx = new Models.EntitiesModel())
                 {
 
-                      DateTime currentDate = DateTime.Now;
+                    DateTime currentDate = DateTime.Now;
 
                     gpExist = ctx.Gestion_Presupuestaria
        .FirstOrDefault(u => currentDate >= u.periodo_inicio && currentDate <= u.periodo_fin);
                     if (gpExist == null)
-                {
-                    throw new Exception("gestion_presupuestaria_for_current_period_dont_exist");
-                }
+                    {
+                        throw new Exception("gestion_presupuestaria_for_current_period_dont_exist");
+                    }
 
                     int siguienteConsecutivo = ctx.Facturas
                     .Where(x => x.Tipo_documento_id == (int)TipoDocumentoId.FacturaElectronica)
@@ -87,7 +87,7 @@ namespace marsh_contable.Controllers
 
                     var llaves = ObtenerClaveYConsecutivo(ctx, TipoDocumentoId.FacturaElectronica); //generamos las llaves, de nuevo, esto como doble factor para que no se repita la clave
 
-                     f = new Models.Facturas()
+                    f = new Models.Facturas()
                     {
                         Clave = llaves.Clave,
                         Consecutivo_electronico = llaves.Consecutivo,
@@ -106,7 +106,7 @@ namespace marsh_contable.Controllers
                         Condicion_venta_id = model.Condicion_venta_id,
                         Medio_pago_id = model.Medio_pago_id,
                         Usuarios_Usuario_id = model.Usuarios_Usuario_id,
-                                           };
+                    };
                     ctx.Facturas.Add(f);
                     ctx.SaveChanges();
                     id = f.id;
@@ -149,9 +149,9 @@ namespace marsh_contable.Controllers
                             Ingresos_id = null,
                             Estado = 1,
                             Tipo_cuentas_id = (int)TipoCuenta.CuentaPorCobrar,
-                          
+
                             Centro_Costos_id = (int)gpExist.Centro_Costos_id,
-                            Categoria_presupuestaria_id = (int) gpExist.Categoria_presupuestaria_id
+                            Categoria_presupuestaria_id = (int)gpExist.Categoria_presupuestaria_id
                         };
                         ctx.Cuenta_Encabezado.Add(cxc);
                         ctx.SaveChanges();
@@ -180,7 +180,7 @@ namespace marsh_contable.Controllers
                 GestionPDetalleController detalleGestion = new GestionPDetalleController();
                 var response = detalleGestion.CreateGestionPDetalle(detalle);
 
-                if(response.CodeStatus != HttpStatusCode.OK)
+                if (response.CodeStatus != HttpStatusCode.OK)
                 {
                     throw new Exception(response.Message);
                 }
@@ -424,7 +424,7 @@ namespace marsh_contable.Controllers
                     //f.Impuesto = model.Impuesto;
                     //f.Total = model.Total;
                     //f.Descuento = model.Descuento;
-                 
+
                     //f.cambio_venta = model.cambio_venta;
                     //f.cambio_compra = model.cambio_compra;
                     //f.Clientes_id = model.Clientes_id;
@@ -437,7 +437,7 @@ namespace marsh_contable.Controllers
 
                 Models.Gestion_P_detalle detalle = new Models.Gestion_P_detalle()
                 {
-                    Monto =f.Total,
+                    Monto = f.Total,
                     Monto_aprobado = gpExist.monto_aprobado,
                     Monto_modificado = gpExist.monto_modificado,
                     Monto_compometido = gpExist.monto_comprometido,
@@ -460,7 +460,7 @@ namespace marsh_contable.Controllers
 
                 if (response.CodeStatus != HttpStatusCode.OK)
                 {
-                  //  throw new Exception(response.Message);
+                    //  throw new Exception(response.Message);
                 }
 
                 int? notaCreditoId = null;
@@ -637,7 +637,7 @@ namespace marsh_contable.Controllers
                                      Impuesto = f.Impuesto,
                                      Total = f.Total,
                                      Descuento = f.Descuento,
-                           
+
                                      cambio_venta = f.cambio_venta,
                                      cambio_compra = f.cambio_compra,
                                      Clientes_id = f.Clientes_id,
@@ -826,7 +826,7 @@ namespace marsh_contable.Controllers
                                  Impuesto = x.Impuesto,
                                  Total = x.Total,
                                  Descuento = x.Descuento,
-                         
+
                                  cambio_venta = x.cambio_venta,
                                  cambio_compra = x.cambio_compra,
                                  Clientes_id = x.Clientes_id,
@@ -845,34 +845,34 @@ namespace marsh_contable.Controllers
                         throw new Exception("factura_not_found");
                     }
 
-                   
+
 
 
                     f.Factura_Detalles = (from d in ctx.Factura_Detalles
-                                         join um in ctx.Unidad_medida on d.Unidad_medida_id equals um.id
-                                         join cc in  ctx.Codigo_comercial on d.Codigo_comercial_id equals cc.id 
-                                         where d.Facturas_id == id
-                                         select new Models.FacturaDetallesViewModel
-                                         {
-                                             id = d.id,
-                                             Facturas_id = d.Facturas_id,
-                                             Subtotal = d.Subtotal,
-                                             Impuesto = d.Impuesto,
-                                             Total = d.Total,
-                                             Cantidad = d.Cantidad,
-                                             Detalle = d.Detalle,
-                                             Codigos_cabys_id = d.Codigos_cabys_id,
-                                             Codigos_cabys_codigo = d.Codigos_cabys_codigo,
-                                             Codigos_cabys_Impuesto_id = d.Codigos_cabys_Impuesto_id,
-                                             Descuento = d.Descuento,
-                                             Unidad_medida_id = d.Unidad_medida_id,
-                                             Codigo_comercial_id = d.Codigo_comercial_id,
-                                             Fecha = d.Fecha,
-                                             Ultima_fec_actualizacion = d.Ultima_fec_actualizacion,
-                                             Unidad_medida = um.Nombre,
-                                             Codigo_comercial = cc.Nombre
+                                          join um in ctx.Unidad_medida on d.Unidad_medida_id equals um.id
+                                          join cc in ctx.Codigo_comercial on d.Codigo_comercial_id equals cc.id
+                                          where d.Facturas_id == id
+                                          select new Models.FacturaDetallesViewModel
+                                          {
+                                              id = d.id,
+                                              Facturas_id = d.Facturas_id,
+                                              Subtotal = d.Subtotal,
+                                              Impuesto = d.Impuesto,
+                                              Total = d.Total,
+                                              Cantidad = d.Cantidad,
+                                              Detalle = d.Detalle,
+                                              Codigos_cabys_id = d.Codigos_cabys_id,
+                                              Codigos_cabys_codigo = d.Codigos_cabys_codigo,
+                                              Codigos_cabys_Impuesto_id = d.Codigos_cabys_Impuesto_id,
+                                              Descuento = d.Descuento,
+                                              Unidad_medida_id = d.Unidad_medida_id,
+                                              Codigo_comercial_id = d.Codigo_comercial_id,
+                                              Fecha = d.Fecha,
+                                              Ultima_fec_actualizacion = d.Ultima_fec_actualizacion,
+                                              Unidad_medida = um.Nombre,
+                                              Codigo_comercial = cc.Nombre
 
-                                         }).ToList();
+                                          }).ToList();
 
 
 
@@ -917,7 +917,7 @@ namespace marsh_contable.Controllers
             }
         }
 
-        
+
         internal ClaveViewModel ObtenerClaveYConsecutivo(Models.EntitiesModel ctx, TipoDocumentoId tipoDocumento)
         {
             General tool = new General();
@@ -945,7 +945,7 @@ namespace marsh_contable.Controllers
                     identificacion = u.identificacion,
                     codigo_actividad_id = u.codigo_actividad_id,
                     tipo_identificacion_id = u.tipo_identificacion_id,
-                   
+
                 })
                 .FirstOrDefault();
 
@@ -970,7 +970,7 @@ namespace marsh_contable.Controllers
                 "1",//en linea
                 empresa.codigo_seguridad
             );
-            
+
 
             return new ClaveViewModel
             {
@@ -979,7 +979,7 @@ namespace marsh_contable.Controllers
             };
         }
 
-     
+
 
 
         // Facturas filtradas por cliente
@@ -1022,8 +1022,8 @@ namespace marsh_contable.Controllers
                 return oR;
             }
         }
-  
-    
+
+
         /// <summary>
         /// Consulta directamente contra Hacienda el estado actual de un documento electrónico dada
         /// su Clave numérica (53 dígitos), guarda la respuesta XML recibida y actualiza el estado
@@ -1285,6 +1285,12 @@ namespace marsh_contable.Controllers
                 var items = new List<Item>();
                 int index = 1;
                 decimal totalImpuestoAcumulado = 0;
+                decimal servGravados = 0;
+                decimal servExcentos = 0;
+                decimal totalVenta = 0;
+                decimal totalDescuentos = 0;
+                decimal totalVentaNeta = 0;
+                decimal totalImpuesto = 0;
 
                 foreach (var row in detalle)
                 {
@@ -1298,7 +1304,7 @@ namespace marsh_contable.Controllers
 
                     // Impuesto con CodigoTarifaIVA (v4.4)
                     var tax = new Facturacion_C_Sharp.Lib.DocumentoItems.Impuesto(
-                        taxLine.codigo,                      
+                        taxLine.codigo,
                         (decimal)taxLine.Porcentaje,
                         montoImpuesto,
                         codigoTarifaIVA: Facturacion_C_Sharp.Lib.DocumentoItems.Impuesto.TarifaToCodigoTarifaIVA((decimal)taxLine.Porcentaje)
@@ -1331,13 +1337,33 @@ namespace marsh_contable.Controllers
                         naturalezaDescuento: row.Descuento > 0 ? "Descuento comercial" : "",
                         impuestos: new Facturacion_C_Sharp.Lib.DocumentoItems.Impuesto[] { tax }
                     ));
+
+                    string[] prefijos = { "5", "6", "7", "8", "9" }; //intervalos del codigo cabys
+
+                    // Comprueba si el texto empieza con alguno de los elementos del arreglo
+                    bool empiezaConRango = prefijos.Any(p => row.Codigos_cabys_codigo.StartsWith(p));
+
+                    if (empiezaConRango)
+                    {
+                        servGravados +=  (decimal)row.Subtotal;
+                    }
+                    else
+                    {
+                        totalVenta += (decimal)row.Subtotal;
+                    }
+
+                    totalDescuentos += (decimal)row.Descuento;
+
+                    totalVentaNeta += (servGravados + totalDescuentos) + (totalVenta - totalDescuentos);
+                    totalImpuesto += (decimal)row.Impuesto;
+
                     index++;
                 }
                 // ── ResumenFactura con estructura v4.4 ──────────────────────────────
-                decimal totalVenta = (decimal)(f.Subtotal);
-                decimal totalDescuentos = (decimal)(f.Descuento );
-                decimal totalVentaNeta = totalVenta - totalDescuentos;
-                decimal totalImpuesto = (decimal)(f.Impuesto );
+              
+              
+            
+            
                 decimal totalOtrosCargos = 0m;
                 decimal totalIVADevuelto = 0m;
 
@@ -1371,9 +1397,9 @@ namespace marsh_contable.Controllers
                 var resumenFac = new ResumenFactura(
                     codigoMoneda: moneda,
                     tipoCambio: tipoCambio,
-                    totalMercanciasGravadas: totalVenta,
-                    totalGravado: totalVenta,
-                    totalVenta: totalVenta,
+                    totalMercanciasGravadas: totalVenta,//totalComprobante,
+                    totalGravado: (totalVenta + servGravados),
+                    totalVenta: (totalVenta+ servGravados),
                     totalDescuentos: totalDescuentos,
                     totalVentaNeta: totalVentaNeta,
                     totalImpuesto: totalImpuesto,
@@ -1381,7 +1407,10 @@ namespace marsh_contable.Controllers
                     totalIVADevuelto: totalIVADevuelto,
                     totalComprobante: totalComprobante,
                     desgloseImpuestos: desglose,
-                    mediosPago: medios
+                    mediosPago: medios,
+                    totalServGravados: servGravados
+                    , totalServExentos: servExcentos
+                   
                 );
                 // ── Tipo de documento y ruta
                 String rutaGuardado = empresaEmi.Ruta_nas;
@@ -1429,7 +1458,7 @@ namespace marsh_contable.Controllers
                     f.Consecutivo_electronico,
                     receptor,
                     referencias: referencias
-                    //codigoActividadEmisor: empresaEmi.codigo_actividad_id.ToString().PadLeft(6, '0')
+                //codigoActividadEmisor: empresaEmi.codigo_actividad_id.ToString().PadLeft(6, '0')
                 );
 
                 // ── Firmar
@@ -1504,40 +1533,11 @@ namespace marsh_contable.Controllers
                             {
                                 string rutaPdf = rutaGuardado + f.Clave + ".pdf";
                                 GenerarPdfFactura(f, detalle, rutaPdf);
+                                // Registramos el PDF generado en la tabla Adjuntos, igual que se hace con el XML
+                                saveXMLFIle(rutaPdf, id, f.Usuarios_Usuario_id, TablasReferencia.Facturas, TipoArchivo.PDF);
 
-                                var adjuntos = new List<string> { rutaGuardado + f.Clave + ".xml", rutaPdf };
-                                if (!string.IsNullOrEmpty(rutaXmlRespuesta))
-                                {
-                                    adjuntos.Add(rutaXmlRespuesta);
-                                }
-
-                                string tituloDoc = tipoDocumento == TipoDocumentoId.FacturaElectronica ? "Factura Electrónica"
-                                                 : tipoDocumento == TipoDocumentoId.NotaCreditoElectronica ? "Nota de Crédito Electrónica"
-                                                 : "Nota de Débito Electrónica";
-
-                                string asunto = $"{tituloDoc} {f.Consecutivo_electronico} - {empresaEmi.Nombre_empresa}";
-                                string cuerpo = $@"
-                                <h2>{tituloDoc}</h2>
-                                <p>Estimado(a) {f.Cliente},</p>
-                                <p>Adjunto encontrará el comprobante electrónico generado por <strong>{empresaEmi.Nombre_empresa}</strong>.</p>
-                                <table style='border-collapse:collapse; width:100%; max-width:450px;'>
-                                    <tr style='background-color:#f8f9fa;'>
-                                        <td style='padding:10px; border:1px solid #dee2e6;'><strong>Clave</strong></td>
-                                        <td style='padding:10px; border:1px solid #dee2e6;'>{f.Clave}</td>
-                                    </tr>
-                                    <tr>
-                                        <td style='padding:10px; border:1px solid #dee2e6;'><strong>Consecutivo</strong></td>
-                                        <td style='padding:10px; border:1px solid #dee2e6;'>{f.Consecutivo_electronico}</td>
-                                    </tr>
-                                    <tr style='background-color:#f8f9fa;'>
-                                        <td style='padding:10px; border:1px solid #dee2e6;'><strong>Total</strong></td>
-                                        <td style='padding:10px; border:1px solid #dee2e6;'>{f.Tipo_moneda} {f.Total:N2}</td>
-                                    </tr>
-                                </table>
-                                <hr/>
-                                <small style='color:#6c757d;'>Notificación automática - Marsh Asprose</small>";
-
-                                tool.Send_Mail(f.Cliente_Correo, asunto, cuerpo, adjuntos);
+                                // Se envían todos los documentos adjuntos registrados para esta factura (XML, PDF, respuesta de Hacienda, etc.)
+                                enviaDocsEmail(id);
                             }
                         }
                         catch
@@ -1563,32 +1563,80 @@ namespace marsh_contable.Controllers
         /// </summary>
         private void GenerarPdfFactura(FacturasViewModel f, List<FacturaDetallesViewModel> detalle, string rutaSalida)
         {
-            var lineas = new List<string>();
-            lineas.Add("Comprobante Electronico");
-            lineas.Add("Clave: " + f.Clave);
-            lineas.Add("Consecutivo: " + f.Consecutivo_electronico);
-            lineas.Add("Fecha: " + f.fecha.ToString("dd/MM/yyyy HH:mm"));
-            lineas.Add("Cliente: " + f.Cliente);
-            lineas.Add("Cedula: " + f.Cliente_cedula);
-            lineas.Add(" ");
-            lineas.Add("Detalle:");
+            var doc = new PdfSimpleWriter.PdfDocumento();
+
+            // Encabezado
+            doc.Titulo("Comprobante Electrónico", 16);
+            doc.Espacio(4);
+            doc.Linea();
+            doc.Espacio(10);
+
+            // Datos generales (etiqueta en negrita + valor)
+            doc.FilaEtiquetaValor("Clave:", f.Clave);
+            doc.FilaEtiquetaValor("Consecutivo:", f.Consecutivo_electronico);
+            doc.FilaEtiquetaValor("Fecha:", f.fecha.ToString("dd/MM/yyyy HH:mm"));
+            doc.FilaEtiquetaValor("Cliente:", f.Cliente);
+            doc.FilaEtiquetaValor("Cédula:", f.Cliente_cedula);
+
+            doc.Espacio(16);
+            doc.Texto("Detalle", 12, negrita: true);
+            doc.Espacio(4);
+
+            // Encabezado de la tabla de detalle
+            doc.FilaTabla(
+                PdfSimpleWriter.CeldaAux("Descripción", 50, 210, negrita: true),
+                PdfSimpleWriter.CeldaAux("Cant.", 260, 40, negrita: true, alineacion: PdfAlineacion.Derecha),
+                PdfSimpleWriter.CeldaAux("Subtotal", 305, 85, negrita: true, alineacion: PdfAlineacion.Derecha),
+                PdfSimpleWriter.CeldaAux("Impuesto", 395, 85, negrita: true, alineacion: PdfAlineacion.Derecha),
+                PdfSimpleWriter.CeldaAux("Total", 485, 77, negrita: true, alineacion: PdfAlineacion.Derecha)
+            );
+            doc.Linea();
+
             foreach (var d in detalle)
             {
-                lineas.Add(string.Format("  {0} x {1}  Subtotal: {2:N2}  Imp: {3:N2}  Total: {4:N2}",
-                    d.Cantidad, d.Detalle, d.Subtotal, d.Impuesto, d.Total));
+                doc.FilaTabla(
+                    PdfSimpleWriter.CeldaAux(d.Detalle, 50, 210),
+                    PdfSimpleWriter.CeldaAux(d.Cantidad.ToString(), 260, 40, alineacion: PdfAlineacion.Derecha),
+                    PdfSimpleWriter.CeldaAux(d.Subtotal.ToString("N2"), 305, 85, alineacion: PdfAlineacion.Derecha),
+                    PdfSimpleWriter.CeldaAux(d.Impuesto.ToString("N2"), 395, 85, alineacion: PdfAlineacion.Derecha),
+                    PdfSimpleWriter.CeldaAux(d.Total.ToString("N2"), 485, 77, alineacion: PdfAlineacion.Derecha)
+                );
             }
-            lineas.Add(" ");
-            lineas.Add(string.Format("Subtotal: {0:N2}", f.Subtotal));
-            lineas.Add(string.Format("Descuento: {0:N2}", f.Descuento));
-            lineas.Add(string.Format("Impuesto: {0:N2}", f.Impuesto));
-            lineas.Add(string.Format("Total: {0} {1:N2}", f.Tipo_moneda, f.Total));
+            doc.Linea();
+            doc.Espacio(8);
 
-            Modulos.PdfSimpleWriter.Generar(lineas, rutaSalida);
+            // Totales, alineados con las columnas de Impuesto/Total
+            doc.FilaTabla(
+                PdfSimpleWriter.CeldaAux("Subtotal:", 395, 85),
+                PdfSimpleWriter.CeldaAux(f.Subtotal.ToString("N2"), 485, 77, alineacion: PdfAlineacion.Derecha)
+            );
+            doc.FilaTabla(
+                PdfSimpleWriter.CeldaAux("Descuento:", 395, 85),
+                PdfSimpleWriter.CeldaAux(f.Descuento.ToString("N2"), 485, 77, alineacion: PdfAlineacion.Derecha)
+            );
+            doc.FilaTabla(
+                PdfSimpleWriter.CeldaAux("Impuesto:", 395, 85),
+                PdfSimpleWriter.CeldaAux(f.Impuesto.ToString("N2"), 485, 77, alineacion: PdfAlineacion.Derecha)
+            );
+            doc.Espacio(4);
+            doc.Linea();
+            doc.Espacio(6);
+            doc.FilaTabla(
+                PdfSimpleWriter.CeldaAux("Total:", 395, 85, negrita: true, tamano: 13),
+                PdfSimpleWriter.CeldaAux(f.Tipo_moneda + " " + f.Total.ToString("N2"), 485, 77, negrita: true, tamano: 13, alineacion: PdfAlineacion.Derecha)
+            );
+
+            // Pie de página
+            doc.Espacio(28);
+            doc.Texto("Documento generado electrónicamente - Marsh Asprose", 8, alineacion: PdfAlineacion.Centro);
+
+            doc.Generar(rutaSalida);
         }
 
 
 
-        private bool saveXMLFIle(string rutaArchivo, int  id = 0, int uid = 1, TablasReferencia tabla = TablasReferencia.Facturas)
+
+        private bool saveXMLFIle(string rutaArchivo, int id = 0, int uid = 1, TablasReferencia tabla = TablasReferencia.Facturas, TipoArchivo tipoArchivo = TipoArchivo.XML)
         {
             try
             {
@@ -1617,7 +1665,7 @@ namespace marsh_contable.Controllers
                         Nombre_Archivo = nombreCompleto,
                         Ruta_Archivo = rutaArchivo,
                         estado = 1, //recien creado significa activo
-                        Tipo_archivo_id = (int)TipoArchivo.XML,
+                        Tipo_archivo_id = (int)tipoArchivo,
                         Tamano = tamanoKB,
                         Descripcion = nombreCompleto,
                         Usuarios_Usuario_id = uid,//administrador por defecto
@@ -1639,6 +1687,135 @@ namespace marsh_contable.Controllers
                 throw ex;
             }
 
+        }
+
+        /// <summary>
+        /// Endpoint público que reenvía por correo electrónico los documentos adjuntos
+        /// (XML, PDF, respuesta de Hacienda, etc.) ya registrados en la tabla Adjuntos
+        /// para la factura indicada.
+        /// </summary>
+        [HttpPost]
+        [Authorize]
+        [Route("api/v1/facturas/{id}/enviarcorreo")]
+        [RequierePermiso(PermisosAplica.UsuarioFacturacion)]
+        public Reply EnviarDocsEmail(int id)
+        {
+            Reply oR = new Reply();
+            oR.CodeStatus = 0;
+            try
+            {
+                if (id <= 0)
+                {
+                    throw new Exception("invalid_value_for_id");
+                }
+
+                bool enviado = enviaDocsEmail(id);
+
+                if (!enviado)
+                {
+                    throw new Exception("no_se_encontraron_adjuntos_o_correo_para_la_factura");
+                }
+
+                oR.CodeStatus = HttpStatusCode.OK;
+                oR.Message = "correo_enviado";
+                oR.Data = id;
+                return oR;
+            }
+            catch (Exception ex)
+            {
+                oR.CodeStatus = HttpStatusCode.InternalServerError;
+                oR.Message = ex.Message;
+                return oR;
+            }
+        }
+
+        /// <summary>
+        /// Busca en la tabla Adjuntos todos los archivos registrados para la factura indicada
+        /// (referencia = facturaId y Tablas_referencia_id = 1, es decir, Facturas) y los envía
+        /// por correo electrónico al cliente asociado a la factura.
+        /// </summary>
+        private bool enviaDocsEmail(int facturaId)
+        {
+            try
+            {
+                using (var ctx = new Models.EntitiesModel())
+                {
+                    var rutasAdjuntos = ctx.Adjuntos
+                        .Where(a => a.referencia == facturaId && a.Tablas_referencia_id == 1 && a.estado == 1)
+                        .Select(a => a.Ruta_Archivo)
+                        .ToList();
+
+                    if (rutasAdjuntos == null || rutasAdjuntos.Count == 0)
+                    {
+                        return false;
+                    }
+
+                    var f = (from x in ctx.Facturas
+                             join c in ctx.Clientes on x.Clientes_id equals c.id
+                             join td in ctx.Tipo_documento on x.Tipo_documento_id equals td.id
+                             join tm in ctx.Tipo_moneda on x.Tipo_moneda_id equals tm.id
+                             where x.id == facturaId
+                             select new
+                             {
+                                 x.Clave,
+                                 x.Consecutivo_electronico,
+                                 x.Total,
+                                 x.Tipo_documento_id,
+                                 TipoDocumentoNombre = td.Nombre,
+                                 Simbolo = tm.Simbolo,
+                                 Cliente = c.Nombre + " " + c.Apellido1,
+                                 Cliente_Correo = c.correo
+                             }).FirstOrDefault();
+
+                    if (f == null || string.IsNullOrEmpty(f.Cliente_Correo))
+                    {
+                        return false;
+                    }
+
+                    var empresaEmi = ctx.Empresa
+                        .Where(u => u.Emp_id == 1)
+                        .Select(u => new { u.Nombre_empresa })
+                        .FirstOrDefault();
+
+                    string nombreEmpresa = empresaEmi != null ? empresaEmi.Nombre_empresa : "";
+
+                    string tituloDoc = f.Tipo_documento_id == (int)TipoDocumentoId.FacturaElectronica ? "Factura Electrónica"
+                                     : f.Tipo_documento_id == (int)TipoDocumentoId.NotaCreditoElectronica ? "Nota de Crédito Electrónica"
+                                     : f.Tipo_documento_id == (int)TipoDocumentoId.NotaDebitoElectronica ? "Nota de Débito Electrónica"
+                                     : f.TipoDocumentoNombre;
+
+                    string asunto = $"{tituloDoc} {f.Consecutivo_electronico} - {nombreEmpresa}";
+                    string cuerpo = $@"
+                    <h2>{tituloDoc}</h2>
+                    <p>Estimado(a) {f.Cliente},</p>
+                    <p>Adjunto encontrará el comprobante electrónico generado por <strong>{nombreEmpresa}</strong>.</p>
+                    <table style='border-collapse:collapse; width:100%; max-width:450px;'>
+                        <tr style='background-color:#f8f9fa;'>
+                            <td style='padding:10px; border:1px solid #dee2e6;'><strong>Clave</strong></td>
+                            <td style='padding:10px; border:1px solid #dee2e6;'>{f.Clave}</td>
+                        </tr>
+                        <tr>
+                            <td style='padding:10px; border:1px solid #dee2e6;'><strong>Consecutivo</strong></td>
+                            <td style='padding:10px; border:1px solid #dee2e6;'>{f.Consecutivo_electronico}</td>
+                        </tr>
+                        <tr style='background-color:#f8f9fa;'>
+                            <td style='padding:10px; border:1px solid #dee2e6;'><strong>Total</strong></td>
+                            <td style='padding:10px; border:1px solid #dee2e6;'>{f.Simbolo} {f.Total:N2}</td>
+                        </tr>
+                    </table>
+                    <hr/>
+                    <small style='color:#6c757d;'>Notificación automática - Marsh Asprose</small>";
+
+                    General tool = new General();
+                    tool.Send_Mail(f.Cliente_Correo, asunto, cuerpo, rutasAdjuntos);
+
+                    return true;
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
         }
 
 
@@ -1772,7 +1949,7 @@ namespace marsh_contable.Controllers
                     var proveedor = ctx.Proveedor
                         .FirstOrDefault(p => p.identificacion == model.emisor.numeroIdentificacion);
 
-                    
+
 
                     if (proveedor != null)
                     {
@@ -1860,8 +2037,8 @@ namespace marsh_contable.Controllers
                         Condicion_venta_id = condicionVentaId,
                         Medio_pago_id = model.Medio_pago_id > 0 ? model.Medio_pago_id : 1,
                         Usuarios_Usuario_id = model.Usuarios_Usuario_id,
-                       // dias_credito = model.dias_credito,
-                       // presupuesto_id = model.presupuesto_id
+                        // dias_credito = model.dias_credito,
+                        // presupuesto_id = model.presupuesto_id
                     };
 
                     ctx.Facturas.Add(f);
