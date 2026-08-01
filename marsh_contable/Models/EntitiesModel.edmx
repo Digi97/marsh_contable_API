@@ -139,6 +139,11 @@
           <Property Name="fecha_actualizacion" Type="datetime" Nullable="false" />
           <Property Name="exonerado" Type="smallint" Nullable="false" />
           <Property Name="OtrasSenas" Type="varchar" MaxLength="200" Nullable="false" />
+          <Property Name="TipoExoneracion" Type="varchar" MaxLength="2" />
+          <Property Name="CodigoExoneracion" Type="varchar" MaxLength="100" />
+          <Property Name="NombreInstitucionExo" Type="varchar" MaxLength="100" />
+          <Property Name="PorcentajeExo" Type="smallint" />
+          <Property Name="FechaEmision" Type="datetime" />
         </EntityType>
         <EntityType Name="codigo_actividad">
           <Key>
@@ -304,6 +309,8 @@
           <Property Name="Ultima_fec_actualizacion" Type="datetime" Nullable="false" />
           <Property Name="Impuesto_id" Type="int" />
           <Property Name="Tipo_Descuento_id" Type="int" />
+          <Property Name="total_exonerado" Type="decimal" Precision="18" Scale="2" />
+          <Property Name="PorcentajeExo" Type="smallint" />
         </EntityType>
         <EntityType Name="Facturas">
           <Key>
@@ -2275,34 +2282,6 @@
           <NavigationProperty Name="Bancos_Movimientos" Relationship="marsh_contableModel.FK_BM_Centro_Costos" FromRole="Centro_Costos" ToRole="Bancos_Movimientos" />
           <NavigationProperty Name="Cuenta_Encabezado" Relationship="marsh_contableModel.FK_CE_Centro_Costos" FromRole="Centro_Costos" ToRole="Cuenta_Encabezado" />
         </EntityType>
-        <EntityType Name="Clientes">
-          <Key>
-            <PropertyRef Name="id" />
-          </Key>
-          <Property Name="id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
-          <Property Name="identificacion" Type="String" MaxLength="45" FixedLength="false" Unicode="false" Nullable="false" />
-          <Property Name="tipo_identificacion_id" Type="Int32" Nullable="false" />
-          <Property Name="Nombre" Type="String" MaxLength="250" FixedLength="false" Unicode="false" Nullable="false" />
-          <Property Name="Apellido1" Type="String" MaxLength="100" FixedLength="false" Unicode="false" Nullable="false" />
-          <Property Name="Apellido2" Type="String" MaxLength="100" FixedLength="false" Unicode="false" Nullable="false" />
-          <Property Name="correo" Type="String" MaxLength="150" FixedLength="false" Unicode="false" Nullable="false" />
-          <Property Name="Distrito_id" Type="Int32" Nullable="false" />
-          <Property Name="Canton_id" Type="Int32" Nullable="false" />
-          <Property Name="Provincia_id" Type="Int32" Nullable="false" />
-          <Property Name="codigo_actividad_id" Type="Int32" Nullable="false" />
-          <Property Name="estado" Type="Int16" Nullable="false" />
-          <Property Name="fecha_creacion" Type="DateTime" Nullable="false" Precision="3" />
-          <Property Name="fecha_actualizacion" Type="DateTime" Nullable="false" Precision="3" />
-          <Property Name="exonerado" Type="Int16" Nullable="false" />
-          <Property Name="OtrasSenas" Type="String" MaxLength="200" FixedLength="false" Unicode="false" Nullable="false" />
-          <NavigationProperty Name="codigo_actividad" Relationship="Self.fk_Clientes_codigo_actividad1" FromRole="Clientes" ToRole="codigo_actividad" />
-          <NavigationProperty Name="Distrito" Relationship="Self.fk_Clientes_Distrito1" FromRole="Clientes" ToRole="Distrito" />
-          <NavigationProperty Name="tipo_identificacion" Relationship="Self.fk_Clientes_tipo_identificacion1" FromRole="Clientes" ToRole="tipo_identificacion" />
-          <NavigationProperty Name="Telefonos" Relationship="Self.fk_Telefonos_Clientes1" FromRole="Clientes" ToRole="Telefonos" />
-          <NavigationProperty Name="Ingresos" Relationship="marsh_contableModel.fk_Facturas_Clientes10" FromRole="Clientes" ToRole="Ingresos" />
-          <NavigationProperty Name="Cuenta_Encabezado" Relationship="marsh_contableModel.FK_CE_Clientes" FromRole="Clientes" ToRole="Cuenta_Encabezado" />
-          <NavigationProperty Name="Facturas" Relationship="marsh_contableModel.fk_Facturas_Clientes1" FromRole="Clientes" ToRole="Facturas" />
-        </EntityType>
         <EntityType Name="codigo_actividad">
           <Key>
             <PropertyRef Name="id" />
@@ -2310,9 +2289,9 @@
           <Property Name="id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
           <Property Name="codigo_actividad1" Type="String" MaxLength="45" FixedLength="false" Unicode="false" Nullable="false" />
           <Property Name="nombre_actividad" Type="String" MaxLength="255" FixedLength="false" Unicode="false" />
-          <NavigationProperty Name="Clientes" Relationship="Self.fk_Clientes_codigo_actividad1" FromRole="codigo_actividad" ToRole="Clientes" />
           <NavigationProperty Name="Proveedor" Relationship="Self.fk_Clientes_codigo_actividad10" FromRole="codigo_actividad" ToRole="Proveedor" />
           <NavigationProperty Name="Empresa" Relationship="Self.fk_Empresa_codigo_actividad1" FromRole="codigo_actividad" ToRole="Empresa" />
+          <NavigationProperty Name="Clientes" Relationship="marsh_contableModel.fk_Clientes_codigo_actividad1" FromRole="codigo_actividad" ToRole="Clientes" />
         </EntityType>
         <EntityType Name="Codigo_comercial">
           <Key>
@@ -2370,8 +2349,8 @@
           <Property Name="Canton_id" Type="Int32" Nullable="false" />
           <Property Name="Canton_Provincia_id" Type="Int32" Nullable="false" />
           <NavigationProperty Name="Canton" Relationship="Self.fk_Distrito_Canton1" FromRole="Distrito" ToRole="Canton" />
-          <NavigationProperty Name="Clientes" Relationship="Self.fk_Clientes_Distrito1" FromRole="Distrito" ToRole="Clientes" />
           <NavigationProperty Name="Proveedor" Relationship="Self.fk_Clientes_Distrito10" FromRole="Distrito" ToRole="Proveedor" />
+          <NavigationProperty Name="Clientes" Relationship="marsh_contableModel.fk_Clientes_Distrito1" FromRole="Distrito" ToRole="Clientes" />
         </EntityType>
         <EntityType Name="Empresa">
           <Key>
@@ -2639,8 +2618,8 @@
           <Property Name="Clientes_id" Type="Int32" />
           <Property Name="Proveedor_id" Type="Int32" />
           <Property Name="telefono_principal" Type="Int16" Nullable="false" />
-          <NavigationProperty Name="Clientes" Relationship="Self.fk_Telefonos_Clientes1" FromRole="Telefonos" ToRole="Clientes" />
           <NavigationProperty Name="Proveedor" Relationship="Self.fk_Telefonos_Proveedor1" FromRole="Telefonos" ToRole="Proveedor" />
+          <NavigationProperty Name="Clientes" Relationship="marsh_contableModel.fk_Telefonos_Clientes1" FromRole="Telefonos" ToRole="Clientes" />
         </EntityType>
         <EntityType Name="Tipo_archivo">
           <Key>
@@ -2690,9 +2669,9 @@
           <Property Name="id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
           <Property Name="codigo_tipo_identificacion" Type="String" MaxLength="3" FixedLength="false" Unicode="false" Nullable="false" />
           <Property Name="Nombre" Type="String" MaxLength="45" FixedLength="false" Unicode="false" Nullable="false" />
-          <NavigationProperty Name="Clientes" Relationship="Self.fk_Clientes_tipo_identificacion1" FromRole="tipo_identificacion" ToRole="Clientes" />
           <NavigationProperty Name="Empresa" Relationship="Self.fk_Empresa_tipo_identificacion1" FromRole="tipo_identificacion" ToRole="Empresa" />
           <NavigationProperty Name="Proveedor" Relationship="Self.fk_Clientes_tipo_identificacion10" FromRole="tipo_identificacion" ToRole="Proveedor" />
+          <NavigationProperty Name="Clientes" Relationship="marsh_contableModel.fk_Clientes_tipo_identificacion1" FromRole="tipo_identificacion" ToRole="Clientes" />
         </EntityType>
         <EntityType Name="Tipo_moneda">
           <Key>
@@ -2852,58 +2831,6 @@
             </Principal>
             <Dependent Role="Gestion_Presupuestaria">
               <PropertyRef Name="Centro_Costos_id" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
-        <Association Name="fk_Clientes_codigo_actividad1">
-          <End Role="codigo_actividad" Type="Self.codigo_actividad" Multiplicity="1" />
-          <End Role="Clientes" Type="Self.Clientes" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="codigo_actividad">
-              <PropertyRef Name="id" />
-            </Principal>
-            <Dependent Role="Clientes">
-              <PropertyRef Name="codigo_actividad_id" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
-        <Association Name="fk_Clientes_Distrito1">
-          <End Role="Distrito" Type="Self.Distrito" Multiplicity="1" />
-          <End Role="Clientes" Type="Self.Clientes" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="Distrito">
-              <PropertyRef Name="id" />
-              <PropertyRef Name="Canton_id" />
-              <PropertyRef Name="Canton_Provincia_id" />
-            </Principal>
-            <Dependent Role="Clientes">
-              <PropertyRef Name="Distrito_id" />
-              <PropertyRef Name="Canton_id" />
-              <PropertyRef Name="Provincia_id" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
-        <Association Name="fk_Clientes_tipo_identificacion1">
-          <End Role="tipo_identificacion" Type="Self.tipo_identificacion" Multiplicity="1" />
-          <End Role="Clientes" Type="Self.Clientes" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="tipo_identificacion">
-              <PropertyRef Name="id" />
-            </Principal>
-            <Dependent Role="Clientes">
-              <PropertyRef Name="tipo_identificacion_id" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
-        <Association Name="fk_Telefonos_Clientes1">
-          <End Role="Clientes" Type="Self.Clientes" Multiplicity="0..1" />
-          <End Role="Telefonos" Type="Self.Telefonos" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="Clientes">
-              <PropertyRef Name="id" />
-            </Principal>
-            <Dependent Role="Telefonos">
-              <PropertyRef Name="Clientes_id" />
             </Dependent>
           </ReferentialConstraint>
         </Association>
@@ -3169,7 +3096,6 @@
           <EntitySet Name="Categoria_gasto" EntityType="Self.Categoria_gasto" />
           <EntitySet Name="Categoria_presupuestaria" EntityType="Self.Categoria_presupuestaria" />
           <EntitySet Name="Centro_Costos" EntityType="Self.Centro_Costos" />
-          <EntitySet Name="Clientes" EntityType="Self.Clientes" />
           <EntitySet Name="codigo_actividad" EntityType="Self.codigo_actividad" />
           <EntitySet Name="Codigo_comercial" EntityType="Self.Codigo_comercial" />
           <EntitySet Name="Codigos_cabys" EntityType="Self.Codigos_cabys" />
@@ -3230,22 +3156,6 @@
           <AssociationSet Name="fk_Gestion_Presupuestaria_Centro_Costos1" Association="Self.fk_Gestion_Presupuestaria_Centro_Costos1">
             <End Role="Centro_Costos" EntitySet="Centro_Costos" />
             <End Role="Gestion_Presupuestaria" EntitySet="Gestion_Presupuestaria" />
-          </AssociationSet>
-          <AssociationSet Name="fk_Clientes_codigo_actividad1" Association="Self.fk_Clientes_codigo_actividad1">
-            <End Role="codigo_actividad" EntitySet="codigo_actividad" />
-            <End Role="Clientes" EntitySet="Clientes" />
-          </AssociationSet>
-          <AssociationSet Name="fk_Clientes_Distrito1" Association="Self.fk_Clientes_Distrito1">
-            <End Role="Distrito" EntitySet="Distrito" />
-            <End Role="Clientes" EntitySet="Clientes" />
-          </AssociationSet>
-          <AssociationSet Name="fk_Clientes_tipo_identificacion1" Association="Self.fk_Clientes_tipo_identificacion1">
-            <End Role="tipo_identificacion" EntitySet="tipo_identificacion" />
-            <End Role="Clientes" EntitySet="Clientes" />
-          </AssociationSet>
-          <AssociationSet Name="fk_Telefonos_Clientes1" Association="Self.fk_Telefonos_Clientes1">
-            <End Role="Clientes" EntitySet="Clientes" />
-            <End Role="Telefonos" EntitySet="Telefonos" />
           </AssociationSet>
           <AssociationSet Name="fk_Clientes_codigo_actividad10" Association="Self.fk_Clientes_codigo_actividad10">
             <End Role="codigo_actividad" EntitySet="codigo_actividad" />
@@ -3350,10 +3260,6 @@
             <End Role="Empresa" EntitySet="Empresa" />
           </AssociationSet>
           <EntitySet Name="Ingresos" EntityType="marsh_contableModel.Ingresos" />
-          <AssociationSet Name="fk_Facturas_Clientes10" Association="marsh_contableModel.fk_Facturas_Clientes10">
-            <End Role="Clientes" EntitySet="Clientes" />
-            <End Role="Ingresos" EntitySet="Ingresos" />
-          </AssociationSet>
           <AssociationSet Name="fk_Devoluciones_Ingresos1" Association="marsh_contableModel.fk_Devoluciones_Ingresos1">
             <End Role="Ingresos" EntitySet="Ingresos" />
             <End Role="Devoluciones" EntitySet="Devoluciones" />
@@ -3473,10 +3379,6 @@
             <End Role="Centro_Costos" EntitySet="Centro_Costos" />
             <End Role="Cuenta_Encabezado" EntitySet="Cuenta_Encabezado" />
           </AssociationSet>
-          <AssociationSet Name="FK_CE_Clientes" Association="marsh_contableModel.FK_CE_Clientes">
-            <End Role="Clientes" EntitySet="Clientes" />
-            <End Role="Cuenta_Encabezado" EntitySet="Cuenta_Encabezado" />
-          </AssociationSet>
           <AssociationSet Name="FK_condicion_venta_gasto" Association="marsh_contableModel.FK_condicion_venta_gasto">
             <End Role="Condicion_venta" EntitySet="Condicion_venta" />
             <End Role="Gastos" EntitySet="Gastos" />
@@ -3539,10 +3441,6 @@
             <End Role="Facturas" EntitySet="Facturas" />
             <End Role="Bancos_Movimientos" EntitySet="Bancos_Movimientos" />
           </AssociationSet>
-          <AssociationSet Name="fk_Facturas_Clientes1" Association="marsh_contableModel.fk_Facturas_Clientes1">
-            <End Role="Clientes" EntitySet="Clientes" />
-            <End Role="Facturas" EntitySet="Facturas" />
-          </AssociationSet>
           <AssociationSet Name="fk_Facturas_Condicion_venta1" Association="marsh_contableModel.fk_Facturas_Condicion_venta1">
             <End Role="Condicion_venta" EntitySet="Condicion_venta" />
             <End Role="Facturas" EntitySet="Facturas" />
@@ -3582,6 +3480,35 @@
           <AssociationSet Name="FK_Usuarios_Factura" Association="marsh_contableModel.FK_Usuarios_Factura">
             <End Role="Usuarios" EntitySet="Usuarios" />
             <End Role="Facturas" EntitySet="Facturas" />
+          </AssociationSet>
+          <EntitySet Name="Clientes" EntityType="marsh_contableModel.Clientes" />
+          <AssociationSet Name="FK_CE_Clientes" Association="marsh_contableModel.FK_CE_Clientes">
+            <End Role="Clientes" EntitySet="Clientes" />
+            <End Role="Cuenta_Encabezado" EntitySet="Cuenta_Encabezado" />
+          </AssociationSet>
+          <AssociationSet Name="fk_Clientes_codigo_actividad1" Association="marsh_contableModel.fk_Clientes_codigo_actividad1">
+            <End Role="codigo_actividad" EntitySet="codigo_actividad" />
+            <End Role="Clientes" EntitySet="Clientes" />
+          </AssociationSet>
+          <AssociationSet Name="fk_Clientes_Distrito1" Association="marsh_contableModel.fk_Clientes_Distrito1">
+            <End Role="Distrito" EntitySet="Distrito" />
+            <End Role="Clientes" EntitySet="Clientes" />
+          </AssociationSet>
+          <AssociationSet Name="fk_Clientes_tipo_identificacion1" Association="marsh_contableModel.fk_Clientes_tipo_identificacion1">
+            <End Role="tipo_identificacion" EntitySet="tipo_identificacion" />
+            <End Role="Clientes" EntitySet="Clientes" />
+          </AssociationSet>
+          <AssociationSet Name="fk_Facturas_Clientes1" Association="marsh_contableModel.fk_Facturas_Clientes1">
+            <End Role="Clientes" EntitySet="Clientes" />
+            <End Role="Facturas" EntitySet="Facturas" />
+          </AssociationSet>
+          <AssociationSet Name="fk_Facturas_Clientes10" Association="marsh_contableModel.fk_Facturas_Clientes10">
+            <End Role="Clientes" EntitySet="Clientes" />
+            <End Role="Ingresos" EntitySet="Ingresos" />
+          </AssociationSet>
+          <AssociationSet Name="fk_Telefonos_Clientes1" Association="marsh_contableModel.fk_Telefonos_Clientes1">
+            <End Role="Clientes" EntitySet="Clientes" />
+            <End Role="Telefonos" EntitySet="Telefonos" />
           </AssociationSet>
           </EntityContainer>
         <EntityType Name="Padron">
@@ -3680,7 +3607,6 @@
           <Property Name="Usuarios_Usuario_id" Type="Int32" Nullable="false" />
           <Property Name="Medio_pago_id" Type="Int32" Nullable="false" />
           <Property Name="Facturas_id" Type="Int32" />
-          <NavigationProperty Name="Clientes" Relationship="marsh_contableModel.fk_Facturas_Clientes10" FromRole="Ingresos" ToRole="Clientes" />
           <NavigationProperty Name="Devoluciones" Relationship="marsh_contableModel.fk_Devoluciones_Ingresos1" FromRole="Ingresos" ToRole="Devoluciones" />
           <NavigationProperty Name="Estado_Factura" Relationship="marsh_contableModel.fk_Factura_Estado_Factura10" FromRole="Ingresos" ToRole="Estado_Factura" />
           <NavigationProperty Name="Tipo_moneda" Relationship="marsh_contableModel.fk_Factura_Tipo_moneda10" FromRole="Ingresos" ToRole="Tipo_moneda" />
@@ -3693,19 +3619,8 @@
           <NavigationProperty Name="Condicion_venta" Relationship="marsh_contableModel.FK_condicion_venta_ingreso" FromRole="Ingresos" ToRole="Condicion_venta" />
           <NavigationProperty Name="Cuenta_Encabezado" Relationship="marsh_contableModel.FK_CE_Ingresos" FromRole="Ingresos" ToRole="Cuenta_Encabezado" />
           <NavigationProperty Name="Facturas" Relationship="marsh_contableModel.fk_Ingresos_Facturas1" FromRole="Ingresos" ToRole="Facturas" />
+          <NavigationProperty Name="Clientes" Relationship="marsh_contableModel.fk_Facturas_Clientes10" FromRole="Ingresos" ToRole="Clientes" />
         </EntityType>
-        <Association Name="fk_Facturas_Clientes10">
-          <End Type="marsh_contableModel.Clientes" Role="Clientes" Multiplicity="1" />
-          <End Type="marsh_contableModel.Ingresos" Role="Ingresos" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="Clientes">
-              <PropertyRef Name="id" />
-            </Principal>
-            <Dependent Role="Ingresos">
-              <PropertyRef Name="Clientes_id" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
         <Association Name="fk_Devoluciones_Ingresos1">
           <End Type="marsh_contableModel.Ingresos" Role="Ingresos" Multiplicity="1" />
           <End Type="marsh_contableModel.Devoluciones" Role="Devoluciones" Multiplicity="*" />
@@ -3803,6 +3718,8 @@
           <NavigationProperty Name="Codigos_cabys" Relationship="marsh_contableModel.fk_Factura_Detalles_Codigos_cabys1" FromRole="Factura_Detalles" ToRole="Codigos_cabys" />
           <NavigationProperty Name="Unidad_medida" Relationship="marsh_contableModel.fk_Factura_Detalles_Unidad_medida1" FromRole="Factura_Detalles" ToRole="Unidad_medida" />
           <NavigationProperty Name="Facturas" Relationship="marsh_contableModel.fk_Factura_Detalles_Facturas1" FromRole="Factura_Detalles" ToRole="Facturas" />
+          <Property Name="total_exonerado" Type="Decimal" Precision="18" Scale="2" />
+          <Property Name="PorcentajeExo" Type="Int16" />
         </EntityType>
         <Association Name="fk_Factura_Detalles_Codigo_comercial1">
           <End Type="marsh_contableModel.Codigo_comercial" Role="Codigo_comercial" Multiplicity="1" />
@@ -4168,7 +4085,6 @@
           <Property Name="Categoria_presupuestaria_id" Type="Int32" />
           <NavigationProperty Name="Categoria_presupuestaria" Relationship="marsh_contableModel.FK_Cuenta_Encabezado_Categoria_Presupuestaria" FromRole="Cuenta_Encabezado" ToRole="Categoria_presupuestaria" />
           <NavigationProperty Name="Centro_Costos" Relationship="marsh_contableModel.FK_CE_Centro_Costos" FromRole="Cuenta_Encabezado" ToRole="Centro_Costos" />
-          <NavigationProperty Name="Clientes" Relationship="marsh_contableModel.FK_CE_Clientes" FromRole="Cuenta_Encabezado" ToRole="Clientes" />
           <NavigationProperty Name="Cuenta_Detalle" Relationship="marsh_contableModel.FK_CD_Cuenta_Encabezado" FromRole="Cuenta_Encabezado" ToRole="Cuenta_Detalle" />
           <NavigationProperty Name="Gastos" Relationship="marsh_contableModel.FK_CE_Gastos" FromRole="Cuenta_Encabezado" ToRole="Gastos" />
           <NavigationProperty Name="Ingresos" Relationship="marsh_contableModel.FK_CE_Ingresos" FromRole="Cuenta_Encabezado" ToRole="Ingresos" />
@@ -4178,6 +4094,7 @@
           <NavigationProperty Name="Tipo_moneda" Relationship="marsh_contableModel.FK_CE_Tipo_moneda" FromRole="Cuenta_Encabezado" ToRole="Tipo_moneda" />
           <NavigationProperty Name="Usuarios" Relationship="marsh_contableModel.FK_CE_Usuarios" FromRole="Cuenta_Encabezado" ToRole="Usuarios" />
           <NavigationProperty Name="Facturas" Relationship="marsh_contableModel.FK_CE_Facturas" FromRole="Cuenta_Encabezado" ToRole="Facturas" />
+          <NavigationProperty Name="Clientes" Relationship="marsh_contableModel.FK_CE_Clientes" FromRole="Cuenta_Encabezado" ToRole="Clientes" />
         </EntityType>
         <Association Name="FK_Cuenta_Encabezado_Categoria_Presupuestaria">
           <End Type="marsh_contableModel.Categoria_presupuestaria" Role="Categoria_presupuestaria" Multiplicity="0..1" />
@@ -4200,18 +4117,6 @@
             </Principal>
             <Dependent Role="Cuenta_Encabezado">
               <PropertyRef Name="Centro_Costos_id" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
-        <Association Name="FK_CE_Clientes">
-          <End Type="marsh_contableModel.Clientes" Role="Clientes" Multiplicity="0..1" />
-          <End Type="marsh_contableModel.Cuenta_Encabezado" Role="Cuenta_Encabezado" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="Clientes">
-              <PropertyRef Name="id" />
-            </Principal>
-            <Dependent Role="Cuenta_Encabezado">
-              <PropertyRef Name="Clientes_id" />
             </Dependent>
           </ReferentialConstraint>
         </Association>
@@ -4429,7 +4334,6 @@
           <Property Name="Usuarios_Usuario_id" Type="Int32" />
           <Property Name="Referencia" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
           <NavigationProperty Name="Bancos_Movimientos" Relationship="marsh_contableModel.FK_BM_Facturas" FromRole="Facturas" ToRole="Bancos_Movimientos" />
-          <NavigationProperty Name="Clientes" Relationship="marsh_contableModel.fk_Facturas_Clientes1" FromRole="Facturas" ToRole="Clientes" />
           <NavigationProperty Name="Condicion_venta" Relationship="marsh_contableModel.fk_Facturas_Condicion_venta1" FromRole="Facturas" ToRole="Condicion_venta" />
           <NavigationProperty Name="Cuenta_Encabezado" Relationship="marsh_contableModel.FK_CE_Facturas" FromRole="Facturas" ToRole="Cuenta_Encabezado" />
           <NavigationProperty Name="Estado_Factura" Relationship="marsh_contableModel.fk_Factura_Estado_Factura1" FromRole="Facturas" ToRole="Estado_Factura" />
@@ -4440,6 +4344,7 @@
           <NavigationProperty Name="Gestion_P_detalle" Relationship="marsh_contableModel.FK_GP_Detalle_Facturas" FromRole="Facturas" ToRole="Gestion_P_detalle" />
           <NavigationProperty Name="Ingresos" Relationship="marsh_contableModel.fk_Ingresos_Facturas1" FromRole="Facturas" ToRole="Ingresos" />
           <NavigationProperty Name="Usuarios" Relationship="marsh_contableModel.FK_Usuarios_Factura" FromRole="Facturas" ToRole="Usuarios" />
+          <NavigationProperty Name="Clientes" Relationship="marsh_contableModel.fk_Facturas_Clientes1" FromRole="Facturas" ToRole="Clientes" />
         </EntityType>
         <Association Name="FK_BM_Facturas">
           <End Type="marsh_contableModel.Facturas" Role="Facturas" Multiplicity="0..1" />
@@ -4450,18 +4355,6 @@
             </Principal>
             <Dependent Role="Bancos_Movimientos">
               <PropertyRef Name="Facturas_id" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
-        <Association Name="fk_Facturas_Clientes1">
-          <End Type="marsh_contableModel.Clientes" Role="Clientes" Multiplicity="1" />
-          <End Type="marsh_contableModel.Facturas" Role="Facturas" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="Clientes">
-              <PropertyRef Name="id" />
-            </Principal>
-            <Dependent Role="Facturas">
-              <PropertyRef Name="Clientes_id" />
             </Dependent>
           </ReferentialConstraint>
         </Association>
@@ -4585,6 +4478,127 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
+        <EntityType Name="Clientes">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="identificacion" Type="String" Nullable="false" MaxLength="45" FixedLength="false" Unicode="false" />
+          <Property Name="tipo_identificacion_id" Type="Int32" Nullable="false" />
+          <Property Name="Nombre" Type="String" Nullable="false" MaxLength="250" FixedLength="false" Unicode="false" />
+          <Property Name="Apellido1" Type="String" Nullable="false" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="Apellido2" Type="String" Nullable="false" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="correo" Type="String" Nullable="false" MaxLength="150" FixedLength="false" Unicode="false" />
+          <Property Name="Distrito_id" Type="Int32" Nullable="false" />
+          <Property Name="Canton_id" Type="Int32" Nullable="false" />
+          <Property Name="Provincia_id" Type="Int32" Nullable="false" />
+          <Property Name="codigo_actividad_id" Type="Int32" Nullable="false" />
+          <Property Name="estado" Type="Int16" Nullable="false" />
+          <Property Name="fecha_creacion" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="fecha_actualizacion" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="exonerado" Type="Int16" Nullable="false" />
+          <Property Name="OtrasSenas" Type="String" Nullable="false" MaxLength="200" FixedLength="false" Unicode="false" />
+          <Property Name="TipoExoneracion" Type="String" MaxLength="2" FixedLength="false" Unicode="false" />
+          <Property Name="CodigoExoneracion" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="NombreInstitucionExo" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="PorcentajeExo" Type="Int16" />
+          <Property Name="FechaEmision" Type="DateTime" Precision="3" />
+          <NavigationProperty Name="Cuenta_Encabezado" Relationship="marsh_contableModel.FK_CE_Clientes" FromRole="Clientes" ToRole="Cuenta_Encabezado" />
+          <NavigationProperty Name="codigo_actividad" Relationship="marsh_contableModel.fk_Clientes_codigo_actividad1" FromRole="Clientes" ToRole="codigo_actividad" />
+          <NavigationProperty Name="Distrito" Relationship="marsh_contableModel.fk_Clientes_Distrito1" FromRole="Clientes" ToRole="Distrito" />
+          <NavigationProperty Name="tipo_identificacion" Relationship="marsh_contableModel.fk_Clientes_tipo_identificacion1" FromRole="Clientes" ToRole="tipo_identificacion" />
+          <NavigationProperty Name="Facturas" Relationship="marsh_contableModel.fk_Facturas_Clientes1" FromRole="Clientes" ToRole="Facturas" />
+          <NavigationProperty Name="Ingresos" Relationship="marsh_contableModel.fk_Facturas_Clientes10" FromRole="Clientes" ToRole="Ingresos" />
+          <NavigationProperty Name="Telefonos" Relationship="marsh_contableModel.fk_Telefonos_Clientes1" FromRole="Clientes" ToRole="Telefonos" />
+        </EntityType>
+        <Association Name="FK_CE_Clientes">
+          <End Type="marsh_contableModel.Clientes" Role="Clientes" Multiplicity="0..1" />
+          <End Type="marsh_contableModel.Cuenta_Encabezado" Role="Cuenta_Encabezado" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Clientes">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="Cuenta_Encabezado">
+              <PropertyRef Name="Clientes_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="fk_Clientes_codigo_actividad1">
+          <End Type="marsh_contableModel.codigo_actividad" Role="codigo_actividad" Multiplicity="1" />
+          <End Type="marsh_contableModel.Clientes" Role="Clientes" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="codigo_actividad">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="Clientes">
+              <PropertyRef Name="codigo_actividad_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="fk_Clientes_Distrito1">
+          <End Type="marsh_contableModel.Distrito" Role="Distrito" Multiplicity="1" />
+          <End Type="marsh_contableModel.Clientes" Role="Clientes" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Distrito">
+              <PropertyRef Name="id" />
+              <PropertyRef Name="Canton_id" />
+              <PropertyRef Name="Canton_Provincia_id" />
+            </Principal>
+            <Dependent Role="Clientes">
+              <PropertyRef Name="Distrito_id" />
+              <PropertyRef Name="Canton_id" />
+              <PropertyRef Name="Provincia_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="fk_Clientes_tipo_identificacion1">
+          <End Type="marsh_contableModel.tipo_identificacion" Role="tipo_identificacion" Multiplicity="1" />
+          <End Type="marsh_contableModel.Clientes" Role="Clientes" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="tipo_identificacion">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="Clientes">
+              <PropertyRef Name="tipo_identificacion_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="fk_Facturas_Clientes1">
+          <End Type="marsh_contableModel.Clientes" Role="Clientes" Multiplicity="1" />
+          <End Type="marsh_contableModel.Facturas" Role="Facturas" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Clientes">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="Facturas">
+              <PropertyRef Name="Clientes_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="fk_Facturas_Clientes10">
+          <End Type="marsh_contableModel.Clientes" Role="Clientes" Multiplicity="1" />
+          <End Type="marsh_contableModel.Ingresos" Role="Ingresos" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Clientes">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="Ingresos">
+              <PropertyRef Name="Clientes_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="fk_Telefonos_Clientes1">
+          <End Type="marsh_contableModel.Clientes" Role="Clientes" Multiplicity="0..1" />
+          <End Type="marsh_contableModel.Telefonos" Role="Telefonos" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Clientes">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="Telefonos">
+              <PropertyRef Name="Clientes_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
         </Schema>
     </edmx:ConceptualModels>
     <!-- C-S mapping content -->
@@ -4648,28 +4662,6 @@
                 <ScalarProperty Name="codigo" ColumnName="codigo" />
                 <ScalarProperty Name="Nombre" ColumnName="Nombre" />
                 <ScalarProperty Name="Seudonimo" ColumnName="Seudonimo" />
-              </MappingFragment>
-            </EntityTypeMapping>
-          </EntitySetMapping>
-          <EntitySetMapping Name="Clientes">
-            <EntityTypeMapping TypeName="marsh_contableModel.Clientes">
-              <MappingFragment StoreEntitySet="Clientes">
-                <ScalarProperty Name="id" ColumnName="id" />
-                <ScalarProperty Name="identificacion" ColumnName="identificacion" />
-                <ScalarProperty Name="tipo_identificacion_id" ColumnName="tipo_identificacion_id" />
-                <ScalarProperty Name="Nombre" ColumnName="Nombre" />
-                <ScalarProperty Name="Apellido1" ColumnName="Apellido1" />
-                <ScalarProperty Name="Apellido2" ColumnName="Apellido2" />
-                <ScalarProperty Name="correo" ColumnName="correo" />
-                <ScalarProperty Name="Distrito_id" ColumnName="Distrito_id" />
-                <ScalarProperty Name="Canton_id" ColumnName="Canton_id" />
-                <ScalarProperty Name="Provincia_id" ColumnName="Provincia_id" />
-                <ScalarProperty Name="codigo_actividad_id" ColumnName="codigo_actividad_id" />
-                <ScalarProperty Name="estado" ColumnName="estado" />
-                <ScalarProperty Name="fecha_creacion" ColumnName="fecha_creacion" />
-                <ScalarProperty Name="fecha_actualizacion" ColumnName="fecha_actualizacion" />
-                <ScalarProperty Name="exonerado" ColumnName="exonerado" />
-                <ScalarProperty Name="OtrasSenas" ColumnName="OtrasSenas" />
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
@@ -5102,6 +5094,8 @@
           <EntitySetMapping Name="Factura_Detalles">
             <EntityTypeMapping TypeName="marsh_contableModel.Factura_Detalles">
               <MappingFragment StoreEntitySet="Factura_Detalles">
+                <ScalarProperty Name="PorcentajeExo" ColumnName="PorcentajeExo" />
+                <ScalarProperty Name="total_exonerado" ColumnName="total_exonerado" />
                 <ScalarProperty Name="Tipo_Descuento_id" ColumnName="Tipo_Descuento_id" />
                 <ScalarProperty Name="Impuesto_id" ColumnName="Impuesto_id" />
                 <ScalarProperty Name="Ultima_fec_actualizacion" ColumnName="Ultima_fec_actualizacion" />
@@ -5273,6 +5267,33 @@
                 <ScalarProperty Name="fecha" ColumnName="fecha" />
                 <ScalarProperty Name="Consecutivo_electronico" ColumnName="Consecutivo_electronico" />
                 <ScalarProperty Name="Clave" ColumnName="Clave" />
+                <ScalarProperty Name="id" ColumnName="id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Clientes">
+            <EntityTypeMapping TypeName="marsh_contableModel.Clientes">
+              <MappingFragment StoreEntitySet="Clientes">
+                <ScalarProperty Name="FechaEmision" ColumnName="FechaEmision" />
+                <ScalarProperty Name="PorcentajeExo" ColumnName="PorcentajeExo" />
+                <ScalarProperty Name="NombreInstitucionExo" ColumnName="NombreInstitucionExo" />
+                <ScalarProperty Name="CodigoExoneracion" ColumnName="CodigoExoneracion" />
+                <ScalarProperty Name="TipoExoneracion" ColumnName="TipoExoneracion" />
+                <ScalarProperty Name="OtrasSenas" ColumnName="OtrasSenas" />
+                <ScalarProperty Name="exonerado" ColumnName="exonerado" />
+                <ScalarProperty Name="fecha_actualizacion" ColumnName="fecha_actualizacion" />
+                <ScalarProperty Name="fecha_creacion" ColumnName="fecha_creacion" />
+                <ScalarProperty Name="estado" ColumnName="estado" />
+                <ScalarProperty Name="codigo_actividad_id" ColumnName="codigo_actividad_id" />
+                <ScalarProperty Name="Provincia_id" ColumnName="Provincia_id" />
+                <ScalarProperty Name="Canton_id" ColumnName="Canton_id" />
+                <ScalarProperty Name="Distrito_id" ColumnName="Distrito_id" />
+                <ScalarProperty Name="correo" ColumnName="correo" />
+                <ScalarProperty Name="Apellido2" ColumnName="Apellido2" />
+                <ScalarProperty Name="Apellido1" ColumnName="Apellido1" />
+                <ScalarProperty Name="Nombre" ColumnName="Nombre" />
+                <ScalarProperty Name="tipo_identificacion_id" ColumnName="tipo_identificacion_id" />
+                <ScalarProperty Name="identificacion" ColumnName="identificacion" />
                 <ScalarProperty Name="id" ColumnName="id" />
               </MappingFragment>
             </EntityTypeMapping>

@@ -56,12 +56,11 @@ namespace marsh_contable.Models
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Cuenta_Encabezado> Cuenta_Encabezado { get; set; }
 
-
         public string presupuesto_id { get; set; }
+
         public int Banco_id { get; set; }
 
         public int dias_credito { get; set; }
 
-        public int createElectronicDoc { get; set; }
     }
 }

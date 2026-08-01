@@ -17,10 +17,10 @@ namespace marsh_contable.Models
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors")]
         public Clientes()
         {
-            this.Telefonos = new HashSet<Telefonos>();
-            this.Ingresos = new HashSet<Ingresos>();
             this.Cuenta_Encabezado = new HashSet<Cuenta_Encabezado>();
             this.Facturas = new HashSet<Facturas>();
+            this.Ingresos = new HashSet<Ingresos>();
+            this.Telefonos = new HashSet<Telefonos>();
         }
     
         public int id { get; set; }
@@ -39,17 +39,22 @@ namespace marsh_contable.Models
         public System.DateTime fecha_actualizacion { get; set; }
         public short exonerado { get; set; }
         public string OtrasSenas { get; set; }
+        public string TipoExoneracion { get; set; }
+        public string CodigoExoneracion { get; set; }
+        public string NombreInstitucionExo { get; set; }
+        public Nullable<short> PorcentajeExo { get; set; }
+        public Nullable<System.DateTime> FechaEmision { get; set; }
     
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<Cuenta_Encabezado> Cuenta_Encabezado { get; set; }
         public virtual codigo_actividad codigo_actividad { get; set; }
         public virtual Distrito Distrito { get; set; }
         public virtual tipo_identificacion tipo_identificacion { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<Telefonos> Telefonos { get; set; }
+        public virtual ICollection<Facturas> Facturas { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Ingresos> Ingresos { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<Cuenta_Encabezado> Cuenta_Encabezado { get; set; }
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<Facturas> Facturas { get; set; }
+        public virtual ICollection<Telefonos> Telefonos { get; set; }
     }
 }

@@ -118,17 +118,26 @@ namespace marsh_contable.Controllers
                     int mes = DateTime.Now.Month;
                     int anio = DateTime.Now.Year;
 
-                    double total = ctx.Facturas
-                        .Where(f => f.fecha.Month == mes &&
-                                    f.fecha.Year == anio)
-                        .Select(f => f.Total)
-                        .DefaultIfEmpty(0)
-                        .Sum();
+                    var totalesPorMoneda = ctx.Facturas
+        .Where(f => f.fecha.Month == mes &&
+                    f.fecha.Year == anio)
+        .Join(ctx.Tipo_moneda,
+              f => f.Tipo_moneda_id,
+              tm => tm.id,
+              (f, tm) => new { f, tm })
+        .GroupBy(x => new { x.f.Tipo_moneda_id, x.tm.Simbolo })
+        .Select(g => new TotalPorMonedaViewModel
+        {
+            Tipo_Moneda_id = g.Key.Tipo_moneda_id,
+            Simbolo = g.Key.Simbolo,
+            Total = g.Sum(x => x.f.Total)
+        })
+        .ToList();
 
                     oR.CodeStatus = HttpStatusCode.OK;
                     oR.Data = new
                     {
-                        total_ganancias_mes = total,
+                        total_ganancias_mes = totalesPorMoneda,
                         mes = mes,
                         anio = anio
                     };
@@ -208,16 +217,53 @@ namespace marsh_contable.Controllers
                     int totalClientes = ctx.Clientes.Count(c => c.estado == 1);
                     int totalClientesMesActual = ctx.Clientes.Count(c => c.estado == 1 && (c.fecha_creacion.Month == mes && c.fecha_creacion.Year == anio));
                     int totalFacturas = ctx.Facturas.Count(f => f.Tipo_documento_id == (int)TipoDocumentoId.FacturaElectronica);
-                    double totalGanancias = ctx.Facturas
-                                              .Where(f => f.fecha.Month == mes && f.fecha.Year == anio)
-                                              .Select(f => f.Total)
-                                              .DefaultIfEmpty(0)
-                                              .Sum();
-                    double totalGastos = ctx.Gastos
-                                              .Where(g => g.Fecha.Month == mes && g.Fecha.Year == anio)
-                                              .Select(g => g.Total)
-                                              .DefaultIfEmpty(0)
-                                              .Sum();
+                    //double totalGanancias = ctx.Facturas
+                    //                          .Where(f => f.fecha.Month == mes && f.fecha.Year == anio)
+                    //                          .Select(f => f.Total)
+                    //                          .DefaultIfEmpty(0)
+                    //                          .Sum();
+
+                    var totalGanancias = ctx.Tipo_moneda
+               .GroupJoin(
+                   ctx.Facturas.Where(f => f.fecha.Month == mes && f.fecha.Year == anio),
+                   tm => tm.id,
+                   f => f.Tipo_moneda_id,
+                   (tm, facturas) => new { tm, facturas }
+               )
+               .Select(x => new TotalPorMonedaViewModel
+               {
+                   Tipo_Moneda_id = x.tm.id,
+                   Simbolo = x.tm.Simbolo,
+                   Total = x.facturas.Sum(f => (double?)f.Total) ?? 0
+               })
+               .ToList();
+
+
+
+
+                    //double totalGastos = ctx.Gastos
+                    //                          .Where(g => g.Fecha.Month == mes && g.Fecha.Year == anio)
+                    //                          .Select(g => g.Total)
+                    //                          .DefaultIfEmpty(0)
+                    //                          .Sum();
+
+
+                    var totalGastos = ctx.Tipo_moneda
+           .GroupJoin(
+               ctx.Gastos.Where(f => f.Fecha.Month == mes && f.Fecha.Year == anio),
+               tm => tm.id,
+               f => f.Tipo_moneda_id,
+               (tm, gastos) => new { tm, gastos }
+           )
+           .Select(x => new TotalPorMonedaViewModel
+           {
+               Tipo_Moneda_id = x.tm.id,
+               Simbolo = x.tm.Simbolo,
+               Total = x.gastos.Sum(f => (double?)f.Total) ?? 0
+           })
+           .ToList();
+
+
 
                     var totalPorTipoDocumento = (from td in ctx.Tipo_documento
                                                  join f in ctx.Facturas

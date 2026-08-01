@@ -683,7 +683,7 @@ namespace marsh_contable.Controllers
                                      Tipo_documento = td.Nombre,
                                      Medio_pago = mp.descripcion,
                                      Proveedor = p.Nombre + " " + p.Apellido1 + " " +p.Apellido2,
-                                     Usuario = u.Nombre + " " + u.Apellido1 + u.Apellido2,
+                                     Usuario = u.Nombre + " " + u.Apellido1 +" " + u.Apellido2,
                                      tipo_moneda = m.Simbolo,
                                     
 

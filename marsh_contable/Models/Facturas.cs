@@ -46,7 +46,6 @@ namespace marsh_contable.Models
     
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Bancos_Movimientos> Bancos_Movimientos { get; set; }
-        public virtual Clientes Clientes { get; set; }
         public virtual Condicion_venta Condicion_venta { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Cuenta_Encabezado> Cuenta_Encabezado { get; set; }
@@ -61,13 +60,8 @@ namespace marsh_contable.Models
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Ingresos> Ingresos { get; set; }
         public virtual Usuarios Usuarios { get; set; }
-
-
-        public string presupuesto_id { get; set; }
-        public int Banco_id { get; set; }
+        public virtual Clientes Clientes { get; set; }
 
         public int dias_credito { get; set; }
-
-        public int createElectronicDoc { get; set; }
     }
 }

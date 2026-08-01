@@ -51,7 +51,16 @@ namespace marsh_contable.Models
         public string Simbolo { get; set; }
 
         public string Referencia { get; set; }
+
+
+        public string TipoExoneracion { get; set; }
+        public string CodigoExoneracion { get; set; }
+        public string NombreInstitucionExo { get; set; }
+        public Nullable<short> PorcentajeExo { get; set; }
+        public System.DateTime FechaEmision { get; set; }
+        public int exonerado { get; set; }
     }
+
 }
 // FECHA DE ENTEGA NOTAS: SIGUIENTE SEMANA SEMANA 5
 //SEMANA 9 REUNIRSE CON NOSOTROS EL PROFE, Y EL PROTOTIPO DEBE ESTAR AL 100% / 14 DE JULIO

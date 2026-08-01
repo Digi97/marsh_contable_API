@@ -185,7 +185,7 @@ namespace marsh_contable.Controllers
                     throw new Exception(response.Message);
                 }
                 /// si todo se hace correctamente creamos el doc electronico
-                CreateDocument(id, TipoDocumentoId.FacturaElectronica);
+                CreateDocument(id, TipoDocumentoId.FacturaElectronica, plazoCredito: model.dias_credito);
 
                 oR.CodeStatus = HttpStatusCode.OK;
                 oR.Data = id;
@@ -287,6 +287,7 @@ namespace marsh_contable.Controllers
                         Medio_pago_id = original.Medio_pago_id,
                         Usuarios_Usuario_id = original.Usuarios_Usuario_id,
                         Referencia = original.Clave //guardamos clave de referencia
+
                     };
                     ctx.Facturas.Add(notaCredito);
                     ctx.SaveChanges();
@@ -653,6 +654,7 @@ namespace marsh_contable.Controllers
                                      Referencia = f.Referencia
                                  }).OrderByDescending(f => f.id).ToList();
 
+
                     oR.CodeStatus = HttpStatusCode.OK;
                     oR.Data = lista;
                     return oR;
@@ -701,7 +703,6 @@ namespace marsh_contable.Controllers
                                      Impuesto = f.Impuesto,
                                      Total = f.Total,
                                      Descuento = f.Descuento,
-
                                      cambio_venta = f.cambio_venta,
                                      cambio_compra = f.cambio_compra,
                                      Clientes_id = f.Clientes_id,
@@ -712,7 +713,9 @@ namespace marsh_contable.Controllers
                                      Estado_factura = ef.Nombre,
                                      Tipo_documento = td.Nombre,
                                      Condicion_venta = cv.Descripcion,
-                                     Medio_pago = mp.descripcion
+                                     Medio_pago = mp.descripcion,
+                                     Simbolo = tm.Simbolo,
+                                     Referencia = f.Referencia
                                  }).ToList();
 
                     oR.CodeStatus = HttpStatusCode.OK;
@@ -761,7 +764,6 @@ namespace marsh_contable.Controllers
                                      Impuesto = f.Impuesto,
                                      Total = f.Total,
                                      Descuento = f.Descuento,
-
                                      cambio_venta = f.cambio_venta,
                                      cambio_compra = f.cambio_compra,
                                      Clientes_id = f.Clientes_id,
@@ -772,7 +774,9 @@ namespace marsh_contable.Controllers
                                      Estado_factura = ef.Nombre,
                                      Tipo_documento = td.Nombre,
                                      Condicion_venta = cv.Descripcion,
-                                     Medio_pago = mp.descripcion
+                                     Medio_pago = mp.descripcion,
+                                     Simbolo = tm.Simbolo,
+                                     Referencia = f.Referencia
                                  }).ToList();
 
                     oR.CodeStatus = HttpStatusCode.OK;
@@ -1141,7 +1145,7 @@ namespace marsh_contable.Controllers
         }
 
 
-        internal Boolean CreateDocument(int id, TipoDocumentoId tipoDocumento, Facturacion_C_Sharp.Lib.DocumentoItems.Referencia[] referencias = null)
+        internal Boolean CreateDocument(int id, TipoDocumentoId tipoDocumento, Facturacion_C_Sharp.Lib.DocumentoItems.Referencia[] referencias = null, int plazoCredito = 0 )
         {
             try
             {
@@ -1197,7 +1201,13 @@ namespace marsh_contable.Controllers
                              Cliente_distrito = dist.codigo_distrito,
                              Cliente_OtrasSenas = c.OtrasSenas,
                              Cliente_Correo = c.correo,
-                             Usuarios_Usuario_id = (int)x.Usuarios_Usuario_id
+                             Usuarios_Usuario_id = (int)x.Usuarios_Usuario_id,
+                             TipoExoneracion = c.TipoExoneracion,
+                             CodigoExoneracion = c.CodigoExoneracion,
+                             NombreInstitucionExo = c.NombreInstitucionExo,
+                             PorcentajeExo = c.PorcentajeExo,
+                             FechaEmision = (DateTime)c.FechaEmision,
+                             exonerado = c.exonerado
                          }).FirstOrDefault();
 
                     detalle = (from d in ctx.Factura_Detalles
@@ -1255,7 +1265,8 @@ namespace marsh_contable.Controllers
                                       Telefono = u.Telefono,
                                       Codigo_Telefono = u.Codigo_telefono,
                                       Usuario_hacienda = u.Usuario_hacienda,
-                                      Contrasena_hacienda = u.Contrasena_hacienda
+                                      Contrasena_hacienda = u.Contrasena_hacienda,
+                                      
                                   }).FirstOrDefault();
                 }
 
@@ -1287,10 +1298,11 @@ namespace marsh_contable.Controllers
                 decimal totalImpuestoAcumulado = 0;
                 decimal servGravados = 0;
                 decimal servExcentos = 0;
-                decimal totalVenta = 0;
+               // decimal totalVenta = 0;
                 decimal totalDescuentos = 0;
                 decimal totalVentaNeta = 0;
                 decimal totalImpuesto = 0;
+                decimal mercGravados = 0;
 
                 foreach (var row in detalle)
                 {
@@ -1301,6 +1313,48 @@ namespace marsh_contable.Controllers
                     decimal montoImpuesto = (decimal)row.Impuesto;
 
                     var taxLine = row.Impuesto_detalle;
+                    //Exoneracion exo;
+                    //Exoneracion.TipoDocumento tipoDocumentoExo;
+                    //if (f.exonerado == 1)
+                    //{
+                    //    switch (f.TipoExoneracion)
+                    //    {
+                    //        case "01":
+                    //            tipoDocumentoExo = Exoneracion.TipoDocumento.Compras_autorizadas_por_la_Direccion_General_de_Tributacion;
+                    //            break;
+                    //        case "02":
+                    //            tipoDocumentoExo = Exoneracion.TipoDocumento.Ventas_exentas_a_diplomaticos;
+                    //            break;
+                    //        case "03":
+                    //            tipoDocumentoExo = Exoneracion.TipoDocumento.Autorizado_por_Ley_especial;
+                    //            break;
+                    //        case "04":
+                    //            tipoDocumentoExo = Exoneracion.TipoDocumento.Exenciones_Direccion_General_de_Hacienda_Autorizacion_Local_Generica;
+                    //            break;
+                    //        case "05":
+                    //            tipoDocumentoExo = Exoneracion.TipoDocumento.Exenciones_Direccion_General_de_Hacienda_Transitorio_V;
+                    //            break;
+                    //        case "06":
+                    //            tipoDocumentoExo = Exoneracion.TipoDocumento.Servicios_turisticos_inscritos_ante_el_ICT;
+                    //            break;
+                    //        case "07":
+                    //            tipoDocumentoExo = Exoneracion.TipoDocumento.Transitorio_XVII_Recoleccion_Clasificacion_Almacenamiento_de_Reciclaje;
+                    //            break;
+                    //        case "08":
+                    //            tipoDocumentoExo = Exoneracion.TipoDocumento.Exoneracion_a_Zona_Franca;
+                    //            break;
+                    //        case "09":
+                    //            tipoDocumentoExo = Exoneracion.TipoDocumento.Exoneracion_de_servicios_complementarios_para_la_exportacion_articulo_11_RLIVA;
+                    //            break;
+                    //        case "10":
+                    //            tipoDocumentoExo = Exoneracion.TipoDocumento.Organo_de_las_corporaciones_municipales;
+                    //            break;
+                    //        case "11":
+                    //            tipoDocumentoExo = Exoneracion.TipoDocumento.Exenciones_Direccion_General_de_Hacienda_Autorizacion_de_Impuesto_Local_Concreta;
+                    //            break;
+                    //    }
+                    //    exo = new Exoneracion(tipoDocumentoExo, f.CodigoExoneracion, f.NombreInstitucionExo, f.FechaEmision, montoImpuesto, )
+                    //}
 
                     // Impuesto con CodigoTarifaIVA (v4.4)
                     var tax = new Facturacion_C_Sharp.Lib.DocumentoItems.Impuesto(
@@ -1308,6 +1362,7 @@ namespace marsh_contable.Controllers
                         (decimal)taxLine.Porcentaje,
                         montoImpuesto,
                         codigoTarifaIVA: Facturacion_C_Sharp.Lib.DocumentoItems.Impuesto.TarifaToCodigoTarifaIVA((decimal)taxLine.Porcentaje)
+
                     );
 
                     // ImpuestoNeto = Monto impuesto - exoneraciones
@@ -1349,12 +1404,13 @@ namespace marsh_contable.Controllers
                     }
                     else
                     {
-                        totalVenta += (decimal)row.Subtotal;
+                        mercGravados += (decimal)row.Subtotal;
+                       // totalVenta += (decimal)row.Subtotal ;
                     }
 
                     totalDescuentos += (decimal)row.Descuento;
 
-                    totalVentaNeta += (servGravados + totalDescuentos) + (totalVenta - totalDescuentos);
+                    totalVentaNeta += (servGravados + mercGravados) - totalDescuentos;
                     totalImpuesto += (decimal)row.Impuesto;
 
                     index++;
@@ -1397,9 +1453,9 @@ namespace marsh_contable.Controllers
                 var resumenFac = new ResumenFactura(
                     codigoMoneda: moneda,
                     tipoCambio: tipoCambio,
-                    totalMercanciasGravadas: totalVenta,//totalComprobante,
-                    totalGravado: (totalVenta + servGravados),
-                    totalVenta: (totalVenta+ servGravados),
+                    totalMercanciasGravadas: mercGravados,//totalComprobante,
+                    totalGravado: (mercGravados + servGravados),
+                    totalVenta: (mercGravados + servGravados),
                     totalDescuentos: totalDescuentos,
                     totalVentaNeta: totalVentaNeta,
                     totalImpuesto: totalImpuesto,
@@ -1448,7 +1504,7 @@ namespace marsh_contable.Controllers
                 var factura = new Documento(
                     DateTime.Now,
                     emisor,
-                    Documento.CondicionVenta.Contado,
+                    f.Condicion_venta_id ==1 ? Documento.CondicionVenta.Contado: Documento.CondicionVenta.Crédito,
                     f.Medio_pago,
                     tipoDoc,
                     items.ToArray(),
@@ -1457,7 +1513,8 @@ namespace marsh_contable.Controllers
                     f.Clave,
                     f.Consecutivo_electronico,
                     receptor,
-                    referencias: referencias
+                    referencias: referencias,
+                    plazoCredito: plazoCredito.ToString()
                 //codigoActividadEmisor: empresaEmi.codigo_actividad_id.ToString().PadLeft(6, '0')
                 );
 

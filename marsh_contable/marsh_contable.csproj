@@ -485,6 +485,7 @@
     <Compile Include="Models\Tipo_moneda.cs">
       <DependentUpon>EntitiesModel.tt</DependentUpon>
     </Compile>
+    <Compile Include="Models\TotalPorMonedaViewModel.cs" />
     <Compile Include="Models\Unidad_medida.cs">
       <DependentUpon>EntitiesModel.tt</DependentUpon>
     </Compile>

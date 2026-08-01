@@ -41,7 +41,6 @@ namespace marsh_contable.Models
         public Nullable<int> Facturas_id { get; set; }
         public Nullable<int> Condicion_venta_id { get; set; }
     
-        public virtual Clientes Clientes { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Devoluciones> Devoluciones { get; set; }
         public virtual Estado_Factura Estado_Factura { get; set; }
@@ -58,11 +57,14 @@ namespace marsh_contable.Models
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Cuenta_Encabezado> Cuenta_Encabezado { get; set; }
         public virtual Facturas Facturas { get; set; }
+        public virtual Clientes Clientes { get; set; }
 
         public string presupuesto_id { get; set; }
+
         public int banco_id { get; set; }
 
         public int dias_credito { get; set; }
+
         public int createElectronicDoc { get; set; }
     }
 }

@@ -21,7 +21,7 @@ namespace marsh_contable.Models
         public Nullable<int> Proveedor_id { get; set; }
         public short telefono_principal { get; set; }
     
-        public virtual Clientes Clientes { get; set; }
         public virtual Proveedor Proveedor { get; set; }
+        public virtual Clientes Clientes { get; set; }
     }
 }

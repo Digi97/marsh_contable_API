@@ -47,7 +47,6 @@ namespace marsh_contable.Models
     
         public virtual Categoria_presupuestaria Categoria_presupuestaria { get; set; }
         public virtual Centro_Costos Centro_Costos { get; set; }
-        public virtual Clientes Clientes { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Cuenta_Detalle> Cuenta_Detalle { get; set; }
         public virtual Gastos Gastos { get; set; }
@@ -58,5 +57,6 @@ namespace marsh_contable.Models
         public virtual Tipo_moneda Tipo_moneda { get; set; }
         public virtual Usuarios Usuarios { get; set; }
         public virtual Facturas Facturas { get; set; }
+        public virtual Clientes Clientes { get; set; }
     }
 }

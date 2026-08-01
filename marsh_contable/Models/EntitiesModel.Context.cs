@@ -30,7 +30,6 @@ namespace marsh_contable.Models
         public virtual DbSet<Categoria_gasto> Categoria_gasto { get; set; }
         public virtual DbSet<Categoria_presupuestaria> Categoria_presupuestaria { get; set; }
         public virtual DbSet<Centro_Costos> Centro_Costos { get; set; }
-        public virtual DbSet<Clientes> Clientes { get; set; }
         public virtual DbSet<codigo_actividad> codigo_actividad { get; set; }
         public virtual DbSet<Codigo_comercial> Codigo_comercial { get; set; }
         public virtual DbSet<Codigos_cabys> Codigos_cabys { get; set; }
@@ -72,5 +71,6 @@ namespace marsh_contable.Models
         public virtual DbSet<Cuenta_Encabezado> Cuenta_Encabezado { get; set; }
         public virtual DbSet<Bancos> Bancos { get; set; }
         public virtual DbSet<Facturas> Facturas { get; set; }
+        public virtual DbSet<Clientes> Clientes { get; set; }
     }
 }

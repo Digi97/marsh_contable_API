@@ -103,7 +103,12 @@ namespace marsh_contable.Controllers
                         exonerado = (Int16)model.exonerado,
                         OtrasSenas = model.OtrasSenas,
                         fecha_creacion = DateTime.Now,
-                        fecha_actualizacion = DateTime.Now
+                        fecha_actualizacion = DateTime.Now,
+                        TipoExoneracion = model.TipoExoneracion,
+                        CodigoExoneracion = model.CodigoExoneracion,
+                        NombreInstitucionExo = model.NombreInstitucionExo,
+                        PorcentajeExo = model.PorcentajeExo,
+                        FechaEmision = model.FechaEmision
                     };
 
                     ctx.Clientes.Add(nuevo);
@@ -216,7 +221,11 @@ namespace marsh_contable.Controllers
                     cli.exonerado = (Int16)model.exonerado;
                     cli.OtrasSenas = model.OtrasSenas;
                     cli.fecha_actualizacion = DateTime.Now;
-
+                    cli.TipoExoneracion = model.TipoExoneracion;
+                    cli.CodigoExoneracion = model.CodigoExoneracion;
+                    cli.NombreInstitucionExo = model.NombreInstitucionExo;
+                    cli.PorcentajeExo = model.PorcentajeExo;
+                    cli.FechaEmision = model.FechaEmision;
                     ctx.SaveChanges();
 
 
