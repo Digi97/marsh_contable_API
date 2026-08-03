@@ -37,6 +37,7 @@
           <Property Name="ValorAnterior" Type="varchar" MaxLength="200" />
           <Property Name="ValorNuevo" Type="varchar" MaxLength="200" />
           <Property Name="Empresa_Emp_id" Type="int" Nullable="false" />
+          <Property Name="Usuario_id" Type="varchar" MaxLength="150" />
         </EntityType>
         <EntityType Name="Bancos">
           <Key>
@@ -2390,8 +2391,8 @@
           <NavigationProperty Name="Provincia" Relationship="marsh_contableModel.FK_Empresa_Provincia" FromRole="Empresa" ToRole="Provincia" />
           <Property Name="Usuario_hacienda" Type="String" MaxLength="200" FixedLength="false" Unicode="false" />
           <Property Name="Contrasena_hacienda" Type="String" MaxLength="200" FixedLength="false" Unicode="false" />
-          <NavigationProperty Name="AuditaTabla" Relationship="marsh_contableModel.FK_AuditaTabla_Empresa" FromRole="Empresa" ToRole="AuditaTabla" />
           <NavigationProperty Name="Bancos" Relationship="marsh_contableModel.FK_Bancos_Empresa" FromRole="Empresa" ToRole="Bancos" />
+          <NavigationProperty Name="AuditaTabla" Relationship="marsh_contableModel.FK_AuditaTabla_Empresa" FromRole="Empresa" ToRole="AuditaTabla" />
         </EntityType>
         <EntityType Name="Estado_Factura">
           <Key>
@@ -3326,12 +3327,7 @@
             <End Role="Gestion_Presupuestaria" EntitySet="Gestion_Presupuestaria" />
             <End Role="Gestion_P_Anio" EntitySet="Gestion_P_Anio" />
           </AssociationSet>
-          <EntitySet Name="AuditaTabla" EntityType="marsh_contableModel.AuditaTabla" />
           <EntitySet Name="MultiFactor" EntityType="marsh_contableModel.MultiFactor" />
-          <AssociationSet Name="FK_AuditaTabla_Empresa" Association="marsh_contableModel.FK_AuditaTabla_Empresa">
-            <End Role="Empresa" EntitySet="Empresa" />
-            <End Role="AuditaTabla" EntitySet="AuditaTabla" />
-          </AssociationSet>
           <AssociationSet Name="FK_MultiFactor_Usuarios" Association="marsh_contableModel.FK_MultiFactor_Usuarios">
             <End Role="Usuarios" EntitySet="Usuarios" />
             <End Role="MultiFactor" EntitySet="MultiFactor" />
@@ -3509,6 +3505,11 @@
           <AssociationSet Name="fk_Telefonos_Clientes1" Association="marsh_contableModel.fk_Telefonos_Clientes1">
             <End Role="Clientes" EntitySet="Clientes" />
             <End Role="Telefonos" EntitySet="Telefonos" />
+          </AssociationSet>
+          <EntitySet Name="AuditaTabla" EntityType="marsh_contableModel.AuditaTabla" />
+          <AssociationSet Name="FK_AuditaTabla_Empresa" Association="marsh_contableModel.FK_AuditaTabla_Empresa">
+            <End Role="Empresa" EntitySet="Empresa" />
+            <End Role="AuditaTabla" EntitySet="AuditaTabla" />
           </AssociationSet>
           </EntityContainer>
         <EntityType Name="Padron">
@@ -3856,22 +3857,6 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <EntityType Name="AuditaTabla">
-          <Key>
-            <PropertyRef Name="id" />
-          </Key>
-          <Property Name="id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
-          <Property Name="CamposKey" Type="String" Nullable="false" MaxLength="200" FixedLength="false" Unicode="false" />
-          <Property Name="NombreTabla" Type="String" Nullable="false" MaxLength="100" FixedLength="false" Unicode="false" />
-          <Property Name="CamposValores" Type="String" Nullable="false" MaxLength="200" FixedLength="false" Unicode="false" />
-          <Property Name="Fecha" Type="DateTime" Nullable="false" Precision="3" />
-          <Property Name="Accion" Type="String" Nullable="false" MaxLength="1" FixedLength="false" Unicode="false" />
-          <Property Name="NombreColumna" Type="String" Nullable="false" MaxLength="100" FixedLength="false" Unicode="false" />
-          <Property Name="ValorAnterior" Type="String" MaxLength="200" FixedLength="false" Unicode="false" />
-          <Property Name="ValorNuevo" Type="String" MaxLength="200" FixedLength="false" Unicode="false" />
-          <Property Name="Empresa_Emp_id" Type="Int32" Nullable="false" />
-          <NavigationProperty Name="Empresa" Relationship="marsh_contableModel.FK_AuditaTabla_Empresa" FromRole="AuditaTabla" ToRole="Empresa" />
-        </EntityType>
         <EntityType Name="MultiFactor">
           <Key>
             <PropertyRef Name="id" />
@@ -3882,18 +3867,6 @@
           <Property Name="Usuarios_Usuario_id" Type="Int32" Nullable="false" />
           <NavigationProperty Name="Usuarios" Relationship="marsh_contableModel.FK_MultiFactor_Usuarios" FromRole="MultiFactor" ToRole="Usuarios" />
         </EntityType>
-        <Association Name="FK_AuditaTabla_Empresa">
-          <End Type="marsh_contableModel.Empresa" Role="Empresa" Multiplicity="1" />
-          <End Type="marsh_contableModel.AuditaTabla" Role="AuditaTabla" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="Empresa">
-              <PropertyRef Name="Emp_id" />
-            </Principal>
-            <Dependent Role="AuditaTabla">
-              <PropertyRef Name="Empresa_Emp_id" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
         <Association Name="FK_MultiFactor_Usuarios">
           <End Type="marsh_contableModel.Usuarios" Role="Usuarios" Multiplicity="1" />
           <End Type="marsh_contableModel.MultiFactor" Role="MultiFactor" Multiplicity="*" />
@@ -4599,6 +4572,35 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
+        <EntityType Name="AuditaTabla">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="CamposKey" Type="String" Nullable="false" MaxLength="200" FixedLength="false" Unicode="false" />
+          <Property Name="NombreTabla" Type="String" Nullable="false" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="CamposValores" Type="String" Nullable="false" MaxLength="200" FixedLength="false" Unicode="false" />
+          <Property Name="Fecha" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="Accion" Type="String" Nullable="false" MaxLength="1" FixedLength="false" Unicode="false" />
+          <Property Name="NombreColumna" Type="String" Nullable="false" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="ValorAnterior" Type="String" MaxLength="200" FixedLength="false" Unicode="false" />
+          <Property Name="ValorNuevo" Type="String" MaxLength="200" FixedLength="false" Unicode="false" />
+          <Property Name="Empresa_Emp_id" Type="Int32" Nullable="false" />
+          <Property Name="Usuario_id" Type="String" MaxLength="150" FixedLength="false" Unicode="false" />
+          <NavigationProperty Name="Empresa" Relationship="marsh_contableModel.FK_AuditaTabla_Empresa" FromRole="AuditaTabla" ToRole="Empresa" />
+        </EntityType>
+        <Association Name="FK_AuditaTabla_Empresa">
+          <End Type="marsh_contableModel.Empresa" Role="Empresa" Multiplicity="1" />
+          <End Type="marsh_contableModel.AuditaTabla" Role="AuditaTabla" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Empresa">
+              <PropertyRef Name="Emp_id" />
+            </Principal>
+            <Dependent Role="AuditaTabla">
+              <PropertyRef Name="Empresa_Emp_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
         </Schema>
     </edmx:ConceptualModels>
     <!-- C-S mapping content -->
@@ -5127,22 +5129,6 @@
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
-          <EntitySetMapping Name="AuditaTabla">
-            <EntityTypeMapping TypeName="marsh_contableModel.AuditaTabla">
-              <MappingFragment StoreEntitySet="AuditaTabla">
-                <ScalarProperty Name="Empresa_Emp_id" ColumnName="Empresa_Emp_id" />
-                <ScalarProperty Name="ValorNuevo" ColumnName="ValorNuevo" />
-                <ScalarProperty Name="ValorAnterior" ColumnName="ValorAnterior" />
-                <ScalarProperty Name="NombreColumna" ColumnName="NombreColumna" />
-                <ScalarProperty Name="Accion" ColumnName="Accion" />
-                <ScalarProperty Name="Fecha" ColumnName="Fecha" />
-                <ScalarProperty Name="CamposValores" ColumnName="CamposValores" />
-                <ScalarProperty Name="NombreTabla" ColumnName="NombreTabla" />
-                <ScalarProperty Name="CamposKey" ColumnName="CamposKey" />
-                <ScalarProperty Name="id" ColumnName="id" />
-              </MappingFragment>
-            </EntityTypeMapping>
-          </EntitySetMapping>
           <EntitySetMapping Name="MultiFactor">
             <EntityTypeMapping TypeName="marsh_contableModel.MultiFactor">
               <MappingFragment StoreEntitySet="MultiFactor">
@@ -5294,6 +5280,23 @@
                 <ScalarProperty Name="Nombre" ColumnName="Nombre" />
                 <ScalarProperty Name="tipo_identificacion_id" ColumnName="tipo_identificacion_id" />
                 <ScalarProperty Name="identificacion" ColumnName="identificacion" />
+                <ScalarProperty Name="id" ColumnName="id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="AuditaTabla">
+            <EntityTypeMapping TypeName="marsh_contableModel.AuditaTabla">
+              <MappingFragment StoreEntitySet="AuditaTabla">
+                <ScalarProperty Name="Usuario_id" ColumnName="Usuario_id" />
+                <ScalarProperty Name="Empresa_Emp_id" ColumnName="Empresa_Emp_id" />
+                <ScalarProperty Name="ValorNuevo" ColumnName="ValorNuevo" />
+                <ScalarProperty Name="ValorAnterior" ColumnName="ValorAnterior" />
+                <ScalarProperty Name="NombreColumna" ColumnName="NombreColumna" />
+                <ScalarProperty Name="Accion" ColumnName="Accion" />
+                <ScalarProperty Name="Fecha" ColumnName="Fecha" />
+                <ScalarProperty Name="CamposValores" ColumnName="CamposValores" />
+                <ScalarProperty Name="NombreTabla" ColumnName="NombreTabla" />
+                <ScalarProperty Name="CamposKey" ColumnName="CamposKey" />
                 <ScalarProperty Name="id" ColumnName="id" />
               </MappingFragment>
             </EntityTypeMapping>

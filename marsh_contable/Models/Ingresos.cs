@@ -59,12 +59,9 @@ namespace marsh_contable.Models
         public virtual Facturas Facturas { get; set; }
         public virtual Clientes Clientes { get; set; }
 
-        public string presupuesto_id { get; set; }
-
         public int banco_id { get; set; }
+        public int createElectronicDoc { get; set; }
 
         public int dias_credito { get; set; }
-
-        public int createElectronicDoc { get; set; }
     }
 }

@@ -62,6 +62,15 @@ namespace marsh_contable.Models
         public virtual Usuarios Usuarios { get; set; }
         public virtual Clientes Clientes { get; set; }
 
-        public int dias_credito { get; set; }
+
+        public int Banco_id { get; set; }
+        public int createElectronicDoc { get; set; }
+
+        public int dias_credito
+        {
+            get; set;
+        }
+
+        public string presupuesto_id { get; set; }
     }
 }

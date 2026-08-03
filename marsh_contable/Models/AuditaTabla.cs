@@ -24,6 +24,7 @@ namespace marsh_contable.Models
         public string ValorAnterior { get; set; }
         public string ValorNuevo { get; set; }
         public int Empresa_Emp_id { get; set; }
+        public string Usuario_id { get; set; }
     
         public virtual Empresa Empresa { get; set; }
     }

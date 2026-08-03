@@ -384,5 +384,79 @@ namespace marsh_contable.Controllers
             }
         }
 
+
+
+
+
+        [HttpGet]
+        [Authorize]
+        [Route("api/v1/empresa/auditlog")]
+        public Reply GetAuditLog()
+        {
+            Reply oR = new Reply();
+            oR.CodeStatus = 0;
+            General tool = new General();
+            DateTime todayMidnight = DateTime.Today;
+            try
+            {
+                
+                using (var ctx = new Models.EntitiesModel())
+                {
+
+
+                    var audita = (from at in ctx.AuditaTabla
+                                  join u in ctx.Usuarios on at.Usuario_id equals u.Correo
+                                   into AuditaT
+                                  from u in AuditaT.DefaultIfEmpty()
+                                  where at.Fecha >= todayMidnight
+                                  select new Models.AuditaTablaViewModel
+                                       {
+                                           id = at.id,
+                                           CamposKey = at.CamposKey,
+                                           CamposValores = at.CamposValores,
+                                           Fecha = at.Fecha,
+                                           Accion = at.Accion,
+                                           NombreColumna = at.NombreColumna,
+                                           ValorAnterior = at.ValorAnterior,
+                                           ValorNuevo = at.ValorNuevo,
+                                           NombreTabla = at.NombreTabla,
+                                           Usuario_id = u.Nombre + " "+ u.Apellido1 +" " + u.Apellido2
+                             
+                                       })
+                            .ToList();
+
+                    if (audita == null)
+                    {
+                        throw new Exception("log_not_found");
+                    }
+
+                
+                    oR.CodeStatus = HttpStatusCode.OK;
+                    oR.Data = audita;
+                }
+            }
+            catch (System.Data.Entity.Validation.DbEntityValidationException ex2)
+            {
+
+                String errorDB = "";
+                foreach (var eve in ex2.EntityValidationErrors)
+                {
+                    foreach (var ve in eve.ValidationErrors)
+                    {
+                        errorDB += ve.ErrorMessage;
+                    }
+                }
+                oR.CodeStatus = HttpStatusCode.InternalServerError;
+                oR.Message = errorDB;
+                return oR;
+            }
+            catch (Exception ex)
+            {
+
+                oR.CodeStatus = HttpStatusCode.InternalServerError;
+                oR.Message = ex.Message;
+            }
+            return oR;
+        }
     }
 }

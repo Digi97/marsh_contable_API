@@ -1,6 +1,8 @@
+using MarshAsprose.Infrastructure;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
+using System.Data.Entity.Infrastructure.Interception;
 using System.Linq;
 using System.Web;
 using System.Web.Http;
@@ -19,6 +21,7 @@ namespace marsh_contable
             FilterConfig.RegisterGlobalFilters(GlobalFilters.Filters);
             RouteConfig.RegisterRoutes(RouteTable.Routes);
             BundleConfig.RegisterBundles(BundleTable.Bundles);
+            DbInterception.Add(new SessionContextInterceptor(new CacheCurrentUserAccessor())); //added
         }
 
         protected void Application_Error(object sender, EventArgs e)
