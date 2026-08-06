@@ -45,12 +45,11 @@ namespace marsh_contable.Controllers
                                     u.Apellido1,
                                     u.Apellido2,
                                     u.Correo,
-                                    u.Id_Empleado,
-                                    u.activo,
+                                    u.Id_Empleado,                                  
                                     u.Roles_id,
-                                    Rol = r.Descripcion,
+                                    Nombre_Rol = r.Descripcion,
                                     Estado = u.activo == 1 ? "Activo" : "Inactivo",
-                                    u.Fec_creacion,
+                                    Fecha_Creacion = u.Fec_creacion,
                                     u.Fecha_bloqueo
                                 };
 
@@ -76,7 +75,7 @@ namespace marsh_contable.Controllers
 
                     if(fechaCreacionDesde.HasValue && fechaCreacionHasta.HasValue)
                     {
-                        query = query.Where(u => u.Fec_creacion >= fechaCreacionDesde.Value && u.Fec_creacion <= fechaCreacionHasta.Value);
+                        query = query.Where(u => u.Fecha_Creacion >= fechaCreacionDesde.Value && u.Fecha_Creacion <= fechaCreacionHasta.Value);
                     }
 
                     if (fechaBloqueoDesde.HasValue && fechaBloqueoHasta.HasValue)
@@ -127,6 +126,8 @@ namespace marsh_contable.Controllers
                     var query = from c in ctx.Clientes
                                 join ti in ctx.tipo_identificacion on c.tipo_identificacion_id equals ti.id
                                 join p in ctx.Provincia on c.Provincia_id equals p.id
+                                join cant in ctx.Canton on c.Canton_id equals cant.id 
+                                join dist in ctx.Distrito on c.Distrito_id equals dist.id
                                 join ca in ctx.codigo_actividad on c.codigo_actividad_id equals ca.id
                                 select new
                                 {
@@ -139,13 +140,14 @@ namespace marsh_contable.Controllers
                                     c.correo,
                                     c.estado,
                                     c.exonerado,
-                                    c.Provincia_id,
                                     c.fecha_creacion,
                                     Tipo_identificacion = ti.Nombre,
                                     Provincia = p.Nombre,
+                                    Canton = cant.Nombre,
+                                    Distrito = dist.Nombre,
                                     Codigo_actividad = ca.codigo_actividad1,
-                                //    Estado = c.estado == 1 ? "Activo" : "Inactivo",
-                                 //   Exonerado = c.exonerado == 1 ? "Sí" : "No",
+                                    Estado = c.estado == 1 ? "Activo" : "Inactivo",
+                                    Exonerado = c.exonerado == 1 ? "Sí" : "No",
                               
                                 };
 
@@ -162,7 +164,29 @@ namespace marsh_contable.Controllers
                     {
                         query = query.Where(c => c.fecha_creacion >= fechaCreacionDesde.Value && c.fecha_creacion <= fechaCreacionHasta.Value);
                     }
-                    var clientes = query.OrderBy(c => c.Nombre).ToList();
+                  //  var clientes = query.OrderBy(c => c.Nombre).ToList();
+
+                    var clientes = query
+                        .OrderBy(c => c.Nombre)
+                        .Select(c => new
+                        {
+                            c.id,
+                            c.identificacion,
+                            c.Nombre,
+                            c.Apellido1,
+                            c.Apellido2,
+                            c.NombreCompleto,
+                            c.correo,
+                            c.fecha_creacion,
+                            c.Tipo_identificacion,
+                            c.Provincia,
+                            c.Canton,
+                            c.Distrito,
+                            c.Codigo_actividad,
+                            c.Estado,
+                            c.Exonerado,
+                        })
+                        .ToList();
 
                     oR.CodeStatus = HttpStatusCode.OK;
                     oR.Data = new
@@ -201,6 +225,9 @@ namespace marsh_contable.Controllers
                     var query = from p in ctx.Proveedor
                                 join ti in ctx.tipo_identificacion on p.tipo_identificacion_id equals ti.id
                                 join pr in ctx.Provincia on p.Provincia_id equals pr.id
+                                join cant in ctx.Canton on p.Canton_id equals cant.id
+                                join dist in ctx.Distrito on p.Distrito_id equals dist.id
+
                                 join ca in ctx.codigo_actividad on p.codigo_actividad_id equals ca.id
                                 select new
                                 {
@@ -212,12 +239,13 @@ namespace marsh_contable.Controllers
                                     NombreCompleto = p.Nombre + " " + p.Apellido1 + " " + p.Apellido2,
                                     p.correo,
                                     p.estado,
-                                    p.Provincia_id,
                                     p.fecha_creacion,
                                     Tipo_identificacion = ti.Nombre,
                                     Provincia = pr.Nombre,
+                                    Canton = cant.Nombre,
+                                    Distrito = dist.Nombre,
                                     Codigo_actividad = ca.codigo_actividad1,
-                                    Activo = p.estado == 1 ? "Activo" : "Inactivo",
+                                    Estado = p.estado == 1 ? "Activo" : "Inactivo",
                                     
                                 };
 
@@ -230,7 +258,28 @@ namespace marsh_contable.Controllers
                     }
 
 
-                    var proveedores = query.OrderBy(p => p.Nombre).ToList();
+                    //    var proveedores = query.OrderBy(p => p.Nombre).ToList();
+
+                    var proveedores = query
+                     .OrderBy(c => c.Nombre)
+                     .Select(c => new
+                     {
+                         c.id,
+                         c.identificacion,
+                         c.Nombre,
+                         c.Apellido1,
+                         c.Apellido2,
+                         c.NombreCompleto,
+                         c.correo,
+                         c.fecha_creacion,
+                         c.Tipo_identificacion,
+                         c.Provincia,
+                         c.Canton,
+                         c.Distrito,
+                         c.Codigo_actividad,
+                         c.Estado
+                     })
+                     .ToList();
 
                     oR.CodeStatus = HttpStatusCode.OK;
                     oR.Data = new
@@ -297,7 +346,7 @@ namespace marsh_contable.Controllers
                                     f.Clientes_id,
                                     f.Estado_Factura_id,
                                     f.Tipo_documento_id,
-                                    Cliente = c.Nombre + " " + c.Apellido1,
+                                    Cliente = c.Nombre + " " + c.Apellido1 + " "+c.Apellido2,
                                     Tipo_moneda = tm.Nombre,
                                     Estado_factura = ef.Nombre,
                                     Tipo_documento = td.Nombre,
@@ -391,7 +440,7 @@ namespace marsh_contable.Controllers
                                     Tipo_documento = td.Nombre,
                                     Medio_pago = mp.descripcion,
                                     Proveedor = p.Nombre + " " + p.Apellido1 + " " + p.Apellido2,
-                                    Usuario = u.Nombre + " " + u.Apellido1,
+                                    Usuario = u.Nombre + " " + u.Apellido1 + " " + u.Apellido2,
                                     Tipo_moneda = m.Simbolo
                                 };
 
