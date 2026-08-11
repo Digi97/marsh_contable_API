@@ -17,6 +17,8 @@ namespace marsh_contable.Controllers
         [HttpPost]
         [Authorize]
         [Route("api/v1/ingresos")]
+        [RequierePermiso(PermisosAplica.UsuarioFacturacion)]
+
         public Reply CreateIngreso([FromBody] Models.Ingresos model)
         {
 
@@ -277,24 +279,23 @@ namespace marsh_contable.Controllers
                 oR.Data = new { ingreso_id = i.id, factura_id = idFacturaGenerada };
                 return oR;
             }
-            catch (System.Data.Entity.Validation.DbEntityValidationException ex2)
-            {
-                String errorDB = "";
-                foreach (var eve in ex2.EntityValidationErrors)
-                {
-                    foreach (var ve in eve.ValidationErrors)
-                    {
-                        errorDB += ve.ErrorMessage;
-                    }
-                }
-                oR.CodeStatus = HttpStatusCode.InternalServerError;
-                oR.Message = errorDB;
-                return oR;
-            }
             catch (Exception ex)
             {
                 oR.CodeStatus = HttpStatusCode.InternalServerError;
-                oR.Message = ex.Message;
+
+                if (ex is System.Data.Entity.Validation.DbEntityValidationException dbEx)
+                {
+                    var errores = dbEx.EntityValidationErrors
+                        .SelectMany(eve => eve.ValidationErrors)
+                        .Select(ve => ve.ErrorMessage);
+
+                    oR.Message = string.Join(" | ", errores);
+                }
+                else
+                {
+                    oR.Message = ex.Message;
+                }
+
                 return oR;
             }
         }
@@ -303,6 +304,8 @@ namespace marsh_contable.Controllers
         [HttpPut]
         [Authorize]
         [Route("api/v1/ingresos/{id}")]
+        [RequierePermiso(PermisosAplica.UsuarioFacturacion)]
+
         public Reply UpdateIngreso(int id, [FromBody] Models.Ingresos model)
         {
             Reply oR = new Reply();
@@ -394,24 +397,23 @@ namespace marsh_contable.Controllers
                 oR.Data = i.id;
                 return oR;
             }
-            catch (System.Data.Entity.Validation.DbEntityValidationException ex2)
-            {
-                String errorDB = "";
-                foreach (var eve in ex2.EntityValidationErrors)
-                {
-                    foreach (var ve in eve.ValidationErrors)
-                    {
-                        errorDB += ve.ErrorMessage;
-                    }
-                }
-                oR.CodeStatus = HttpStatusCode.InternalServerError;
-                oR.Message = errorDB;
-                return oR;
-            }
             catch (Exception ex)
             {
                 oR.CodeStatus = HttpStatusCode.InternalServerError;
-                oR.Message = ex.Message;
+
+                if (ex is System.Data.Entity.Validation.DbEntityValidationException dbEx)
+                {
+                    var errores = dbEx.EntityValidationErrors
+                        .SelectMany(eve => eve.ValidationErrors)
+                        .Select(ve => ve.ErrorMessage);
+
+                    oR.Message = string.Join(" | ", errores);
+                }
+                else
+                {
+                    oR.Message = ex.Message;
+                }
+
                 return oR;
             }
         }
@@ -420,6 +422,8 @@ namespace marsh_contable.Controllers
         [HttpGet]
         [Authorize]
         [Route("api/v1/ingresos")]
+        [RequierePermiso(PermisosAplica.UsuarioFacturacion)]
+
         public Reply GetAllIngresos()
         {
             Reply oR = new Reply();
@@ -475,6 +479,8 @@ namespace marsh_contable.Controllers
         [HttpGet]
         [Authorize]
         [Route("api/v1/ingresos/{id}")]
+        [RequierePermiso(PermisosAplica.UsuarioFacturacion)]
+
         public Reply GetIngresoById(int id)
         {
             Reply oR = new Reply();
@@ -516,7 +522,7 @@ namespace marsh_contable.Controllers
                                  Estado_factura = ef.Nombre,
                                  Medio_pago = mp.descripcion,
                                  Usuario = u.Nombre + " " + u.Apellido1,
-                                 Condicion_venta_id = (int)x.Condicion_venta_id
+                                 Condicion_venta_id = x.Condicion_venta_id ?? 1
                              }).FirstOrDefault();
 
                     if (i == null)
@@ -561,6 +567,8 @@ namespace marsh_contable.Controllers
         [HttpGet]
         [Authorize]
         [Route("api/v1/ingresos/cliente/{clienteId}")]
+        [RequierePermiso(PermisosAplica.UsuarioFacturacion)]
+
         public Reply GetIngresosByCliente(int clienteId)
         {
             Reply oR = new Reply();
@@ -596,82 +604,6 @@ namespace marsh_contable.Controllers
             }
         }
 
-
-        private bool validacionPresupuesto(int pid = 0, double gtotal = 0)
-        {
-            General tool = new General();
-            try
-            {
-                using (var ctx = new Models.EntitiesModel())
-                {
-                    ctx.Configuration.LazyLoadingEnabled = false;
-                    ctx.Configuration.ProxyCreationEnabled = false;
-
-                    DateTime currentDate = DateTime.Now;
-
-                    // Buscar presupuesto vigente
-                    Models.Gestion_Presupuestaria gpExist = ctx.Gestion_Presupuestaria
-                        .FirstOrDefault(u => currentDate >= u.periodo_inicio &&
-                                             currentDate <= u.periodo_fin &&
-                                             u.id == pid);
-
-                    if (gpExist == null)
-                        throw new Exception("gestion_presupuestaria_for_current_period_dont_exist");
-
-                    string Symbol = ctx.Tipo_moneda
-                        .Where(t => t.id == gpExist.Tipo_moneda_id)
-                        .Select(t => t.Simbolo)
-                        .FirstOrDefault() ?? "₡";
-
-
-                    // Sumar montos ya ejecutados en gestion_p_detalle
-
-                    int anioActual = currentDate.Year;
-                    int mesActual = currentDate.Month;
-
-                    double montoEjecutado = (from d in ctx.Gestion_P_detalle
-                                             join gp in ctx.Gestion_Presupuestaria
-                                                 on d.Gestion_Presupuestaria_id equals gp.id
-                                             where d.Gestion_Presupuestaria_id == pid
-                                                && d.activo == 1
-                                                && gp.anio_presupuesto == anioActual.ToString()
-                                                && currentDate >= gp.periodo_inicio
-                                                && currentDate <= gp.periodo_fin
-                                                && d.Fecha_registro.Month == mesActual
-                                                && d.Fecha_registro.Year == anioActual
-                                             select d.Monto)
-                                             .DefaultIfEmpty(0)
-                                             .Sum();
-
-
-                    decimal montoMensual = ctx.Gestion_P_Anio
-                        .Where(d => d.Gestion_Presupuestaria_id == pid && d.anio_presupuesto == currentDate.Year.ToString() && d.mes == currentDate.Month)
-                        .Select(d => d.monto)
-                        .DefaultIfEmpty(0)
-                        .Sum();
-
-
-
-                    double montoAprobado = (double)montoMensual; //MONTO APROBADO PARA EL MES ACTUAL //gpExist.monto_aprobado;
-                    double montoConNuevoGasto = montoEjecutado + gtotal;
-
-                    // Validar que el nuevo gasto no exceda el presupuesto
-                    if (montoConNuevoGasto >= montoAprobado)
-                    {
-                        double disponible = montoAprobado - montoEjecutado;
-                        throw new Exception(
-                            $"presupuesto_excedido_monto_aprobado_{montoAprobado}_ejecutado_{montoEjecutado}_disponible_{disponible}"
-                        );
-                    }
-
-                }
-                return true;
-            }
-            catch (Exception ex)
-            {
-                throw ex;
-            }
-        }
 
     }
 }

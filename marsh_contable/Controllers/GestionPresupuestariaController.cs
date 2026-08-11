@@ -105,24 +105,23 @@ namespace marsh_contable.Controllers
                     return oR;
                 }
             }
-            catch (System.Data.Entity.Validation.DbEntityValidationException ex2)
-            {
-                String errorDB = "";
-                foreach (var eve in ex2.EntityValidationErrors)
-                {
-                    foreach (var ve in eve.ValidationErrors)
-                    {
-                        errorDB += ve.ErrorMessage;
-                    }
-                }
-                oR.CodeStatus = HttpStatusCode.InternalServerError;
-                oR.Message = errorDB;
-                return oR;
-            }
             catch (Exception ex)
             {
                 oR.CodeStatus = HttpStatusCode.InternalServerError;
-                oR.Message = ex.Message;
+
+                if (ex is System.Data.Entity.Validation.DbEntityValidationException dbEx)
+                {
+                    var errores = dbEx.EntityValidationErrors
+                        .SelectMany(eve => eve.ValidationErrors)
+                        .Select(ve => ve.ErrorMessage);
+
+                    oR.Message = string.Join(" | ", errores);
+                }
+                else
+                {
+                    oR.Message = ex.Message;
+                }
+
                 return oR;
             }
         }
@@ -189,24 +188,23 @@ namespace marsh_contable.Controllers
                     return oR;
                 }
             }
-            catch (System.Data.Entity.Validation.DbEntityValidationException ex2)
-            {
-                String errorDB = "";
-                foreach (var eve in ex2.EntityValidationErrors)
-                {
-                    foreach (var ve in eve.ValidationErrors)
-                    {
-                        errorDB += ve.ErrorMessage;
-                    }
-                }
-                oR.CodeStatus = HttpStatusCode.InternalServerError;
-                oR.Message = errorDB;
-                return oR;
-            }
             catch (Exception ex)
             {
                 oR.CodeStatus = HttpStatusCode.InternalServerError;
-                oR.Message = ex.Message;
+
+                if (ex is System.Data.Entity.Validation.DbEntityValidationException dbEx)
+                {
+                    var errores = dbEx.EntityValidationErrors
+                        .SelectMany(eve => eve.ValidationErrors)
+                        .Select(ve => ve.ErrorMessage);
+
+                    oR.Message = string.Join(" | ", errores);
+                }
+                else
+                {
+                    oR.Message = ex.Message;
+                }
+
                 return oR;
             }
         }
@@ -491,21 +489,23 @@ namespace marsh_contable.Controllers
                     return oR;
                 }
             }
-            catch (System.Data.Entity.Validation.DbEntityValidationException ex2)
-            {
-                string errorDB = "";
-                foreach (var eve in ex2.EntityValidationErrors)
-                    foreach (var ve in eve.ValidationErrors)
-                        errorDB += ve.ErrorMessage;
-
-                oR.CodeStatus = HttpStatusCode.InternalServerError;
-                oR.Message = errorDB;
-                return oR;
-            }
             catch (Exception ex)
             {
                 oR.CodeStatus = HttpStatusCode.InternalServerError;
-                oR.Message = ex.Message;
+
+                if (ex is System.Data.Entity.Validation.DbEntityValidationException dbEx)
+                {
+                    var errores = dbEx.EntityValidationErrors
+                        .SelectMany(eve => eve.ValidationErrors)
+                        .Select(ve => ve.ErrorMessage);
+
+                    oR.Message = string.Join(" | ", errores);
+                }
+                else
+                {
+                    oR.Message = ex.Message;
+                }
+
                 return oR;
             }
         }
@@ -586,22 +586,52 @@ namespace marsh_contable.Controllers
                 using (var ctx = new Models.EntitiesModel())
                 {
 
-                 
-                    var resultado = (from gp in ctx.Gestion_Presupuestaria
-                                     join cc in ctx.Centro_Costos on gp.Centro_Costos_id equals cc.id
-                                     join cp in ctx.Categoria_presupuestaria on gp.Categoria_presupuestaria_id equals cp.id
-                                     join tm in ctx.Tipo_moneda on gp.Tipo_moneda_id equals tm.id
-                                     join gpa in ctx.Gestion_P_Anio on new { id = gp.id, gp.anio_presupuesto } equals new { id = gpa.Gestion_Presupuestaria_id, gpa.anio_presupuesto }
-                                     where gp.anio_presupuesto == anio_presupuesto && gpa.mes == mes_presupuesto
-                                     select new
-                                     {
-                                         id = gp.id+"_"+gp.Categoria_presupuestaria_id+"_"+ gp.Centro_Costos_id,
-                                         gp.nombre,
-                                         descripcion = gp.codigo + " ( " + cp.nombre + "-" + cc.Nombre + " ) ",
-                                         monto = gpa.monto,//gp.monto_aprobado,
-                                         simbolo = tm.Simbolo
-                                     }).ToList();
-
+                    var resultado = ctx.Gestion_Presupuestaria
+                        .Join(ctx.Centro_Costos,
+                            gp => gp.Centro_Costos_id,
+                            cc => cc.id,
+                            (gp, cc) => new { gp, cc })
+                        .Join(ctx.Categoria_presupuestaria,
+                            x => x.gp.Categoria_presupuestaria_id,
+                            cp => cp.id,
+                            (x, cp) => new { x.gp, x.cc, cp })
+                        .Join(ctx.Tipo_moneda,
+                            x => x.gp.Tipo_moneda_id,
+                            tm => tm.id,
+                            (x, tm) => new { x.gp, x.cc, x.cp, tm })
+                        .Join(ctx.Gestion_P_Anio,
+                            x => new { id = x.gp.id, anio = x.gp.anio_presupuesto },
+                            gpa => new { id = gpa.Gestion_Presupuestaria_id, anio = gpa.anio_presupuesto },
+                            (x, gpa) => new { x.gp, x.cc, x.cp, x.tm, gpa })
+                        .Where(x => x.gp.anio_presupuesto == anio_presupuesto && x.gpa.mes == mes_presupuesto)
+                        .GroupJoin(
+                            ctx.Gestion_P_detalle
+                                .GroupBy(d => d.Gestion_Presupuestaria_id)
+                                .Select(g => new { Gestion_Presupuestaria_id = g.Key, total_detalle = g.Sum(d => d.Monto) }),
+                            x => x.gp.id,
+                            gpd => gpd.Gestion_Presupuestaria_id,
+                            (x, gpdGroup) => new { x.gp, x.cc, x.cp, x.tm, x.gpa, gpdGroup })
+                        .SelectMany(
+                            x => x.gpdGroup.DefaultIfEmpty(),
+                            (x, gpd) => new
+                            {
+                                id = x.gp.id + "_" + x.gp.Categoria_presupuestaria_id + "_" + x.gp.Centro_Costos_id,
+                                x.gp.nombre,
+                                descripcion = x.gp.codigo + " ( " + x.cp.nombre + "-" + x.cc.Nombre + " ) ",
+                                montoPresupuesto = x.gpa.monto,     // decimal, crudo
+            totalDetalle = gpd != null ? gpd.total_detalle : 0, // double, crudo
+            simbolo = x.tm.Simbolo
+                            })
+                        .ToList() // <-- acá termina la traducción a SQL, todo lo de abajo es en memoria
+                        .Select(x => new
+                        {
+                            x.id,
+                            x.nombre,
+                            x.descripcion,
+                            monto = x.montoPresupuesto - (decimal)x.totalDetalle, // ahora sí se puede castear
+        x.simbolo
+                        })
+                        .ToList();
                     if (resultado == null)
                     {
                         throw new Exception("gestion_presupuestaria_not_found");
@@ -897,21 +927,23 @@ namespace marsh_contable.Controllers
                     return oR;
                 }
             }
-            catch (System.Data.Entity.Validation.DbEntityValidationException ex2)
-            {
-                string errorDB = "";
-                foreach (var eve in ex2.EntityValidationErrors)
-                    foreach (var ve in eve.ValidationErrors)
-                        errorDB += ve.ErrorMessage;
-
-                oR.CodeStatus = HttpStatusCode.InternalServerError;
-                oR.Message = errorDB;
-                return oR;
-            }
             catch (Exception ex)
             {
                 oR.CodeStatus = HttpStatusCode.InternalServerError;
-                oR.Message = ex.Message;
+
+                if (ex is System.Data.Entity.Validation.DbEntityValidationException dbEx)
+                {
+                    var errores = dbEx.EntityValidationErrors
+                        .SelectMany(eve => eve.ValidationErrors)
+                        .Select(ve => ve.ErrorMessage);
+
+                    oR.Message = string.Join(" | ", errores);
+                }
+                else
+                {
+                    oR.Message = ex.Message;
+                }
+
                 return oR;
             }
         }

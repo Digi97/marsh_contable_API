@@ -23,6 +23,8 @@ namespace marsh_contable.Controllers
         [HttpGet]
         [Authorize]
         [Route("api/v1/reportes/usuarios/filtro")]
+        [RequierePermiso(PermisosAplica.UsuarioReporte)]
+
         public Reply GetReporteUsuariosFiltrado(int? tipoPermiso = null, DateTime? fechaCreacionDesde =null , DateTime? fechaCreacionHasta = null,
             DateTime? fechaBloqueoDesde = null, DateTime? fechaBloqueoHasta = null
             )
@@ -112,6 +114,8 @@ namespace marsh_contable.Controllers
         [HttpGet]
         [Authorize]
         [Route("api/v1/reportes/clientes/filtro")]
+        [RequierePermiso(PermisosAplica.UsuarioReporte)]
+
         public Reply GetReporteClientesFiltrado([FromUri] int? estado = null, int? exonerado = null, DateTime? fechaCreacionDesde = null, DateTime? fechaCreacionHasta = null)
         {
             Reply oR = new Reply();
@@ -211,6 +215,8 @@ namespace marsh_contable.Controllers
         [HttpGet]
         [Authorize]
         [Route("api/v1/reportes/proveedores/filtro")]
+        [RequierePermiso(PermisosAplica.UsuarioReporte)]
+
         public Reply GetReporteProveedoresFiltrado([FromUri] int? estado = null, int? exonerado = null, DateTime? fechaCreacionDesde = null, DateTime? fechaCreacionHasta = null)
         {
             Reply oR = new Reply();
@@ -308,6 +314,8 @@ namespace marsh_contable.Controllers
         [HttpGet]
         [Authorize]
         [Route("api/v1/reportes/facturas/filtro")]
+        [RequierePermiso(PermisosAplica.UsuarioReporte)]
+
         public Reply GetReporteFacturasFiltrado(
             [FromUri] int? tipoDocumentoId = null,
             [FromUri] int? clienteId = null,
@@ -399,6 +407,8 @@ namespace marsh_contable.Controllers
         [HttpGet]
         [Authorize]
         [Route("api/v1/reportes/gastos/filtro")]
+        [RequierePermiso(PermisosAplica.UsuarioReporte)]
+
         public Reply GetReporteGastosFiltrado(
             [FromUri] int? categoriaGastoId = null,
             [FromUri] int? proveedorId = null,
@@ -515,6 +525,8 @@ namespace marsh_contable.Controllers
         [HttpGet]
         [Authorize]
         [Route("api/v1/reportes/gestion_presupuestaria/filtro")]
+        [RequierePermiso(PermisosAplica.UsuarioReporte)]
+
         public Reply GetReporteGestionPresupuestariaFiltrado(
             [FromUri] DateTime? fechaCreacionDesde = null,
             [FromUri] DateTime? fechaCreacionHasta = null)

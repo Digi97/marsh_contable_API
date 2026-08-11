@@ -16,6 +16,9 @@ namespace marsh_contable.Modulos
         UsuarioMantenimientoClientes = 7,
         UsuarioMantenimientoProveedores = 8,
         UsuarioPresupuestos = 9,
-        UsuarioMantenimiento = 10
+        UsuarioMantenimiento = 10,
+            UsuarioReporte = 11,
+            UsuarioAuditoria = 12
+
     }
 }

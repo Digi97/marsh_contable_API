@@ -60,24 +60,23 @@ namespace marsh_contable.Controllers
                     return oR;
                 }
             }
-            catch (System.Data.Entity.Validation.DbEntityValidationException ex2)
-            {
-                String errorDB = "";
-                foreach (var eve in ex2.EntityValidationErrors)
-                {
-                    foreach (var ve in eve.ValidationErrors)
-                    {
-                        errorDB += ve.ErrorMessage;
-                    }
-                }
-                oR.CodeStatus = HttpStatusCode.InternalServerError;
-                oR.Message = errorDB;
-                return oR;
-            }
             catch (Exception ex)
             {
                 oR.CodeStatus = HttpStatusCode.InternalServerError;
-                oR.Message = ex.Message;
+
+                if (ex is System.Data.Entity.Validation.DbEntityValidationException dbEx)
+                {
+                    var errores = dbEx.EntityValidationErrors
+                        .SelectMany(eve => eve.ValidationErrors)
+                        .Select(ve => ve.ErrorMessage);
+
+                    oR.Message = string.Join(" | ", errores);
+                }
+                else
+                {
+                    oR.Message = ex.Message;
+                }
+
                 return oR;
             }
         }
@@ -125,24 +124,23 @@ namespace marsh_contable.Controllers
                     return oR;
                 }
             }
-            catch (System.Data.Entity.Validation.DbEntityValidationException ex2)
-            {
-                String errorDB = "";
-                foreach (var eve in ex2.EntityValidationErrors)
-                {
-                    foreach (var ve in eve.ValidationErrors)
-                    {
-                        errorDB += ve.ErrorMessage;
-                    }
-                }
-                oR.CodeStatus = HttpStatusCode.InternalServerError;
-                oR.Message = errorDB;
-                return oR;
-            }
             catch (Exception ex)
             {
                 oR.CodeStatus = HttpStatusCode.InternalServerError;
-                oR.Message = ex.Message;
+
+                if (ex is System.Data.Entity.Validation.DbEntityValidationException dbEx)
+                {
+                    var errores = dbEx.EntityValidationErrors
+                        .SelectMany(eve => eve.ValidationErrors)
+                        .Select(ve => ve.ErrorMessage);
+
+                    oR.Message = string.Join(" | ", errores);
+                }
+                else
+                {
+                    oR.Message = ex.Message;
+                }
+
                 return oR;
             }
         }
@@ -329,24 +327,23 @@ namespace marsh_contable.Controllers
                     return oR;
                 }
             }
-            catch (System.Data.Entity.Validation.DbEntityValidationException ex2)
-            {
-                String errorDB = "";
-                foreach (var eve in ex2.EntityValidationErrors)
-                {
-                    foreach (var ve in eve.ValidationErrors)
-                    {
-                        errorDB += ve.ErrorMessage;
-                    }
-                }
-                oR.CodeStatus = HttpStatusCode.InternalServerError;
-                oR.Message = errorDB;
-                return oR;
-            }
             catch (Exception ex)
             {
                 oR.CodeStatus = HttpStatusCode.InternalServerError;
-                oR.Message = ex.Message;
+
+                if (ex is System.Data.Entity.Validation.DbEntityValidationException dbEx)
+                {
+                    var errores = dbEx.EntityValidationErrors
+                        .SelectMany(eve => eve.ValidationErrors)
+                        .Select(ve => ve.ErrorMessage);
+
+                    oR.Message = string.Join(" | ", errores);
+                }
+                else
+                {
+                    oR.Message = ex.Message;
+                }
+
                 return oR;
             }
         }
