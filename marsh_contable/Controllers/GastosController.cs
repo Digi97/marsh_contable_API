@@ -731,6 +731,166 @@ namespace marsh_contable.Controllers
         }
 
 
+
+        [HttpGet]
+        [Authorize]
+        [Route("api/v1/aceptaciones")]
+        public Reply GetAllAceptacionesPaged()
+        {
+            Reply oR = new Reply();
+            oR.CodeStatus = 0;
+            try
+            {
+                // Leer query string crudo
+                var q = System.Web.HttpContext.Current.Request.QueryString;
+
+                var request = new Models.DataTableRequest
+                {
+                    Draw = int.TryParse(q["draw"], out var d) ? d : 1,
+                    Start = int.TryParse(q["start"], out var s) ? s : 0,
+                    Length = int.TryParse(q["length"], out var l) ? l : 25,
+                    SearchValue = q["search[value]"],
+                    SortDirection = q["order[0][dir]"]
+                };
+
+                // El índice de la columna ordenada -> nombre real de la columna
+                if (int.TryParse(q["order[0][column]"], out var colIdx))
+                {
+                    // columns[colIdx][data] trae el nombre que mandó el front (id, codigo, nombre...)
+                    request.SortColumn = q[$"columns[{colIdx}][data]"];
+                }
+
+                using (var ctx = new Models.EntitiesModel())
+                {
+                    var query = ctx.Gastos.AsQueryable();
+
+                    if (!string.IsNullOrEmpty(request.SearchValue))
+                    {
+                        string search = request.SearchValue.ToLower();
+                        query = query.Where(x =>
+                            x.Descripcion.ToLower().Contains(search) ||
+                            x.Doc_Referencia.ToLower().Contains(search) ||
+                            x.Total.ToString().Contains(search) ||
+                            x.Proveedor.Nombre.ToLower().Contains(search) ||
+                            x.Proveedor.Apellido1.ToLower().Contains(search) ||
+                            x.Proveedor.Apellido2.ToLower().Contains(search) ||
+                            x.Categoria_gasto.Nombre.ToLower().Contains(search) ||
+                            x.Usuarios.Nombre.ToLower().Contains(search) ||
+                            x.Usuarios.Apellido1.ToLower().Contains(search) ||
+                            x.Usuarios.Apellido2.ToLower().Contains(search)
+                        );
+                    }
+
+                    int totalRecords = ctx.Gastos.Count();
+                    int totalFiltered = query.Count();
+
+                    switch (request.SortColumn?.ToLower())
+                    {
+                        case "descripcion":
+                            query = request.SortDirection == "asc"
+                                ? query.OrderBy(x => x.Descripcion)
+                                : query.OrderByDescending(x => x.Descripcion);
+                            break;
+                        case "total":
+                            query = request.SortDirection == "asc"
+                                ? query.OrderBy(x => x.Total)
+                                : query.OrderByDescending(x => x.Total);
+                            break;
+                        case "subtotal":
+                            query = request.SortDirection == "asc"
+                                ? query.OrderBy(x => x.Subtotal)
+                                : query.OrderByDescending(x => x.Subtotal);
+                            break;
+                        case "doc_referencia":
+                            query = request.SortDirection == "asc"
+                                ? query.OrderBy(x => x.Doc_Referencia)
+                                : query.OrderByDescending(x => x.Doc_Referencia);
+                            break;
+                        case "fecha":
+                            query = request.SortDirection == "asc"
+                                ? query.OrderBy(x => x.Fecha)
+                                : query.OrderByDescending(x => x.Fecha);
+                            break;
+
+                        default:
+                            query = query.OrderBy(x => x.id);
+                            break;
+                    }
+
+
+                    var queryJoined = (from g in ctx.Gastos
+                                       join cg in ctx.Categoria_gasto on g.Categoria_gasto_id equals cg.id
+                                       join td in ctx.Tipo_documento on g.Tipo_documento_id equals td.id
+                                       join mp in ctx.Medio_pago on g.Medio_pago_id equals mp.id
+                                       join p in ctx.Proveedor on g.Proveedor_id equals p.id
+                                       join u in ctx.Usuarios on g.Usuarios_Usuario_id equals u.Usuario_id
+                                       join m in ctx.Tipo_moneda on g.Tipo_moneda_id equals m.id
+                                       select new Models.GastosViewModel
+                                       {
+                                           id = g.id,
+                                           Descripcion = g.Descripcion,
+                                           Categoria_gasto_id = g.Categoria_gasto_id,
+                                           Subtotal = g.Subtotal,
+                                           Impuesto = g.Impuesto,
+                                           Total = g.Total,
+                                           Doc_Referencia = g.Doc_Referencia,
+                                           Fecha = g.Fecha,
+                                           Ultima_Fec_Actualizacion = g.Ultima_Fec_Actualizacion,
+                                           Usuarios_Usuario_id = g.Usuarios_Usuario_id,
+                                           Tipo_documento_id = g.Tipo_documento_id,
+                                           Medio_pago_id = g.Medio_pago_id,
+                                           Proveedor_id = g.Proveedor_id,
+                                           Categoria_gasto = cg.Nombre,
+                                           Tipo_documento = td.Nombre,
+                                           Medio_pago = mp.descripcion,
+                                           Proveedor = p.Nombre + " " + p.Apellido1 + " " + p.Apellido2,
+                                           Usuario = u.Nombre + " " + u.Apellido1 + " " + u.Apellido2,
+                                           tipo_moneda = m.Simbolo,
+
+
+                                       }).Where(x=> x.Tipo_documento_id != 6)
+                                 .OrderByDescending(x => x.id).ToList();
+
+                    var data = queryJoined
+                        .Skip(request.Start)
+                        .Take(request.Length > 0 ? request.Length : totalFiltered)
+                        .ToList();
+
+
+
+                    oR.CodeStatus = HttpStatusCode.OK;
+                    oR.Data = new
+                    {
+                        draw = request.Draw,
+                        recordsTotal = totalRecords,
+                        recordsFiltered = totalFiltered,
+                        data = data
+                    };
+                    return oR;
+                }
+            }
+            catch (Exception ex)
+            {
+                oR.CodeStatus = HttpStatusCode.InternalServerError;
+
+                if (ex is System.Data.Entity.Validation.DbEntityValidationException dbEx)
+                {
+                    var errores = dbEx.EntityValidationErrors
+                        .SelectMany(eve => eve.ValidationErrors)
+                        .Select(ve => ve.ErrorMessage);
+
+                    oR.Message = string.Join(" | ", errores);
+                }
+                else
+                {
+                    oR.Message = ex.Message;
+                }
+
+                return oR;
+            }
+        }
+
+
         [HttpGet]
         [Authorize]
         [Route("api/v1/gastos/{id}")]

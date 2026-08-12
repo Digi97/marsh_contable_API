@@ -157,34 +157,7 @@ namespace marsh_contable.Controllers
                         ctx.SaveChanges();
                     }
                 }
-                //Models.Gestion_P_detalle detalle = new Models.Gestion_P_detalle()
-                //{
-                //    Monto = f.Total,
-                //    Monto_aprobado = gpExist.monto_aprobado,
-                //    Monto_modificado = gpExist.monto_modificado,
-                //    Monto_compometido = gpExist.monto_comprometido,
-                //    Monto_ejecutado = (decimal)f.Total,
-                //    detalle_presupuesto = $"Factura #{id} - Clave: {f.Clave}",
-                //    Gestion_Presupuestaria_id = gpExist.id, // ID del presupuesto activo
-                //    Categoria_presupuestaria_id = (int)Modulos.Categoria_presupuestaria.Ingresos,
-                //    Gastos_id = null,
-                //    Ingresos_id = null,
-                //    Facturas_id = id,
-                //    Usuarios_Usuario_id = (int)model.Usuarios_Usuario_id,
-                //    Fecha_registro = DateTime.Now,
-                //    Observaciones = $"Consecutivo: {f.Consecutivo_electronico} | Subtotal: {f.Subtotal} | Impuesto: {f.Impuesto} | Descuento: {f.Descuento}",
-                //    activo = 1
-                //};
-
-
-                //GestionPDetalleController detalleGestion = new GestionPDetalleController();
-                //var response = detalleGestion.CreateGestionPDetalle(detalle);
-
-                //if (response.CodeStatus != HttpStatusCode.OK)
-                //{
-                //    throw new Exception(response.Message);
-                //}
-                /// si todo se hace correctamente creamos el doc electronico
+                
                 CreateDocument(id, TipoDocumentoId.FacturaElectronica, plazoCredito: model.dias_credito);
 
                 oR.CodeStatus = HttpStatusCode.OK;
